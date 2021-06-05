@@ -1,16 +1,20 @@
 import React, { useState } from "react";
+import Courses from "./Courses";
 import SelectMap from "./SelectMap";
 import { useMap } from "./store";
 
 export default function Sidebar() {
   const mapFilename = useMap(getMapFilename);
   return (
-    <div className="absolute shadow-xl border-l border-gray-200 inset-y-0 right-0 w-1/4 h-full bg-white">
+    <div className="absolute z-10 shadow-xl border-l border-gray-200 inset-y-0 right-0 w-1/4 h-full bg-white">
       <Section title="Map" defaultOpen={false}>
         {mapFilename}
         <div className="mt-2">
           <SelectMap>Select map</SelectMap>
         </div>
+      </Section>
+      <Section title="Courses" defaultOpen={true}>
+        <Courses />
       </Section>
     </div>
   );
@@ -31,7 +35,7 @@ function Section({ title, defaultOpen, children }) {
       >
         <h2
           className={`${
-            open ? "text-indigo-700" : "text-grey-darkest"
+            open ? "text-indigo-700" : "text-gray-600"
           } font-thin text-lg`}
         >
           {title}
@@ -59,7 +63,7 @@ function Toggle({ open, onClick }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2"
-        viewbox="0 0 24 24"
+        viewBox="0 0 24 24"
         width="24"
         xmlns="http://www.w3.org/2000/svg"
       >
