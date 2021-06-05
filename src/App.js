@@ -1,15 +1,23 @@
-import { useState } from "react";
 import Map from "./MapComponent";
-import SelectMap from "./SelectMap";
+import StartScreen from "./StartScreen";
+import Sidebar from "./Sidebar";
+import { useMap } from "./store";
 
 function App() {
-  const [mapFile, setMapFile] = useState();
+  const mapFile = useMap(getMap);
 
   return mapFile ? (
-    <Map mapFile={mapFile} />
+    <>
+      <Map mapFile={mapFile} />
+      <Sidebar />
+    </>
   ) : (
-    <SelectMap onMapLoaded={setMapFile} />
+    <StartScreen />
   );
 }
 
 export default App;
+
+function getMap(state) {
+  return state.map;
+}

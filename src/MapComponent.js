@@ -9,6 +9,8 @@ import "ol/ol.css";
 import OcadTiler from "ocad-tiler";
 import TileLayer from "ol/layer/Tile";
 import * as olSize from "ol/size";
+import Projection from "ol/proj/Projection";
+import TileState from "ol/TileState";
 
 export default function MapComponent({ mapFile }) {
   const container = useRef();
@@ -35,7 +37,12 @@ export default function MapComponent({ mapFile }) {
       register(proj4);
       setProjection(getOlProjection(projectionName));
     } else {
-      throw new Error("Map file CRS is not EPSG, can't find projection.");
+      setProjection(
+        new Projection({
+          code: "unspecified-ocad-projection",
+          units: "meters",
+        })
+      );
     }
   }
 
@@ -68,25 +75,41 @@ export default function MapComponent({ mapFile }) {
 
       function loadTile(tile) {
         if (!tile.getImage().src) {
-          const { tileCoord } = tile;
-          const [z] = tileCoord;
-          const tileGrid = source.getTileGrid();
-          const resolution = tileGrid.getResolution(z);
-          const tileSize = olSize.toSize(tileGrid.getTileSize(z));
-          const extent = tileGrid.getTileCoordExtent(tileCoord);
-          const svg = ocadTiler.renderSvg(extent, resolution, {
-            DOMImplementation: document.implementation,
-          });
+          try {
+            const { tileCoord } = tile;
+            const [z] = tileCoord;
+            const tileGrid = source.getTileGrid();
+            const resolution = tileGrid.getResolution(z);
+            const tileSize = olSize.toSize(tileGrid.getTileSize(z));
+            const extent = tileGrid.getTileCoordExtent(tileCoord);
+            const svg = ocadTiler.renderSvg(extent, resolution, {
+              DOMImplementation: document.implementation,
+            });
 
-          svg.setAttribute("width", tileSize[0]);
-          svg.setAttribute("height", tileSize[1]);
-          svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
+            svg.setAttribute("width", tileSize[0]);
+            svg.setAttribute("height", tileSize[1]);
+            svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
 
-          const xml = svg.outerHTML;
-          const url = `data:image/svg+xml;base64,${btoa(
-            unescape(encodeURIComponent(xml))
-          )}`;
-          tile.getImage().src = url;
+            const image = new Image();
+            const xml = svg.outerHTML;
+            const url = `data:image/svg+xml;base64,${btoa(
+              unescape(encodeURIComponent(xml))
+            )}`;
+            image.src = url;
+
+            image.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = tileSize[0];
+              canvas.height = tileSize[1];
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(image, 0, 0);
+
+              tile.getImage().src = canvas.toDataURL();
+            };
+          } catch (e) {
+            console.log(e);
+            tile.setState(TileState.ERROR);
+          }
         }
       }
     }

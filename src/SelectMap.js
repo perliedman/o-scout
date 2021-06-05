@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import readOcad from "ocad2geojson/src/ocad-reader";
 import toBuffer from "blob-to-buffer";
 import Spinner from "./ui/Spinner";
+import Button from "./ui/Button";
 
-export default function SelectMap({ onMapLoaded }) {
+import { useMap } from "./store";
+
+export default function SelectMap({ className, children }) {
   const [state, setState] = useState("idle");
+  const fileRef = useRef();
+  const setMap = useMap(getSetter);
 
   return (
     <>
+      <Button className={className} onClick={() => fileRef.current.click()}>
+        {state === "loading" && <Spinner />}
+        {children}
+      </Button>
       <input
+        ref={fileRef}
+        className="hidden"
         disabled={state === "loading"}
         type="file"
         accept=".ocd"
         onChange={loadMap}
       />
-      {state === "loading" && <Spinner />}
     </>
   );
 
@@ -29,11 +39,15 @@ export default function SelectMap({ onMapLoaded }) {
         })
       );
       const map = await readOcad(file);
-      onMapLoaded(map);
+      setMap(blob.name, map);
       setState("idle");
     } catch (e) {
       console.error(e);
       setState("error");
     }
   }
+}
+
+function getSetter(state) {
+  return state.setMap;
 }
