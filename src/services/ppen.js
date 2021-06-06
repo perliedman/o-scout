@@ -1,8 +1,8 @@
 import flatten from "arr-flatten";
 import Coordinate from "../models/coordinate";
-import Course from "../models/course";
-import Event from "../models/event";
-import Control from "../models/control";
+import { addCourse, createEvent } from "../models/event";
+import { createControl } from "../models/control";
+import { createCourse } from "../models/course";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
@@ -40,7 +40,7 @@ export function parsePPen(doc) {
     return [control].concat(next ? getCourseControls(next, sequence + 1) : []);
   };
 
-  const event = new Event(
+  const event = createEvent(
     eventTag.getElementsByTagName("title")[0].textContent,
     []
   );
@@ -61,8 +61,7 @@ export function parsePPen(doc) {
       const optionsTag = c.getElementsByTagName("options")[0];
       const printScale =
         (optionsTag && Number(optionsTag.getAttribute("print-scale"))) || scale;
-      const course = new Course(
-        event,
+      const course = createCourse(
         c.getAttribute("id"),
         c.getElementsByTagName("name")[0].textContent,
         courseControls,
@@ -75,7 +74,7 @@ export function parsePPen(doc) {
     })
     .sort((a, b) => a.order - b.order);
 
-  courses.forEach((c) => event.addCourse(c));
+  courses.forEach((c) => addCourse(event, c));
 
   return event;
 }
@@ -85,7 +84,7 @@ const parseLocation = (loc) =>
 
 const parseControl = (tag) => {
   const codeTag = tag.getElementsByTagName("code")[0];
-  return new Control(
+  return createControl(
     tag.id && Number(tag.id),
     tag.getAttribute("kind"),
     codeTag ? codeTag.textContent : undefined,

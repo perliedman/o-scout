@@ -20,7 +20,7 @@ const useEvent = create((set) => ({
       set: (event) =>
         set(
           undoable((draft) => {
-            draft.event = event;
+            Object.keys(event).forEach((k) => (draft[k] = event[k]));
           })
         ),
     },
