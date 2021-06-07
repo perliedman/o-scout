@@ -4,9 +4,10 @@ import produce, { applyPatches, enablePatches } from "immer";
 enablePatches();
 
 export const useMap = create((set) => ({
-  map: undefined,
-  setMap: (mapFilename, map) =>
-    set((state) => ({ ...state, map, mapFilename })),
+  mapFile: undefined,
+  setMapFile: (mapFilename, mapFile) =>
+    set((state) => ({ ...state, mapFile, mapFilename })),
+  setMapInstance: (map) => set((state) => ({ ...state, map })),
 }));
 
 const history = {};

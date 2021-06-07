@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import useEvent from "./store";
 import shallow from "zustand/shallow";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 import FilePicker from "./FilePicker";
 import { parsePPen } from "./services/ppen";
+import CourseLayer from "./CourseLayer";
 
 export default function Courses() {
   const { courses, selectedCourseId, setSelected, setName, setEvent } =
     useEvent(getCourses, shallow);
+  const selectedCourse = useMemo(
+    () => courses.find((course) => course.id === selectedCourseId),
+    [courses, selectedCourseId]
+  );
 
   const [isSelectingCourse, selectCourse] = useState(false);
 
@@ -44,6 +49,7 @@ export default function Courses() {
         accept=".ppen"
         onSelect={loadCourse}
       />
+      {selectedCourse && <CourseLayer course={selectedCourse} />}
     </>
   );
 

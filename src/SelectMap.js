@@ -49,5 +49,5 @@ export default function SelectMap({ className, children }) {
 }
 
 function getSetter(state) {
-  return state.setMap;
+  return state.setMapFile;
 }

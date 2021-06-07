@@ -21,5 +21,5 @@ function App() {
 export default App;
 
 function getMap(state) {
-  return state.map;
+  return state.mapFile;
 }

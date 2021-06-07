@@ -11,11 +11,13 @@ import TileLayer from "ol/layer/Tile";
 import * as olSize from "ol/size";
 import Projection from "ol/proj/Projection";
 import TileState from "ol/TileState";
+import { useMap } from "./store";
 
-export default function MapComponent({ mapFile }) {
+export default function MapComponent() {
+  const { mapFile, map, setMapInstance } = useMap(getMap);
+
   const container = useRef();
   const [projection, setProjection] = useState();
-  const [map, setMap] = useState();
 
   const registerProjection = useCallback(_registerProjection, [mapFile]);
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function MapComponent({ mapFile }) {
       setProjection(null);
     };
   }, [registerProjection, mapFile]);
-  useEffect(createMap, [mapFile, projection]);
+  useEffect(createMap, [setMapInstance, mapFile, projection]);
   useEffect(addLayer, [map, mapFile]);
 
   return <div className="absolute w-full h-full" ref={container} />;
@@ -49,10 +51,11 @@ export default function MapComponent({ mapFile }) {
   function createMap() {
     if (projection) {
       const map = new OlMap({ target: container.current, projection });
-      setMap(map);
+      setMapInstance(map);
 
       return () => {
         map.setTarget(null);
+        setMapInstance(null);
       };
     }
   }
@@ -114,4 +117,8 @@ export default function MapComponent({ mapFile }) {
       }
     }
   }
+}
+
+function getMap({ mapFile, map, setMapInstance }) {
+  return { mapFile, map, setMapInstance };
 }
