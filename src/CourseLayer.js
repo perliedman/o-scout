@@ -10,6 +10,10 @@ import Stroke from "ol/style/Stroke";
 import { courseOverPrintRgb } from "./models/course";
 import RegularShape from "ol/style/RegularShape";
 import LineString from "ol/geom/LineString";
+import GeoJSON from "ol/format/GeoJSON";
+import useNumberPositions from "./services/use-number-positions";
+import Text from "ol/style/Text";
+import Fill from "ol/style/Fill";
 
 export default function CourseLayer({ course }) {
   const { map, mapFile } = useMap(getMap);
@@ -76,11 +80,15 @@ export default function CourseLayer({ course }) {
     [crs, course.controls]
   );
   featuresRef.current = features;
+  const numberGeoJSON = useNumberPositions(course.controls, (c) =>
+    toProjectedCoord(crs, c)
+  );
 
   useEffect(() => {
     source.clear();
     source.addFeatures(features);
-  }, [source, features]);
+    source.addFeatures(new GeoJSON().readFeatures(numberGeoJSON));
+  }, [source, features, numberGeoJSON]);
 
   return null;
 
@@ -121,6 +129,11 @@ export default function CourseLayer({ course }) {
       const stroke = lineStyle.getStroke();
       stroke.setWidth(5 / resolution);
       return lineStyle;
+    } else if (kind === "number") {
+      const text = numberStyle.getText();
+      text.setText(feature.get("label"));
+      text.setScale(6 / resolution);
+      return numberStyle;
     }
   }
 }
@@ -171,4 +184,8 @@ const finishStyle = [
 const lineSpace = 60;
 const lineStyle = new Style({
   stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
+});
+
+const numberStyle = new Style({
+  text: new Text({ fill: new Fill({ color: courseOverPrintRgb }) }),
 });
