@@ -1,5 +1,7 @@
 import create from "zustand";
 import produce, { applyPatches, enablePatches } from "immer";
+import { createEvent } from "./models/event";
+import { createCourse } from "./models/course";
 
 enablePatches();
 
@@ -15,7 +17,7 @@ let currentVersion = -1;
 const maxHistoryLength = 40;
 
 const useEvent = create((set) => ({
-  ...createNewEvent(),
+  ...createEvent("New event", [createCourse(1, "New course")]),
   actions: {
     event: {
       set: (event) =>
@@ -70,22 +72,4 @@ function undo(state) {
 
 function redo(state) {
   return applyPatches(state, history[++currentVersion].redo);
-}
-
-function createNewEvent() {
-  const course = createCourse(1, "New course");
-  return {
-    name: "New event",
-    courses: [course, createCourse(2, "Another course")],
-    selectedCourseId: course.id,
-    controls: [],
-  };
-}
-
-function createCourse(id, name) {
-  return {
-    id,
-    name,
-    controls: [],
-  };
 }
