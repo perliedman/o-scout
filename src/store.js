@@ -21,11 +21,11 @@ const useEvent = create((set) => ({
   actions: {
     event: {
       set: (event) =>
-        set(
-          undoable((draft) => {
-            Object.keys(event).forEach((k) => (draft[k] = event[k]));
-          })
-        ),
+        set((state) => ({
+          ...state,
+          ...event,
+          selectedCourseId: event.courses[0].id,
+        })),
     },
     course: {
       setSelected: (selectedCourseId) =>

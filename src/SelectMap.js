@@ -6,14 +6,18 @@ import Button from "./ui/Button";
 
 import { useMap } from "./store";
 
-export default function SelectMap({ className, children }) {
+export default function SelectMap({ className, children, type = "normal" }) {
   const [state, setState] = useState("idle");
   const fileRef = useRef();
   const setMap = useMap(getSetter);
 
   return (
     <>
-      <Button className={className} onClick={() => fileRef.current.click()}>
+      <Button
+        type={type}
+        className={className}
+        onClick={() => fileRef.current.click()}
+      >
         {state === "loading" && <Spinner />}
         {children}
       </Button>

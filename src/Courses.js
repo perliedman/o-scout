@@ -7,8 +7,10 @@ import { parsePPen } from "./services/ppen";
 import CourseLayer from "./CourseLayer";
 
 export default function Courses() {
-  const { courses, selectedCourseId, setSelected, setName, setEvent } =
-    useEvent(getCourses, shallow);
+  const { courses, selectedCourseId, setSelected, setEvent } = useEvent(
+    getCourses,
+    shallow
+  );
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]
@@ -20,30 +22,25 @@ export default function Courses() {
     <>
       <ul>
         {courses.map((course) => (
-          <li key={course.id} onClick={() => setSelected(course.id)}>
-            <span
-              className={
+          <li key={course.id}>
+            <button
+              onClick={() => setSelected(course.id)}
+              className={`focus:outline-none focus:ring-2 rounded p-1 ring-indigo-600 ${
                 selectedCourseId === course.id
                   ? "text-indigo-600"
                   : "text-gray-darkest"
-              }
+              }`}
             >
-              {selectedCourseId === course.id ? (
-                <input
-                  type="text"
-                  value={course.name}
-                  onChange={(e) => setName(selectedCourseId, e.target.value)}
-                />
-              ) : (
-                course.name
-              )}
-            </span>
+              {course.name}
+            </button>
           </li>
         ))}
       </ul>
-      <Dropdown>
-        <DropdownItem onClick={selectCourse}>Load courses...</DropdownItem>
-      </Dropdown>
+      <div className="flex justify-end">
+        <Dropdown>
+          <DropdownItem onClick={selectCourse}>Load courses...</DropdownItem>
+        </Dropdown>
+      </div>
       <FilePicker
         active={isSelectingCourse}
         accept=".ppen"

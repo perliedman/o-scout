@@ -9,7 +9,7 @@ export default function Dropdown({ children }) {
       <div>
         <button
           type="button"
-          className="bg-gray-100 rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+          className="bg-gray-100 rounded-full p-2 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
           id="menu-button"
           aria-expanded="true"
           aria-haspopup="true"

@@ -55,7 +55,7 @@ function Section({ title, defaultOpen, children }) {
 function Toggle({ open, onClick }) {
   return (
     <button
-      className={`rounded-full border transform ${
+      className={`focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform ${
         open ? "border-indigo-600 bg-indigo-600" : "border-grey rotate-180"
       } w-7 h-7 flex items-center justify-center transition-transform`}
       onClick={onClick}
