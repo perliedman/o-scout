@@ -10871,6 +10871,11 @@ supports-hyperlinks@^2.0.0:
     has-flag "^4.0.0"
     supports-color "^7.0.0"
 
+svg-control-descriptions@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/svg-control-descriptions/-/svg-control-descriptions-1.0.0.tgz#c900d9d62153e6aaafec4621751a0bc14acbdcc1"
+  integrity sha512-jLCsyc4GRvIC5lIjhxbDUTngzqoPZkoodtYczvzS3b1jEoMSJzRa0uEPzXQHbRoagw+4uEqgs5k5gj+C8o/3Iw==
+
 svg-parser@^2.0.2:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/svg-parser/-/svg-parser-2.0.4.tgz#fdc2e29e13951736140b76cb122c8ee6630eb6b5"
