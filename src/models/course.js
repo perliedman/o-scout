@@ -1,10 +1,4 @@
-// const distance = (c1, c2) => {
-//   const crd1 = c1.coordinates;
-//   const crd2 = c2.coordinates;
-//   const dx = crd2[0] - crd1[0];
-//   const dy = crd2[1] - crd1[1];
-//   return Math.sqrt(dx * dx + dy * dy);
-// };
+import { controlDistance } from "./control";
 
 export const courseOverPrintRgb = "rgba(182, 44, 152, 0.8)";
 
@@ -18,15 +12,17 @@ export function createCourse(id, name, controls = [], printScale, type) {
   };
 }
 
-//   distance() {
-//     const controls = this.controls;
-//     return (
-//       (controls.slice(1).reduce((a, c, i) => a + distance(controls[i], c), 0) /
-//         1000 /
-//         1000) *
-//       this.event.map.scale
-//     );
-//   }
+export function courseDistance(course, scale) {
+  const controls = course.controls;
+  return (
+    (controls
+      .slice(1)
+      .reduce((a, c, i) => a + controlDistance(controls[i], c), 0) /
+      1000 /
+      1000) *
+    scale
+  );
+}
 
 //   bounds() {
 //     return this.controls.reduce(

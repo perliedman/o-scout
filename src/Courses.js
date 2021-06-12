@@ -1,20 +1,21 @@
 import React, { useMemo, useState } from "react";
-import useEvent from "./store";
+import useEvent, { useMap } from "./store";
 import shallow from "zustand/shallow";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 import FilePicker from "./FilePicker";
 import { parsePPen } from "./services/ppen";
 import CourseLayer from "./CourseLayer";
+import ControlDescriptionSheet from "./ControlDescriptionSheet";
 
 export default function Courses() {
-  const { courses, selectedCourseId, setSelected, setEvent } = useEvent(
-    getCourses,
-    shallow
-  );
+  const { eventName, courses, selectedCourseId, setSelected, setEvent } =
+    useEvent(getCourses, shallow);
+  const mapFile = useMap(getMapFile);
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]
   );
+  const mapScale = useMemo(() => mapFile.getCrs().scale, [mapFile]);
 
   const [isSelectingCourse, selectCourse] = useState(false);
 
@@ -28,11 +29,20 @@ export default function Courses() {
               className={`focus:outline-none focus:ring-2 rounded p-1 ring-indigo-600 ${
                 selectedCourseId === course.id
                   ? "text-indigo-600"
-                  : "text-gray-darkest"
+                  : "text-gray-600"
               }`}
             >
               {course.name}
             </button>
+            {selectedCourseId === course.id && (
+              <div className="my-4">
+                <ControlDescriptionSheet
+                  eventName={eventName}
+                  course={course}
+                  mapScale={mapScale}
+                />
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -62,6 +72,7 @@ export default function Courses() {
 }
 
 function getCourses({
+  name,
   courses,
   selectedCourseId,
   actions: {
@@ -69,7 +80,18 @@ function getCourses({
     course: { setSelected, setName },
   },
 }) {
-  return { courses, selectedCourseId, setSelected, setName, setEvent: set };
+  return {
+    eventName: name,
+    courses,
+    selectedCourseId,
+    setSelected,
+    setName,
+    setEvent: set,
+  };
+}
+
+function getMapFile({ mapFile }) {
+  return mapFile;
 }
 
 function readAsText(file) {

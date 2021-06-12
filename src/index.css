@@ -1,3 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.control-sheet {
+  @apply border border-black text-center;
+}
+
+.control-sheet tr {
+  @apply h-10;
+}
+
+.control-sheet td {
+  @apply border border-black w-10;
+}
+
+.control-sheet img {
+  @apply m-auto;
+  zoom: 0.175;
+}
+
+.control-sheet .heavy-right {
+  @apply border-r-2;
+}

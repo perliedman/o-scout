@@ -1,5 +1,13 @@
 import Coordinate from "./coordinate";
 
+export const controlDistance = (c1, c2) => {
+  const crd1 = c1.coordinates;
+  const crd2 = c2.coordinates;
+  const dx = crd2[0] - crd1[0];
+  const dy = crd2[1] - crd1[1];
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
 export function createControl(id, kind, code, coordinates, description) {
   return {
     id: id,
