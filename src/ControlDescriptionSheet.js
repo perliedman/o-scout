@@ -11,18 +11,18 @@ export default function ControlDescriptionSheet({
     <table className="control-sheet">
       <tbody>
         <tr>
-          <td colspan="8" className="font-bold">
+          <td colSpan="8" className="font-bold">
             {eventName}
           </td>
         </tr>
         <tr>
-          <td colspan="3" className="heavy-right font-bold">
+          <td colSpan="3" className="heavy-right font-bold">
             {course.name}
           </td>
-          <td colspan="3" className="heavy-right font-bold">
+          <td colSpan="3" className="heavy-right font-bold">
             {courseDistance(course, mapScale).toFixed(1)} km
           </td>
-          <td colspan="2"></td>
+          <td colSpan="2"></td>
         </tr>
         {course.controls.map((c, i) => (
           <tr key={i}>

@@ -1,32 +1,19 @@
 import React, { useState } from "react";
 import Courses from "./Courses";
-import SelectMap from "./SelectMap";
-import { useMap } from "./store";
+import MapSection from "./MapSection";
+import Toggle from "./ui/Toggle";
 
 export default function Sidebar() {
-  const mapFilename = useMap(getMapFilename);
   return (
     <div className="absolute z-10 shadow-xl border-l border-gray-200 inset-y-0 right-0 w-1/4 h-full bg-white">
       <Section title="Map" defaultOpen={false}>
-        <div
-          className="w-full overflow-ellipsis overflow-hidden"
-          title={mapFilename}
-        >
-          {mapFilename}
-        </div>
-        <div className="mt-2">
-          <SelectMap>Select map</SelectMap>
-        </div>
+        <MapSection />
       </Section>
       <Section title="Courses" defaultOpen={true}>
         <Courses />
       </Section>
     </div>
   );
-}
-
-function getMapFilename(state) {
-  return state.mapFilename;
 }
 
 function Section({ title, defaultOpen, children }) {
@@ -49,31 +36,5 @@ function Section({ title, defaultOpen, children }) {
       </header>
       {open ? <div className="font-thin">{children}</div> : null}
     </div>
-  );
-}
-
-function Toggle({ open, onClick }) {
-  return (
-    <button
-      className={`focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform ${
-        open ? "border-indigo-600 bg-indigo-600" : "border-grey rotate-180"
-      } w-7 h-7 flex items-center justify-center transition-transform`}
-      onClick={onClick}
-    >
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height="24"
-        stroke={open ? "white" : "#606F7B"}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
-    </button>
   );
 }

@@ -6,21 +6,31 @@ import Button from "./ui/Button";
 
 import { useMap } from "./store";
 
-export default function SelectMap({ className, children, type = "normal" }) {
+export default function SelectMap({
+  className,
+  children,
+  type = "normal",
+  component,
+  onError,
+}) {
   const [state, setState] = useState("idle");
   const fileRef = useRef();
   const setMap = useMap(getSetter);
 
   return (
     <>
-      <Button
-        type={type}
-        className={className}
-        onClick={() => fileRef.current.click()}
-      >
-        {state === "loading" && <Spinner />}
-        {children}
-      </Button>
+      {component ? (
+        <div onClick={() => fileRef.current.click()}>{component}</div>
+      ) : (
+        <Button
+          type={type}
+          className={className}
+          onClick={() => fileRef.current.click()}
+        >
+          {state === "loading" && <Spinner />}
+          {children}
+        </Button>
+      )}
       <input
         ref={fileRef}
         className="hidden"
@@ -48,6 +58,7 @@ export default function SelectMap({ className, children, type = "normal" }) {
     } catch (e) {
       console.error(e);
       setState("error");
+      onError && onError(e);
     }
   }
 }
