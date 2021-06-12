@@ -75,5 +75,5 @@ function DescriptionSymbol({ symbol }) {
     symbol &&
       import(`svg-control-descriptions/symbols/${symbol}.svg`).then(setSvg);
   }, [symbol]);
-  return svg ? <img src={svg.default} /> : null;
+  return svg ? <img src={svg.default} alt={symbol} /> : null;
 }
