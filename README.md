@@ -2,6 +2,8 @@
 
 A web based app for orienteering course setting and exploration.
 
+You can try the app here: [https://o-scout.vercel.app/](https://o-scout.vercel.app/)
+
 Currently very much a work in progress!
 
 ## Developing
