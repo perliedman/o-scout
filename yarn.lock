@@ -7968,10 +7968,10 @@ ocad2geojson@^2.1.2:
     uuid "^3.4.0"
     vt-pbf "^3.1.1"
 
-ocad2geojson@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/ocad2geojson/-/ocad2geojson-2.1.4.tgz#9be72fa03f9bf2017ae9bf140170f990019ce372"
-  integrity sha512-ZXc5xivDkEQ8qypeB+CIoCv5bJucB6zVZoLlbkqOgdlocQtwlQqFq8sKIDkyc3Ce0lS9Ef1lpEdd7l8tG6OALA==
+ocad2geojson@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/ocad2geojson/-/ocad2geojson-2.1.5.tgz#d363e04acf846cc453a9103fe3ab81d4c8c339df"
+  integrity sha512-CmASP4AJ2ahxL+psse/xkRePF2nwJVXHr0OLm/MP9YPaTJg275/cisdDoEVcXdHglAliiGDxBcGTh9h1pJHG+Q==
   dependencies:
     "@turf/line-offset" "^6.3.0"
     arr-flatten "^1.1.0"

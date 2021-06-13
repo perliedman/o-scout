@@ -11,7 +11,7 @@
     "blob-to-buffer": "^1.2.9",
     "immer": "^9.0.2",
     "ocad-tiler": "^1.2.1",
-    "ocad2geojson": "^2.1.4",
+    "ocad2geojson": "^2.1.5",
     "ol": "^6.5.0",
     "proj4": "^2.7.2",
     "react": "^17.0.2",
