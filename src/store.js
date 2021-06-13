@@ -73,3 +73,14 @@ function undo(state) {
 function redo(state) {
   return applyPatches(state, history[++currentVersion].redo);
 }
+
+export const useNotifications = create((set) => ({
+  notifications: [],
+  push: (type, message, detail) =>
+    set((state) => ({
+      ...state,
+      notifications: [...state.notifications, { type, message, detail }],
+    })),
+  pop: () =>
+    set((state) => ({ ...state, notifications: state.notifications.slice(1) })),
+}));

@@ -4,18 +4,18 @@ import toBuffer from "blob-to-buffer";
 import Spinner from "./ui/Spinner";
 import Button from "./ui/Button";
 
-import { useMap } from "./store";
+import { useMap, useNotifications } from "./store";
 
 export default function SelectMap({
   className,
   children,
   type = "normal",
   component,
-  onError,
 }) {
   const [state, setState] = useState("idle");
   const fileRef = useRef();
   const setMap = useMap(getSetter);
+  const pushNotification = useNotifications(getPush);
 
   return (
     <>
@@ -25,7 +25,10 @@ export default function SelectMap({
         <Button
           type={type}
           className={className}
-          onClick={() => fileRef.current.click()}
+          onClick={() => {
+            fileRef.current.value = "";
+            fileRef.current.click();
+          }}
         >
           {state === "loading" && <Spinner />}
           {children}
@@ -58,11 +61,15 @@ export default function SelectMap({
     } catch (e) {
       console.error(e);
       setState("error");
-      onError && onError(e);
+      pushNotification("danger", "Failed to load map.", e.toString());
     }
   }
 }
 
 function getSetter(state) {
   return state.setMapFile;
+}
+
+function getPush({ push }) {
+  return push;
 }
