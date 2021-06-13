@@ -11,21 +11,24 @@ import TileLayer from "ol/layer/Tile";
 import * as olSize from "ol/size";
 import Projection from "ol/proj/Projection";
 import TileState from "ol/TileState";
-import { useMap } from "./store";
+import { useMap, useNotifications } from "./store";
 
 export default function MapComponent() {
   const { mapFile, map, setMapInstance } = useMap(getMap);
+  const pushNotification = useNotifications(getPush);
 
   const container = useRef();
   const [projection, setProjection] = useState();
+  const hasTileErrors = useRef(false);
 
   const registerProjection = useCallback(_registerProjection, [mapFile]);
   useEffect(() => {
+    hasTileErrors.current = false;
     registerProjection();
     return () => {
       setProjection(null);
     };
-  }, [registerProjection, mapFile]);
+  }, [registerProjection, hasTileErrors, mapFile]);
   useEffect(createMap, [setMapInstance, mapFile, projection]);
   useEffect(addLayer, [map, mapFile]);
 
@@ -111,6 +114,14 @@ export default function MapComponent() {
             };
           } catch (e) {
             console.log(e);
+            if (!hasTileErrors.current) {
+              pushNotification(
+                "warning",
+                "Some parts of the map failed to display",
+                e.toString()
+              );
+              hasTileErrors.current = true;
+            }
             tile.setState(TileState.ERROR);
           }
         }
@@ -121,4 +132,8 @@ export default function MapComponent() {
 
 function getMap({ mapFile, map, setMapInstance }) {
   return { mapFile, map, setMapInstance };
+}
+
+function getPush({ push }) {
+  return push;
 }
