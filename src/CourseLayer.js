@@ -11,9 +11,14 @@ import { courseOverPrintRgb } from "./models/course";
 import RegularShape from "ol/style/RegularShape";
 import LineString from "ol/geom/LineString";
 import GeoJSON from "ol/format/GeoJSON";
-import useNumberPositions from "./services/use-number-positions";
+import useNumberPositions, {
+  controlCircleOutsideDiameter,
+  overprintLineWidth,
+  startTriangleRadius,
+} from "./services/use-number-positions";
 import Text from "ol/style/Text";
 import Fill from "ol/style/Fill";
+import Coordinate from "./models/coordinate";
 
 export default function CourseLayer({ course }) {
   const { map, mapFile } = useMap(getMap);
@@ -62,11 +67,13 @@ export default function CourseLayer({ course }) {
               const dx = c2[0] - c1[0];
               const dy = c2[1] - c1[1];
               const l = Math.sqrt(dx * dx + dy * dy);
-              if (l > 2 * lineSpace) {
-                const ox = (lineSpace * dx) / l;
-                const oy = (lineSpace * dy) / l;
-                const startCoord = [c1[0] + ox, c1[1] + oy];
-                const endCoord = [c2[0] - ox, c2[1] - oy];
+              const startSpace = spacing(previous);
+              const endSpace = spacing(control);
+              if (l > startSpace + endSpace) {
+                const vx = dx / l;
+                const vy = dy / l;
+                const startCoord = c1.add([vx * startSpace, vy * startSpace]);
+                const endCoord = c2.add([-vx * endSpace, -vy * endSpace]);
 
                 return new Feature({
                   geometry: new LineString([startCoord, endCoord]),
@@ -97,14 +104,12 @@ export default function CourseLayer({ course }) {
     if (kind === "normal") {
       const image = controlStyle.getImage();
       const stroke = image.getStroke();
-      image.setRadius(32 / resolution);
-      stroke.setWidth(5 / resolution);
+      image.setRadius((controlCircleOutsideDiameter * 10) / 2 / resolution);
+      stroke.setWidth((overprintLineWidth * 10) / resolution);
       return controlStyle;
     } else if (kind === "start") {
       const image = startStyle.getImage();
-      const stroke = image.getStroke();
-      image.setScale(0.3 / resolution);
-      stroke.setWidth(20 / resolution);
+      image.setScale(0.5 / resolution);
 
       const next = featuresRef.current[feature.get("index") + 1];
       if (next) {
@@ -121,13 +126,13 @@ export default function CourseLayer({ course }) {
       finishStyle.forEach((style, i) => {
         const image = style.getImage();
         const stroke = image.getStroke();
-        image.setRadius((24 + i * 8) / resolution);
-        stroke.setWidth(5 / resolution);
+        image.setRadius((20 + i * 10) / resolution);
+        stroke.setWidth((overprintLineWidth * 10) / resolution);
       });
       return finishStyle;
     } else if (kind === "line") {
       const stroke = lineStyle.getStroke();
-      stroke.setWidth(5 / resolution);
+      stroke.setWidth((overprintLineWidth * 10) / resolution);
       return lineStyle;
     } else if (kind === "number") {
       const text = numberStyle.getText();
@@ -140,10 +145,10 @@ export default function CourseLayer({ course }) {
 
 const mmToMeter = 0.001;
 const toProjectedCoord = (crs, coordinate) => {
-  return [
+  return new Coordinate(
     coordinate[0] * mmToMeter * crs.scale + crs.easting,
-    coordinate[1] * mmToMeter * crs.scale + crs.northing,
-  ];
+    coordinate[1] * mmToMeter * crs.scale + crs.northing
+  );
 };
 
 function getMap({ map, mapFile }) {
@@ -153,35 +158,45 @@ function getMap({ map, mapFile }) {
 const controlStyle = new Style({
   image: new Circle({
     radius: 16,
-    stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
+    stroke: new Stroke({
+      color: courseOverPrintRgb,
+      width: overprintLineWidth,
+    }),
   }),
 });
 
 const startStyle = new Style({
   image: new RegularShape({
     points: 3,
-    radius: 128,
-    stroke: new Stroke({ color: courseOverPrintRgb, width: 16 }),
+    radius: startTriangleRadius * 10 * 2,
+    stroke: new Stroke({
+      color: courseOverPrintRgb,
+      width: overprintLineWidth * 10 * 2,
+    }),
   }),
 });
 
 const finishStyle = [
   new Style({
     image: new Circle({
-      points: 3,
       radius: 128,
-      stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
+      stroke: new Stroke({
+        color: courseOverPrintRgb,
+        width: overprintLineWidth,
+      }),
     }),
   }),
   new Style({
     image: new Circle({
       radius: 128,
-      stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
+      stroke: new Stroke({
+        color: courseOverPrintRgb,
+        width: overprintLineWidth,
+      }),
     }),
   }),
 ];
 
-const lineSpace = 60;
 const lineStyle = new Style({
   stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
 });
@@ -189,3 +204,17 @@ const lineStyle = new Style({
 const numberStyle = new Style({
   text: new Text({ fill: new Fill({ color: courseOverPrintRgb }) }),
 });
+
+function spacing(control) {
+  const { kind } = control;
+  switch (kind) {
+    case "start":
+      return startTriangleRadius * 10;
+    case "finish":
+      return 30 + (overprintLineWidth * 10) / 2;
+    default:
+      return (
+        (controlCircleOutsideDiameter / 2) * 10 + (overprintLineWidth * 10) / 2
+      );
+  }
+}

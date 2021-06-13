@@ -102,9 +102,12 @@ export default function useNumberPositions(
   }, [controls, courseObjRatio, transformCoord]);
 }
 
+// Units in mm, from ISOM-2017
+export const startTriangleRadius = Math.sqrt(6 * 6 + 3 * 3) / 2;
+export const controlCircleOutsideDiameter = 5.0;
+export const overprintLineWidth = 0.35;
+const controlNumberCircleDistance = 1.825;
 const defaultControlNumberAngle = Math.PI / 6;
-const controlCircleOutsideDiameter = 5.9; //5.35
-const controlNumberCircleDistance = 2; // 1.825
 const controlCircleSize = 1;
 
 // const createControlTextLocations = (controls, courseObjRatio) => {
