@@ -19,6 +19,8 @@ import useNumberPositions, {
 import Text from "ol/style/Text";
 import Fill from "ol/style/Fill";
 import Coordinate from "./models/coordinate";
+import useControls from "./services/use-controls";
+import useControlConnections from "./services/user-control-connections";
 
 export default function CourseLayer({ course }) {
   const { map, mapFile } = useMap(getMap);
@@ -46,56 +48,32 @@ export default function CourseLayer({ course }) {
   }, [map, layer]);
 
   const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
-  const features = useMemo(
-    () =>
-      course.controls
-        .map(
-          (control, index) =>
-            new Feature({
-              geometry: new Point(toProjectedCoord(crs, control.coordinates)),
-              index,
-              ...control,
-            })
-        )
-        .concat(
-          course.controls
-            .slice(1)
-            .map((control, index) => {
-              const previous = course.controls[index];
-              const c1 = toProjectedCoord(crs, previous.coordinates);
-              const c2 = toProjectedCoord(crs, control.coordinates);
-              const dx = c2[0] - c1[0];
-              const dy = c2[1] - c1[1];
-              const l = Math.sqrt(dx * dx + dy * dy);
-              const startSpace = spacing(previous);
-              const endSpace = spacing(control);
-              if (l > startSpace + endSpace) {
-                const vx = dx / l;
-                const vy = dy / l;
-                const startCoord = c1.add([vx * startSpace, vy * startSpace]);
-                const endCoord = c2.add([-vx * endSpace, -vy * endSpace]);
 
-                return new Feature({
-                  geometry: new LineString([startCoord, endCoord]),
-                  kind: "line",
-                });
-              }
-              return null;
-            })
-            .filter(Boolean)
-        ),
-    [crs, course.controls]
+  const transformCoord = useCallback((c) => toProjectedCoord(crs, c), [crs]);
+  const controlsGeoJSON = useControls(course.controls, transformCoord);
+  const controlConnectionsGeoJSON = useControlConnections(
+    course.controls,
+    transformCoord
   );
+  const controlLabelsGeoJSON = useNumberPositions(
+    course.controls,
+    transformCoord
+  );
+
+  const features = useMemo(() => {
+    const geojson = new GeoJSON();
+    return [
+      ...geojson.readFeatures(controlsGeoJSON),
+      ...geojson.readFeatures(controlConnectionsGeoJSON),
+      ...geojson.readFeatures(controlLabelsGeoJSON),
+    ];
+  }, [controlsGeoJSON, controlConnectionsGeoJSON, controlLabelsGeoJSON]);
   featuresRef.current = features;
-  const numberGeoJSON = useNumberPositions(course.controls, (c) =>
-    toProjectedCoord(crs, c)
-  );
 
   useEffect(() => {
     source.clear();
     source.addFeatures(features);
-    source.addFeatures(new GeoJSON().readFeatures(numberGeoJSON));
-  }, [source, features, numberGeoJSON]);
+  }, [source, features]);
 
   return null;
 
@@ -204,17 +182,3 @@ const lineStyle = new Style({
 const numberStyle = new Style({
   text: new Text({ fill: new Fill({ color: courseOverPrintRgb }) }),
 });
-
-function spacing(control) {
-  const { kind } = control;
-  switch (kind) {
-    case "start":
-      return startTriangleRadius * 10;
-    case "finish":
-      return 30 + (overprintLineWidth * 10) / 2;
-    default:
-      return (
-        (controlCircleOutsideDiameter / 2) * 10 + (overprintLineWidth * 10) / 2
-      );
-  }
-}
