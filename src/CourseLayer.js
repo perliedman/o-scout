@@ -1,5 +1,3 @@
-import { Feature } from "ol";
-import Point from "ol/geom/Point";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
@@ -9,7 +7,6 @@ import { useMap } from "./store";
 import Stroke from "ol/style/Stroke";
 import { courseOverPrintRgb } from "./models/course";
 import RegularShape from "ol/style/RegularShape";
-import LineString from "ol/geom/LineString";
 import GeoJSON from "ol/format/GeoJSON";
 import useNumberPositions, {
   controlCircleOutsideDiameter,

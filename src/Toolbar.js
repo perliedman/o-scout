@@ -7,10 +7,10 @@ export default function Toolbar() {
   return (
     <div className="relative">
       <div className="absolute left-1/2 transform -translate-x-1/2 z-20 top-0">
-        <ToolButton disabled={!undo} onClick={undo}>
+        <ToolButton disabled={!undo} onClick={undo || null}>
           Undo
         </ToolButton>
-        <ToolButton disabled={!redo} onClick={redo}>
+        <ToolButton disabled={!redo} onClick={redo || null}>
           Redo
         </ToolButton>
       </div>

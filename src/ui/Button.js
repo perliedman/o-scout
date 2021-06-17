@@ -9,7 +9,7 @@ export default function Button({
 }) {
   return (
     <button
-      className={`focus:outline-none focus:ring-2 ring-indigo-600 rounded-lg font-thin ${
+      className={`focus:outline-none focus:ring-2 ring-indigo-600 rounded font-thin ${
         type === "primary"
           ? "bg-indigo-600 text-white"
           : "text-indigo-700 border-2 border-indigo-600"

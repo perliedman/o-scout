@@ -48,7 +48,7 @@ export default function Dropdown({ children }) {
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button"
-          tabindex="-1"
+          tabIndex="-1"
         >
           <div className="py-1" role="none">
             <DropdownContext.Provider value={() => setOpen(false)}>
@@ -67,7 +67,7 @@ export function DropdownItem({ onClick, children }) {
     <button
       className="hover:bg-gray-100 hover:text-gray-900 text-gray-700 block px-4 py-2 text-sm w-full text-left"
       role="menuitem"
-      tabindex="-1"
+      tabIndex="-1"
       onClick={(e) => {
         close();
         onClick && onClick(e);

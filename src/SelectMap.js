@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
-import readOcad from "ocad2geojson/src/ocad-reader";
-import toBuffer from "blob-to-buffer";
 import Spinner from "./ui/Spinner";
 import Button from "./ui/Button";
+import OcadTiler from "ocad-tiler";
 
 import { useMap, useNotifications } from "./store";
+import { readMap } from "./services/map";
 
 export default function SelectMap({
   className,
@@ -49,15 +49,8 @@ export default function SelectMap({
     setState("loading");
     try {
       const [blob] = e.target.files;
-      const file = await new Promise((resolve, reject) =>
-        toBuffer(blob, (err, buffer) => {
-          if (err) reject(err);
-          resolve(buffer);
-        })
-      );
-      const map = await readOcad(file);
-      setMap(blob.name, map);
-      setState("idle");
+      const map = await readMap(blob);
+      setMap(blob.name, map, new OcadTiler(map));
     } catch (e) {
       console.error(e);
       setState("error");
