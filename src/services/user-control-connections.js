@@ -19,8 +19,8 @@ export function createControlConnections(controls, transformCoord) {
       .slice(1)
       .map((control, index) => {
         const previous = controls[index];
-        const c1 = transformCoord(previous.coordinates);
-        const c2 = transformCoord(control.coordinates);
+        const c1 = previous.coordinates;
+        const c2 = control.coordinates;
         const dx = c2[0] - c1[0];
         const dy = c2[1] - c1[1];
         const l = Math.sqrt(dx * dx + dy * dy);
@@ -41,7 +41,10 @@ export function createControlConnections(controls, transformCoord) {
             },
             geometry: {
               type: "LineString",
-              coordinates: [startCoord, endCoord],
+              coordinates: [
+                transformCoord(startCoord),
+                transformCoord(endCoord),
+              ],
             },
           };
         }
@@ -55,12 +58,10 @@ function spacing(control) {
   const { kind } = control;
   switch (kind) {
     case "start":
-      return startTriangleRadius * 10;
+      return startTriangleRadius;
     case "finish":
-      return 30 + (overprintLineWidth * 10) / 2;
+      return 3 + overprintLineWidth / 2;
     default:
-      return (
-        (controlCircleOutsideDiameter / 2) * 10 + (overprintLineWidth * 10) / 2
-      );
+      return controlCircleOutsideDiameter / 2 + overprintLineWidth / 2;
   }
 }

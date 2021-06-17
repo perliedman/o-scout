@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Courses from "./Courses";
 import MapSection from "./MapSection";
+import PrintAndExport from "./PrintAndExport";
 import Toggle from "./ui/Toggle";
 
 export default function Sidebar() {
@@ -11,6 +12,9 @@ export default function Sidebar() {
       </Section>
       <Section title="Courses" defaultOpen={true}>
         <Courses />
+      </Section>
+      <Section title="Print &amp; Export" defaultOpen={false}>
+        <PrintAndExport />
       </Section>
     </div>
   );

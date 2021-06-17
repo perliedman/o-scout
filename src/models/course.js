@@ -1,4 +1,12 @@
+import { circle, createSvgNode, lines } from "../services/create-svg";
+import { createControls } from "../services/use-controls";
+import {
+  controlCircleOutsideDiameter,
+  createNumberPositions,
+} from "../services/use-number-positions";
+import { createControlConnections } from "../services/user-control-connections";
 import { controlDistance } from "./control";
+import Coordinate from "./coordinate";
 
 export const courseOverPrintRgb = "rgba(182, 44, 152, 0.8)";
 
@@ -24,17 +32,17 @@ export function courseDistance(course, scale) {
   );
 }
 
-//   bounds() {
-//     return this.controls.reduce(
-//       (a, c) => [
-//         Math.min(a[0], c.coordinates[0]),
-//         Math.min(a[1], c.coordinates[1]),
-//         Math.max(a[2], c.coordinates[0]),
-//         Math.max(a[3], c.coordinates[1]),
-//       ],
-//       [Number.MAX_VALUE, Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
-//     );
-//   }
+export function courseBounds(course) {
+  return course.controls.reduce(
+    (a, c) => [
+      Math.min(a[0], c.coordinates[0]),
+      Math.min(a[1], c.coordinates[1]),
+      Math.max(a[2], c.coordinates[0]),
+      Math.max(a[3], c.coordinates[1]),
+    ],
+    [Number.MAX_VALUE, Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
+  );
+}
 
 //   objScale() {
 //     return this.printScale / this.event.map.scale;
@@ -90,55 +98,64 @@ export function courseDistance(course, scale) {
 //     }
 //   }
 
-// function courseToSvg(course, document) {
-//   const controls = course.controls;
-//   const objScale = course.objScale();
+export function courseToSvg(course, document) {
+  const controls = course.controls;
+  const objScale = 1; //course.objScale();
 
-//   return createSvgNode(document, {
-//     type: "g",
-//     children: controls
-//       .map((c, i) =>
-//         c.toSvg(
-//           c.kind === "start" && course.controls.length > i + 1
-//             ? Math.atan2.apply(
-//                 Math,
-//                 course.controls[i + 1].coordinates
-//                   .sub(c.coordinates)
-//                   .toArray()
-//                   .reverse()
-//               ) -
-//                 Math.PI / 2
-//             : 0,
-//           objScale
-//         )
-//       )
-//       .concat(
-//         createControlConnections(controls, objScale).map(
-//           ({ geometry: { coordinates } }) =>
-//             lines(coordinates, false, courseOverPrintRgb, objScale)
-//         )
-//       )
-//       .concat(
-//         createControlTextLocations(controls, objScale).map(
-//           ({ properties, geometry: { coordinates } }, i) => ({
-//             type: "text",
-//             attrs: {
-//               x: coordinates[0] * 100,
-//               y: -coordinates[1] * 100,
-//               dx: "-50%",
-//               dy: "50%",
-//               fill: courseOverPrintRgb,
-//               style: `font: normal ${600 * objScale}px sans-serif;`,
-//             },
-//             text:
-//               properties.kind !== "start" && properties.kind !== "finish"
-//                 ? (i + 1).toString()
-//                 : "",
-//           })
-//         )
-//       ),
-//   });
-// }
+  // Convert from PPEN mm to OCAD coordinates, 1/100 mm;
+  // also flip y axis since SVG y-axis increases downwards
+  const transformCoord = ([x, y]) => new Coordinate(x * 100, -y * 100);
+
+  return createSvgNode(document, {
+    type: "g",
+    children: createControls(controls, transformCoord)
+      .features.map(({ geometry: { type, coordinates } }) =>
+        type === "Point"
+          ? circle(
+              coordinates,
+              (controlCircleOutsideDiameter / 2) * 100,
+              courseOverPrintRgb
+            )
+          : lines(coordinates, true, courseOverPrintRgb)
+      )
+      .concat(
+        createControlConnections(
+          controls,
+          transformCoord,
+          objScale
+        ).features.map(({ geometry: { coordinates } }) =>
+          lines(coordinates, false, courseOverPrintRgb, objScale)
+        )
+      )
+      .concat(
+        createNumberPositions(controls, transformCoord, objScale).features.map(
+          (
+            {
+              properties,
+              geometry: {
+                coordinates: [x, y],
+              },
+            },
+            i
+          ) => ({
+            type: "text",
+            attrs: {
+              x,
+              y,
+              dx: "-50%",
+              dy: "50%",
+              fill: courseOverPrintRgb,
+              style: `font: normal ${600 * objScale}px sans-serif;`,
+            },
+            text:
+              properties.kind !== "start" && properties.kind !== "finish"
+                ? (i + 1).toString()
+                : "",
+          })
+        )
+      ),
+  });
+}
 
 // const defaultControlNumberAngle = Math.PI / 6;
 // const controlCircleOutsideDiameter = 5.9; //5.35
@@ -233,27 +250,3 @@ export function courseDistance(course, scale) {
 
 //   return bestPoint;
 // };
-
-// const createControlConnections = (controls, courseObjScale) =>
-//   controls.slice(1).map((_, i) => {
-//     const r = (controlCircleOutsideDiameter / 2) * courseObjScale;
-//     const c0 = controls[i].coordinates;
-//     const c1 = controls[i + 1].coordinates;
-//     const v = c1.sub(c0);
-//     const l = v.vLength();
-
-//     const dx = v[0] / l;
-//     const dy = v[1] / l;
-
-//     const p0 = c0.add(new Coordinate(dx * r, dy * r));
-//     const p1 = c1.sub(new Coordinate(dx * r, dy * r));
-
-//     return {
-//       type: "Feature",
-//       properties: {},
-//       geometry: {
-//         type: "LineString",
-//         coordinates: [p0.toArray(), p1.toArray()],
-//       },
-//     };
-//   });

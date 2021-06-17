@@ -6,7 +6,6 @@ import proj4 from "proj4";
 import { getProjection } from "./services/epsg";
 import XYZ from "ol/source/XYZ";
 import "ol/ol.css";
-import OcadTiler from "ocad-tiler";
 import TileLayer from "ol/layer/Tile";
 import * as olSize from "ol/size";
 import Projection from "ol/proj/Projection";
@@ -14,7 +13,7 @@ import TileState from "ol/TileState";
 import { useMap, useNotifications } from "./store";
 
 export default function MapComponent() {
-  const { mapFile, map, setMapInstance } = useMap(getMap);
+  const { mapFile, map, tiler, setMapInstance } = useMap(getMap);
   const pushNotification = useNotifications(getPush);
 
   const container = useRef();
@@ -30,7 +29,7 @@ export default function MapComponent() {
     };
   }, [registerProjection, hasTileErrors, mapFile]);
   useEffect(createMap, [setMapInstance, mapFile, projection]);
-  useEffect(addLayer, [map, mapFile]);
+  useEffect(addLayer, [map, mapFile, tiler, pushNotification]);
 
   return <div className="absolute w-full h-full" ref={container} />;
 
@@ -69,11 +68,10 @@ export default function MapComponent() {
         tileLoadFunction: loadTile,
         url: "{z}/{x}/{y}.png",
       });
-      const ocadTiler = new OcadTiler(mapFile);
 
       const layer = new TileLayer({ source });
       map.addLayer(layer);
-      map.getView().fit(ocadTiler.bounds);
+      map.getView().fit(tiler.bounds);
 
       return () => {
         map.removeLayer(layer);
@@ -88,7 +86,7 @@ export default function MapComponent() {
             const resolution = tileGrid.getResolution(z);
             const tileSize = olSize.toSize(tileGrid.getTileSize(z));
             const extent = tileGrid.getTileCoordExtent(tileCoord);
-            const svg = ocadTiler.renderSvg(extent, resolution, {
+            const svg = tiler.renderSvg(extent, resolution, {
               DOMImplementation: document.implementation,
             });
 
@@ -130,8 +128,8 @@ export default function MapComponent() {
   }
 }
 
-function getMap({ mapFile, map, setMapInstance }) {
-  return { mapFile, map, setMapInstance };
+function getMap({ mapFile, map, tiler, setMapInstance }) {
+  return { mapFile, map, tiler, setMapInstance };
 }
 
 function getPush({ push }) {

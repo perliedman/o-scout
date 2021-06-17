@@ -7,8 +7,8 @@ enablePatches();
 
 export const useMap = create((set) => ({
   mapFile: undefined,
-  setMapFile: (mapFilename, mapFile) =>
-    set((state) => ({ ...state, mapFile, mapFilename })),
+  setMapFile: (mapFilename, mapFile, tiler) =>
+    set((state) => ({ ...state, mapFile, mapFilename, tiler })),
   setMapInstance: (map) => set((state) => ({ ...state, map })),
 }));
 
