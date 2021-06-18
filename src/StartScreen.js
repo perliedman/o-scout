@@ -19,6 +19,21 @@ export default function StartScreen() {
           <h3 className="text-4xl font-thin text-indigo-600">
             Web-based Course Setting for Orienteering
           </h3>
+          <p className="text-gray-500 font-thin mx-auto mt-16 max-w-xl">
+            This is very much a work in progress at this point. Some things are
+            usable today, a lot of things are completely missing or very roughly
+            implemented.
+          </p>
+          <p className="text-gray-500 font-thin mx-auto mt-16 max-w-xl">
+            For reporting issues, getting the code or helping out, visit{" "}
+            <a
+              className="text-indigo-400 hover:underline hover:text-indigo-600"
+              href="https://github.com/perliedman/o-scout/"
+            >
+              O-Scout at GitHub
+            </a>
+            .
+          </p>
           <div className="mt-24">
             <span className="mr-4">
               <SelectMap type="primary" className="text-xl w-48 h-16">
