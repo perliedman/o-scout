@@ -18,6 +18,7 @@ import Fill from "ol/style/Fill";
 import Coordinate from "./models/coordinate";
 import useControls from "./services/use-controls";
 import useControlConnections from "./services/user-control-connections";
+import useSpecialObjects from "./services/specia-objects";
 
 export default function CourseLayer({ course }) {
   const { map, mapFile } = useMap(getMap);
@@ -56,6 +57,10 @@ export default function CourseLayer({ course }) {
     course.controls,
     transformCoord
   );
+  const specialObjectsGeoJSON = useSpecialObjects(
+    course.specialObjects,
+    transformCoord
+  );
 
   const features = useMemo(() => {
     const geojson = new GeoJSON();
@@ -63,8 +68,14 @@ export default function CourseLayer({ course }) {
       ...geojson.readFeatures(controlsGeoJSON),
       ...geojson.readFeatures(controlConnectionsGeoJSON),
       ...geojson.readFeatures(controlLabelsGeoJSON),
+      ...geojson.readFeatures(specialObjectsGeoJSON),
     ];
-  }, [controlsGeoJSON, controlConnectionsGeoJSON, controlLabelsGeoJSON]);
+  }, [
+    controlsGeoJSON,
+    controlConnectionsGeoJSON,
+    controlLabelsGeoJSON,
+    specialObjectsGeoJSON,
+  ]);
   featuresRef.current = features;
 
   useEffect(() => {
@@ -114,6 +125,8 @@ export default function CourseLayer({ course }) {
       text.setText(feature.get("label"));
       text.setScale(6 / resolution);
       return numberStyle;
+    } else if (kind === "white-out") {
+      return whiteOutStyle;
     }
   }
 }
@@ -178,4 +191,8 @@ const lineStyle = new Style({
 
 const numberStyle = new Style({
   text: new Text({ fill: new Fill({ color: courseOverPrintRgb }) }),
+});
+
+const whiteOutStyle = new Style({
+  fill: new Fill({ color: "white" }),
 });

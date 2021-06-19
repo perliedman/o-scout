@@ -15,7 +15,7 @@ describe("parsePPen", () => {
   test("can read special objects", () => {
     const event = parsePpenFile("./test-data/ppen/test1.ppen");
     event.courses.forEach((course) => {
-      expect(course.specialObjects.features.length).toBe(2);
+      expect(course.specialObjects.length).toBe(2);
     });
   });
 

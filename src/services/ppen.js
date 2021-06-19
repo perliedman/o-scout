@@ -115,7 +115,7 @@ export function parsePPen(doc) {
         : Array.from(coursesTag.getElementsByTagName("course")).map(
             (courseTag) => courseTag.getAttribute("course")
           );
-      const coordinates = Array.from(
+      const locations = Array.from(
         specialObjectTag.getElementsByTagName("location")
       ).map((locationTag) =>
         ["x", "y"].map((attribute) =>
@@ -124,29 +124,23 @@ export function parsePPen(doc) {
       );
 
       const specialObject = {
-        type: "Feature",
         id,
-        properties: { kind, isAllCourses },
-        geometry: {
-          type: "Polygon",
-          coordinates:
-            kind === "white-out"
-              ? [coordinates]
-              : bboxPolygon([...coordinates[0], ...coordinates[1]]),
-        },
+        kind,
+        isAllCourses,
+        locations,
       };
 
       courseIds.forEach((courseId) => {
         const course = event.courses.find((c) => c.id === courseId);
         if (course) {
-          course.specialObjects.features.push(specialObject);
+          course.specialObjects.push(specialObject);
         } else {
           warnings.push(
             `No course with id ${courseId} found for special object ${id}.`
           );
         }
       });
-      event.specialObjects.features.push(specialObject);
+      event.specialObjects.push(specialObject);
     }
   }
 }

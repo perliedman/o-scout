@@ -1,4 +1,3 @@
-import { featureCollection } from "@turf/helpers";
 import { circle, createSvgNode, lines } from "../services/create-svg";
 import { createControls } from "../services/use-controls";
 import {
@@ -18,7 +17,7 @@ export function createCourse(id, name, controls = [], printScale, type) {
     controls: controls,
     printScale: printScale,
     type: type,
-    specialObjects: featureCollection([]),
+    specialObjects: [],
   };
 }
 
