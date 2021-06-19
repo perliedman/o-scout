@@ -84,8 +84,9 @@ const parseLocation = (loc) =>
 
 const parseControl = (tag) => {
   const codeTag = tag.getElementsByTagName("code")[0];
+  const id = tag.getAttribute("id");
   return createControl(
-    tag.id && Number(tag.id),
+    Number(id),
     tag.getAttribute("kind"),
     codeTag ? codeTag.textContent : undefined,
     parseLocation(tag.getElementsByTagName("location")[0]),
