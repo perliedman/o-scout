@@ -1,3 +1,4 @@
+import { featureCollection } from "@turf/helpers";
 import { createControl } from "./control";
 
 export function createEvent(name, courses) {
@@ -9,6 +10,7 @@ export function createEvent(name, courses) {
     map: { scale: 15000 },
     controls: {},
     controlList: [],
+    specialObjects: featureCollection([]),
   };
 }
 

@@ -7,11 +7,29 @@ describe("parsePPen", () => {
     ppenFile                         | numberCourses
     ${"./test-data/ppen/test1.ppen"} | ${4}
     ${"./test-data/ppen/test2.ppen"} | ${5}
-  `("reads $input correctly", ({ ppenFile, numberCourses }) => {
-    const ppenStr = readFileSync(ppenFile, "utf-8");
-    const doc = new DOMParser().parseFromString(ppenStr, "text/xml");
-    const event = parsePPen(doc);
-
+  `("reads $input courses without errors", ({ ppenFile, numberCourses }) => {
+    const event = parsePpenFile(ppenFile);
     expect(event.courses.length).toBe(numberCourses);
   });
+
+  test("can read special objects", () => {
+    const event = parsePpenFile("./test-data/ppen/test1.ppen");
+    event.courses.forEach((course) => {
+      expect(course.specialObjects.features.length).toBe(2);
+    });
+  });
+
+  test("gives warnings", () => {
+    const event = parsePpenFile("./test-data/ppen/test2.ppen");
+    expect(event.warnings.length).toBe(1);
+    expect(event.warnings[0]).toBe(
+      "No course with id 0 found for special object 13."
+    );
+  });
 });
+
+function parsePpenFile(path) {
+  const ppenStr = readFileSync(path, "utf-8");
+  const doc = new DOMParser().parseFromString(ppenStr, "text/xml");
+  return parsePPen(doc);
+}

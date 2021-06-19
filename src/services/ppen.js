@@ -3,12 +3,14 @@ import Coordinate from "../models/coordinate";
 import { addCourse, createEvent } from "../models/event";
 import { createControl } from "../models/control";
 import { createCourse } from "../models/course";
+import bboxPolygon from "@turf/bbox-polygon";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
   const mapTag = eventTag.getElementsByTagName("map")[0];
   const scale = Number(mapTag.getAttribute("scale"));
   const mapAbsPath = mapTag.getAttribute("absolute-path");
+  const warnings = [];
 
   const controls = Array.from(doc.getElementsByTagName("control")).map(
     parseControl
@@ -76,26 +78,78 @@ export function parsePPen(doc) {
 
   courses.forEach((c) => addCourse(event, c));
 
-  return event;
+  parseSpecialObjects(event, doc.getElementsByTagName("special-object"));
+
+  return { ...event, warnings };
+
+  function parseLocation(loc) {
+    return new Coordinate(
+      Number(loc.getAttribute("x")),
+      Number(loc.getAttribute("y"))
+    );
+  }
+
+  function parseControl(tag) {
+    const codeTag = tag.getElementsByTagName("code")[0];
+    const id = tag.getAttribute("id");
+    return createControl(
+      Number(id),
+      tag.getAttribute("kind"),
+      codeTag ? codeTag.textContent : undefined,
+      parseLocation(tag.getElementsByTagName("location")[0]),
+      Array.from(tag.getElementsByTagName("description")).reduce((a, dtag) => {
+        a[dtag.getAttribute("box")] = dtag.getAttribute("iof-2004-ref");
+        return a;
+      }, {})
+    );
+  }
+
+  function parseSpecialObjects(event, specialObjectsTags) {
+    for (const specialObjectTag of Array.from(specialObjectsTags)) {
+      const id = specialObjectTag.getAttribute("id");
+      const kind = specialObjectTag.getAttribute("kind");
+      const coursesTag = specialObjectTag.getElementsByTagName("courses")[0];
+      const isAllCourses = coursesTag.getAttribute("all") === "true";
+      const courseIds = isAllCourses
+        ? event.courses.map(({ id }) => id)
+        : Array.from(coursesTag.getElementsByTagName("course")).map(
+            (courseTag) => courseTag.getAttribute("course")
+          );
+      const coordinates = Array.from(
+        specialObjectTag.getElementsByTagName("location")
+      ).map((locationTag) =>
+        ["x", "y"].map((attribute) =>
+          Number(locationTag.getAttribute(attribute))
+        )
+      );
+
+      const specialObject = {
+        type: "Feature",
+        id,
+        properties: { kind, isAllCourses },
+        geometry: {
+          type: "Polygon",
+          coordinates:
+            kind === "white-out"
+              ? [coordinates]
+              : bboxPolygon([...coordinates[0], ...coordinates[1]]),
+        },
+      };
+
+      courseIds.forEach((courseId) => {
+        const course = event.courses.find((c) => c.id === courseId);
+        if (course) {
+          course.specialObjects.features.push(specialObject);
+        } else {
+          warnings.push(
+            `No course with id ${courseId} found for special object ${id}.`
+          );
+        }
+      });
+      event.specialObjects.features.push(specialObject);
+    }
+  }
 }
-
-const parseLocation = (loc) =>
-  new Coordinate(Number(loc.getAttribute("x")), Number(loc.getAttribute("y")));
-
-const parseControl = (tag) => {
-  const codeTag = tag.getElementsByTagName("code")[0];
-  const id = tag.getAttribute("id");
-  return createControl(
-    Number(id),
-    tag.getAttribute("kind"),
-    codeTag ? codeTag.textContent : undefined,
-    parseLocation(tag.getElementsByTagName("location")[0]),
-    Array.from(tag.getElementsByTagName("description")).reduce((a, dtag) => {
-      a[dtag.getAttribute("box")] = dtag.getAttribute("iof-2004-ref");
-      return a;
-    }, {})
-  );
-};
 
 const createXml = (document, n) => {
   const node = document.createElement(n.type);
