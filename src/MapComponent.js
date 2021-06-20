@@ -11,6 +11,7 @@ import * as olSize from "ol/size";
 import Projection from "ol/proj/Projection";
 import TileState from "ol/TileState";
 import { useMap, useNotifications } from "./store";
+import { svgToBitmap } from "./services/svg-to-bitmap";
 
 export default function MapComponent() {
   const { mapFile, map, tiler, setMapInstance } = useMap(getMap);
@@ -77,7 +78,7 @@ export default function MapComponent() {
         map.removeLayer(layer);
       };
 
-      function loadTile(tile) {
+      async function loadTile(tile) {
         if (!tile.getImage().src) {
           try {
             const { tileCoord } = tile;
@@ -94,22 +95,7 @@ export default function MapComponent() {
             svg.setAttribute("height", tileSize[1]);
             svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
 
-            const image = new Image();
-            const xml = svg.outerHTML;
-            const url = `data:image/svg+xml;base64,${btoa(
-              unescape(encodeURIComponent(xml))
-            )}`;
-            image.src = url;
-
-            image.onload = () => {
-              const canvas = document.createElement("canvas");
-              canvas.width = tileSize[0];
-              canvas.height = tileSize[1];
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(image, 0, 0);
-
-              tile.getImage().src = canvas.toDataURL();
-            };
+            tile.getImage().src = await svgToBitmap(svg, tileSize);
           } catch (e) {
             console.log(e);
             if (!hasTileErrors.current) {
