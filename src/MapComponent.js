@@ -12,6 +12,7 @@ import Projection from "ol/proj/Projection";
 import TileState from "ol/TileState";
 import { useMap, useNotifications } from "./store";
 import { svgToBitmap } from "./services/svg-to-bitmap";
+import { View } from "ol";
 
 export default function MapComponent() {
   const { mapFile, map, tiler, setMapInstance } = useMap(getMap);
@@ -30,7 +31,7 @@ export default function MapComponent() {
     };
   }, [registerProjection, hasTileErrors, mapFile]);
   useEffect(createMap, [setMapInstance, mapFile, projection]);
-  useEffect(addLayer, [map, mapFile, tiler, pushNotification]);
+  useEffect(addLayer, [map, mapFile, tiler, pushNotification, projection]);
 
   return <div className="absolute w-full h-full" ref={container} />;
 
@@ -53,7 +54,10 @@ export default function MapComponent() {
 
   function createMap() {
     if (projection) {
-      const map = new OlMap({ target: container.current, projection });
+      const map = new OlMap({
+        target: container.current,
+        view: new View({ projection }),
+      });
       setMapInstance(map);
 
       return () => {
@@ -64,8 +68,9 @@ export default function MapComponent() {
   }
 
   function addLayer() {
-    if (map) {
+    if (map && projection) {
       const source = new XYZ({
+        projection,
         tileLoadFunction: loadTile,
         url: "{z}/{x}/{y}.png",
       });

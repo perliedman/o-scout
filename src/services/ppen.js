@@ -3,7 +3,6 @@ import Coordinate from "../models/coordinate";
 import { addCourse, createEvent } from "../models/event";
 import { createControl } from "../models/control";
 import { createCourse } from "../models/course";
-import bboxPolygon from "@turf/bbox-polygon";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
