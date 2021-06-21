@@ -24,7 +24,7 @@ const useEvent = create((set) => ({
         set((state) => ({
           ...state,
           ...event,
-          selectedCourseId: event.courses[0].id,
+          selectedCourseId: event.courses?.[0]?.id,
         })),
     },
     course: {
