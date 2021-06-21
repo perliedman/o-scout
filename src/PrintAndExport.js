@@ -4,6 +4,7 @@ import shallow from "zustand/shallow";
 import { useMemo } from "react";
 import { courseBounds } from "./models/course";
 import { courseToSvg } from "./services/create-svg";
+import * as olExtent from "ol/extent";
 
 export default function PrintAndExport() {
   const { courses, selectedCourseId } = useEvent(getCourses, shallow);
@@ -21,13 +22,14 @@ export default function PrintAndExport() {
 
   function onPrint() {
     const crs = mapFile.getCrs();
-    const paperExtent = courseBounds(selectedCourse);
-    const buffer = 10;
+    const paperExtent =
+      selectedCourse.printArea?.extent ||
+      olExtent.buffer(courseBounds(selectedCourse), 10);
+    // Convert from PPEN mm to OCAD coordinates, 1/100 mm
     const projectedExtent = [
-      [paperExtent[0] - buffer, paperExtent[1] - buffer],
-      [paperExtent[2] + buffer, paperExtent[3] + buffer],
+      [paperExtent[0], paperExtent[1]],
+      [paperExtent[2], paperExtent[3]],
     ]
-      // Convert from PPEN mm to OCAD coordinates, 1/100 mm
       .map(([x, y]) => crs.toProjectedCoord([x * 100, y * 100]))
       .flat();
     const width = projectedExtent[2] - projectedExtent[0];

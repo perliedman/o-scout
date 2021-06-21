@@ -70,6 +70,9 @@ export function parsePPen(doc) {
         c.getAttribute("kind")
       );
       course.order = Number(c.getAttribute("order"));
+      course.printArea = parsePrintArea(
+        c.getElementsByTagName("print-area")?.[0]
+      );
 
       return course;
     })
@@ -141,6 +144,22 @@ export function parsePPen(doc) {
       });
       event.specialObjects.push(specialObject);
     }
+  }
+
+  function parsePrintArea(printAreaTag) {
+    if (!printAreaTag) return { auto: true, restrictToPage: true };
+    return {
+      auto: printAreaTag.getAttribute("automatic") === "true",
+      restrictToPage:
+        printAreaTag.getAttribute("restrict-to-page-size") === "true",
+      extent: ["left", "bottom", "right", "top"].map((attr) =>
+        Number(printAreaTag.getAttribute(attr))
+      ),
+      pageWidth: Number(printAreaTag.getAttribute("page-width")),
+      pageHeight: Number(printAreaTag.getAttribute("page-height")),
+      pageMargins: Number(printAreaTag.getAttribute("page-margins")),
+      pageLandscape: printAreaTag.getAttribute("page-landscape") === true,
+    };
   }
 }
 
