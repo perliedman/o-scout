@@ -56,7 +56,9 @@ export default function Courses() {
         accept=".ppen"
         onSelect={loadCourse}
       />
-      {selectedCourse && <CourseLayer course={selectedCourse} />}
+      {selectedCourse && (
+        <CourseLayer eventName={eventName} course={selectedCourse} />
+      )}
     </>
   );
 

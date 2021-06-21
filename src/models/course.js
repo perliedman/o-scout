@@ -1,12 +1,4 @@
-import { circle, createSvgNode, lines } from "../services/create-svg";
-import { createControls } from "../services/use-controls";
-import {
-  controlCircleOutsideDiameter,
-  createNumberPositions,
-} from "../services/use-number-positions";
-import { createControlConnections } from "../services/user-control-connections";
 import { controlDistance } from "./control";
-import Coordinate from "./coordinate";
 
 export const courseOverPrintRgb = "rgba(182, 44, 152, 0.8)";
 
@@ -98,65 +90,6 @@ export function courseBounds(course) {
 //         throw new Error(`Unknown course type "${this.type}".`);
 //     }
 //   }
-
-export function courseToSvg(course, document) {
-  const controls = course.controls;
-  const objScale = 1; //course.objScale();
-
-  // Convert from PPEN mm to OCAD coordinates, 1/100 mm;
-  // also flip y axis since SVG y-axis increases downwards
-  const transformCoord = ([x, y]) => new Coordinate(x * 100, -y * 100);
-
-  return createSvgNode(document, {
-    type: "g",
-    children: createControls(controls, transformCoord)
-      .features.map(({ geometry: { type, coordinates } }) =>
-        type === "Point"
-          ? circle(
-              coordinates,
-              (controlCircleOutsideDiameter / 2) * 100,
-              courseOverPrintRgb
-            )
-          : lines(coordinates, true, courseOverPrintRgb)
-      )
-      .concat(
-        createControlConnections(
-          controls,
-          transformCoord,
-          objScale
-        ).features.map(({ geometry: { coordinates } }) =>
-          lines(coordinates, false, courseOverPrintRgb, objScale)
-        )
-      )
-      .concat(
-        createNumberPositions(controls, transformCoord, objScale).features.map(
-          (
-            {
-              properties,
-              geometry: {
-                coordinates: [x, y],
-              },
-            },
-            i
-          ) => ({
-            type: "text",
-            attrs: {
-              x,
-              y,
-              dx: "-50%",
-              dy: "50%",
-              fill: courseOverPrintRgb,
-              style: `font: normal ${600 * objScale}px sans-serif;`,
-            },
-            text:
-              properties.kind !== "start" && properties.kind !== "finish"
-                ? (i + 1).toString()
-                : "",
-          })
-        )
-      ),
-  });
-}
 
 // const defaultControlNumberAngle = Math.PI / 6;
 // const controlCircleOutsideDiameter = 5.9; //5.35

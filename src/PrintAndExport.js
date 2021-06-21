@@ -2,7 +2,8 @@ import useEvent, { useMap } from "./store";
 import Button from "./ui/Button";
 import shallow from "zustand/shallow";
 import { useMemo } from "react";
-import { courseBounds, courseToSvg } from "./models/course";
+import { courseBounds } from "./models/course";
+import { courseToSvg } from "./services/create-svg";
 
 export default function PrintAndExport() {
   const { courses, selectedCourseId } = useEvent(getCourses, shallow);
