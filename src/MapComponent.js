@@ -8,7 +8,6 @@ import XYZ from "ol/source/XYZ";
 import "ol/ol.css";
 import TileLayer from "ol/layer/Tile";
 import * as olSize from "ol/size";
-import Projection from "ol/proj/Projection";
 import TileState from "ol/TileState";
 import { useMap, useNotifications } from "./store";
 import { svgToBitmap } from "./services/svg-to-bitmap";
@@ -37,19 +36,15 @@ export default function MapComponent() {
 
   async function _registerProjection() {
     const crs = mapFile.getCrs();
-    if (crs.catalog === "EPSG") {
-      const projectionName = `${crs.catalog}:${crs.code}`;
-      proj4.defs(projectionName, await getProjection(crs.code));
-      register(proj4);
-      setProjection(getOlProjection(projectionName));
-    } else {
-      setProjection(
-        new Projection({
-          code: "unspecified-ocad-projection",
-          units: "meters",
-        })
-      );
-    }
+    const projectionName =
+      crs.catalog === "EPSG"
+        ? `${crs.catalog}:${crs.code}`
+        : // TODO: This is a really stupid fallback; figure out how
+          // to set a really "generic" projection
+          "EPSG:3006";
+    proj4.defs(projectionName, await getProjection(crs.code));
+    register(proj4);
+    setProjection(getOlProjection(projectionName));
   }
 
   function createMap() {
