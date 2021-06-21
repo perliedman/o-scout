@@ -6,7 +6,7 @@ import Toggle from "./ui/Toggle";
 
 export default function Sidebar() {
   return (
-    <div className="absolute z-10 shadow-xl border-l border-gray-200 inset-y-0 right-0 w-1/4 h-full bg-white">
+    <div className="absolute z-10 shadow-xl border-l border-gray-200 inset-y-0 right-0 w-1/4 h-full overflow-y-auto bg-white">
       <Section title="Map" defaultOpen={false}>
         <MapSection />
       </Section>
