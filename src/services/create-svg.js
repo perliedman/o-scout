@@ -7,6 +7,7 @@ import {
 } from "./use-number-positions";
 import { createControlConnections } from "./user-control-connections";
 import fetch from "./fetch";
+import { controlDistance } from "../models/control";
 
 export function createSvgNode(document, n) {
   if (n instanceof SVGElement) {
@@ -203,7 +204,29 @@ export async function courseDefinitionToSvg(eventName, course) {
             text(code, cellSize + cellSize / 2, baseLine, "black", 14),
             colLine(1, index + 2, 1),
             description.all
-              ? []
+              ? [
+                  await descriptionSymbol(
+                    description.all,
+                    index + 2,
+                    4,
+                    cellSize - 1 // TODO: LOL
+                  ),
+                  text(
+                    (
+                      (controlDistance(
+                        course.controls[index - 1],
+                        course.controls[index]
+                      ) /
+                        1000) *
+                      15000
+                    ).toFixed(0) + " m",
+                    cellSize * 4 + cellSize / 2,
+                    baseLine,
+                    "black",
+                    14,
+                    "bold"
+                  ),
+                ]
               : (
                   await Promise.all(
                     ["C", "D", "E", "F", "G", "H"].map(
@@ -239,15 +262,26 @@ export async function courseDefinitionToSvg(eventName, course) {
       await import(`svg-control-descriptions/symbols/${symbol}.svg`)
     ).default;
     const symbolXml = await fetch(svgUrl, null, { format: "text" });
+    const svg = new window.DOMParser().parseFromString(
+      symbolXml,
+      "image/svg+xml"
+    );
+    const [svgWidth, svgHeight] = getSvgDimensions(
+      svg.getRootNode().firstChild
+    );
+    const aspectRatio = svgHeight / svgWidth;
+    const ratio = svgWidth / 130;
+    const imageWidth = (width - margin * 2) * ratio;
+    const imageHeight = (width - margin * 2) * aspectRatio * ratio;
 
     return {
       type: "image",
       attrs: {
         href: `data:image/svg+xml,${encodeURIComponent(symbolXml)}`,
-        x: cellSize * col + margin,
-        y: cellSize * row + margin,
-        width: width - margin * 2,
-        height: width - margin * 2,
+        x: cellSize * col + cellSize / 2 - imageWidth / 2,
+        y: cellSize * row + cellSize / 2 - imageHeight / 2,
+        width: imageWidth,
+        height: imageHeight,
       },
     };
   }
@@ -302,4 +336,8 @@ function text(text, x, y, fill, fontSize, fontStyle = "normal") {
     },
     text,
   };
+}
+
+export function getSvgDimensions(svg) {
+  return ["width", "height"].map((attr) => parseInt(svg.getAttribute(attr)));
 }
