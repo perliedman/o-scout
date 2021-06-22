@@ -1,59 +1,150 @@
 import useEvent, { useMap } from "./store";
 import Button from "./ui/Button";
+import Toggle from "./ui/Toggle";
 import shallow from "zustand/shallow";
-import { useMemo } from "react";
-import { courseBounds } from "./models/course";
-import { courseToSvg } from "./services/create-svg";
-import * as olExtent from "ol/extent";
+import { useMemo, useState } from "react";
+import { printCourse } from "./services/print";
+import downloadBlob, { download } from "./services/download-blob";
+import Spinner from "./ui/Spinner";
+import { svgToBitmap } from "./services/svg-to-bitmap";
 
 export default function PrintAndExport() {
-  const { courses, selectedCourseId } = useEvent(getCourses, shallow);
+  const [state, setState] = useState("idle");
+  const { eventName, courses, selectedCourseId } = useEvent(
+    getCourses,
+    shallow
+  );
   const { mapFile, tiler } = useMap(getMap);
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]
   );
+  const [format, setFormat] = useState("svg");
+  const [selection, setSelection] = useState(
+    courses?.length > 0
+      ? "allCourses"
+      : selectedCourse
+      ? "selectedCourse"
+      : "map"
+  );
+  const [showOptions, setShowOptions] = useState(false);
 
   return (
-    <Button onClick={onPrint} disabled={!selectedCourse}>
-      Print
-    </Button>
+    <>
+      <div className="my-4 flex justify-between">
+        <div>Options</div>
+        <Toggle
+          type="small"
+          open={showOptions}
+          onClick={() => setShowOptions(!showOptions)}
+        />
+      </div>
+      {showOptions && (
+        <div className="flex flex-col ml-4 text-sm">
+          <div>Print selection</div>
+          {Object.keys(selectionOptions).map((option) => (
+            <label key={option}>
+              <input
+                className="mr-2"
+                type="radio"
+                name="selection"
+                value={option}
+                checked={option === selection}
+                onChange={() => setSelection(option)}
+              />
+              {selectionOptions[option]}
+            </label>
+          ))}
+          <div className="mt-2">Print format</div>
+          {Object.keys(formatOptions).map((option) => (
+            <label key={option}>
+              <input
+                className="mr-2"
+                type="radio"
+                name="format"
+                value={option}
+                checked={option === format}
+                onChange={() => setFormat(option)}
+              />
+              {formatOptions[option].name}
+            </label>
+          ))}
+        </div>
+      )}
+
+      <div className="flex justify-end mt-4">
+        <Button onClick={onPrint}>
+          {state === "printing" && <Spinner className="text-indigo-600" />}
+          {`Print ${selectionOptions[selection]} to ${formatOptions[format].name}`}
+        </Button>
+      </div>
+    </>
   );
 
   function onPrint() {
-    const crs = mapFile.getCrs();
-    const paperExtent =
-      selectedCourse.printArea?.extent ||
-      olExtent.buffer(courseBounds(selectedCourse), 10);
-    // Convert from PPEN mm to OCAD coordinates, 1/100 mm
-    const projectedExtent = [
-      [paperExtent[0], paperExtent[1]],
-      [paperExtent[2], paperExtent[3]],
-    ]
-      .map(([x, y]) => crs.toProjectedCoord([x * 100, y * 100]))
-      .flat();
-    const width = projectedExtent[2] - projectedExtent[0];
-    const height = projectedExtent[3] - projectedExtent[1];
-    const mapSvg = tiler.renderSvg(projectedExtent, 1);
-    mapSvg.setAttribute("width", width);
-    mapSvg.setAttribute("height", height);
-    mapSvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    const courseGroup = courseToSvg(selectedCourse, window.document);
+    setState("printing");
 
-    const mapGroup = mapSvg.querySelector("g");
-    mapGroup.appendChild(courseGroup);
+    const printCourses =
+      selection === "allCourses"
+        ? courses
+        : selection === "currentCourse"
+        ? [selectedCourse]
+        : [];
+    const postProcess =
+      format === "pdf"
+        ? (svg) => null //svgToPdf(svg, mapFile)
+        : format === "svg"
+        ? (svg) =>
+            Promise.resolve(
+              new Blob([svg.outerHTML], { type: "application/svg+xml" })
+            )
+        : format === "png"
+        ? (svg) => svgToBitmap(svg)
+        : null;
 
-    const blob = new Blob([mapSvg.outerHTML], { type: "image/svg" });
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement("a");
-    a.href = url;
-    a.click();
-    URL.revokeObjectURL(url);
+    printNext();
+
+    async function printNext() {
+      if (printCourses.length === 0) {
+        setState("idle");
+        return;
+      }
+
+      try {
+        const course = printCourses.pop();
+        const mapSvg = printCourse(course, mapFile, tiler, {
+          fill: format !== "pdf" ? "white" : undefined,
+        });
+        const output = await postProcess(mapSvg);
+        if (output instanceof Blob) {
+          downloadBlob(output, `${eventName} - ${course.name}.${format}`);
+        } else {
+          download(output, `${eventName} - ${course.name}.${format}`);
+        }
+
+        setTimeout(printNext, 250);
+      } catch (e) {
+        console.error(e);
+        setState("error");
+      }
+    }
   }
 }
 
-function getCourses({ courses, selectedCourseId }) {
+const selectionOptions = {
+  allCourses: "All Courses",
+  currentCourse: "Current Course",
+  map: "Map",
+};
+
+const formatOptions = {
+  svg: { name: "SVG", mime: "image/svg+xml" },
+  png: { name: "PNG", mime: "image/png" },
+};
+
+function getCourses({ name, courses, selectedCourseId }) {
   return {
+    eventName: name,
     courses,
     selectedCourseId,
   };

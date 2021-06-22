@@ -96,8 +96,7 @@ export function courseToSvg(course, document) {
             attrs: {
               x,
               y,
-              dx: "-50%",
-              dy: "50%",
+              "text-anchor": "middle",
               fill: courseOverPrintRgb,
               style: `font: normal ${600 * objScale}px sans-serif;`,
             },
