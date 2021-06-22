@@ -25,6 +25,7 @@
   },
   "scripts": {
     "start": "craco start",
+    "prebuild": "yarn test --watchAll=false",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
