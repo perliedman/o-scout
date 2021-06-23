@@ -113,6 +113,7 @@ export function courseToSvg(course, document) {
 export async function courseDefinitionToSvg(eventName, course) {
   const { controls } = course;
   const cellSize = 25;
+  const fontSize = 14;
   const width = 8 * cellSize;
   const height = cellSize * (controls.length + 2);
 
@@ -158,7 +159,15 @@ export async function courseDefinitionToSvg(eventName, course) {
 
   function header() {
     return [
-      text(eventName, width / 2, cellSize - 7, "black", 14, "bold", "middle"),
+      text(
+        eventName,
+        width / 2,
+        cellSize - 7,
+        "black",
+        fontSize,
+        "bold",
+        "middle"
+      ),
       lines(
         [
           [0, cellSize],
@@ -174,13 +183,21 @@ export async function courseDefinitionToSvg(eventName, course) {
   function courseInfo() {
     const y = cellSize * 2 - 7;
     return [
-      text(course.name, (cellSize * 3) / 2, y, "black", 14, "bold", "middle"),
+      text(
+        course.name,
+        (cellSize * 3) / 2,
+        y,
+        "black",
+        fontSize,
+        "bold",
+        "middle"
+      ),
       text(
         `${courseDistance(course, 15000).toFixed(1)} km`,
         cellSize * 3 + (cellSize * 3) / 2,
         y,
         "black",
-        14,
+        fontSize,
         "bold",
         "middle"
       ),
@@ -199,8 +216,8 @@ export async function courseDefinitionToSvg(eventName, course) {
           return [
             kind === "start"
               ? await descriptionSymbol("start", index + 2, 0)
-              : text(index, cellSize / 2, baseLine, "black", 14, "bold"),
-            text(code, cellSize + cellSize / 2, baseLine, "black", 14),
+              : text(index, cellSize / 2, baseLine, "black", fontSize, "bold"),
+            text(code, cellSize + cellSize / 2, baseLine, "black", fontSize),
             colLine(1, index + 2, 1),
             description.all
               ? [
@@ -222,7 +239,7 @@ export async function courseDefinitionToSvg(eventName, course) {
                     cellSize * 4 + cellSize / 2,
                     baseLine,
                     "black",
-                    14,
+                    fontSize,
                     "bold"
                   ),
                 ]
