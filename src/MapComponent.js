@@ -12,6 +12,7 @@ import TileState from "ol/TileState";
 import { useMap, useNotifications } from "./store";
 import { svgToBitmap } from "./services/svg-to-bitmap";
 import { View } from "ol";
+import Spinner from "./ui/Spinner";
 
 export default function MapComponent() {
   const { mapFile, map, tiler, setMapInstance } = useMap(getMap);
@@ -20,9 +21,11 @@ export default function MapComponent() {
   const container = useRef();
   const [projection, setProjection] = useState();
   const hasTileErrors = useRef(false);
+  const [state, setState] = useState("idle");
 
   const registerProjection = useCallback(_registerProjection, [mapFile]);
   useEffect(() => {
+    setState("loading");
     hasTileErrors.current = false;
     registerProjection();
     return () => {
@@ -32,7 +35,18 @@ export default function MapComponent() {
   useEffect(createMap, [setMapInstance, mapFile, projection]);
   useEffect(addLayer, [map, mapFile, tiler, pushNotification, projection]);
 
-  return <div className="absolute w-full h-full" ref={container} />;
+  return (
+    <>
+      <div className="absolute w-full h-full" ref={container} />
+      {state === "loading" && (
+        <div className="flex h-screen">
+          <div className="m-auto text-center bg-white text-2xl text-gray-400">
+            <Spinner className="text-gray-400" /> Loading map...
+          </div>
+        </div>
+      )}
+    </>
+  );
 
   async function _registerProjection() {
     const crs = mapFile.getCrs();
@@ -96,6 +110,7 @@ export default function MapComponent() {
             svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
 
             tile.getImage().src = await svgToBitmap(svg, tileSize);
+            setState("idle");
           } catch (e) {
             console.log(e);
             if (!hasTileErrors.current) {
