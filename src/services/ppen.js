@@ -158,7 +158,7 @@ export function parsePPen(doc) {
       pageWidth: Number(printAreaTag.getAttribute("page-width")),
       pageHeight: Number(printAreaTag.getAttribute("page-height")),
       pageMargins: Number(printAreaTag.getAttribute("page-margins")),
-      pageLandscape: printAreaTag.getAttribute("page-landscape") === true,
+      pageLandscape: printAreaTag.getAttribute("page-landscape") === "true",
     };
   }
 }

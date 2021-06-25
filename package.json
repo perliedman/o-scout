@@ -5,11 +5,13 @@
   "dependencies": {
     "@craco/craco": "^6.1.2",
     "@heroicons/react": "^1.0.1",
+    "@react-pdf/pdfkit": "^2.0.10",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "@turf/bbox-polygon": "^6.4.0",
     "@turf/helpers": "^6.4.0",
+    "blob-stream": "^0.1.3",
     "blob-to-buffer": "^1.2.9",
     "immer": "^9.0.2",
     "ocad-tiler": "^1.2.1",
@@ -21,7 +23,11 @@
     "react-scripts": "4.0.3",
     "svg-control-descriptions": "^1.0.0",
     "web-vitals": "^1.0.1",
-    "zustand": "^3.5.1"
+    "zustand": "^3.5.1",
+    "svg-to-pdfkit": "https://github.com/perliedman/SVG-to-PDFKIT#react-pdf-pdfkit"
+  },
+  "resolutions": {
+    "pdfkit": "@react-pdf/pdfkit"
   },
   "scripts": {
     "start": "craco start",

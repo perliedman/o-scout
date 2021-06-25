@@ -3,7 +3,7 @@ import Button from "./ui/Button";
 import Toggle from "./ui/Toggle";
 import shallow from "zustand/shallow";
 import { useMemo, useState } from "react";
-import { printCourse } from "./services/print";
+import { printCourse, renderPdf } from "./services/print";
 import downloadBlob, { download } from "./services/download-blob";
 import Spinner from "./ui/Spinner";
 import { svgToBitmap } from "./services/svg-to-bitmap";
@@ -19,7 +19,7 @@ export default function PrintAndExport() {
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]
   );
-  const [format, setFormat] = useState("svg");
+  const [format, setFormat] = useState("pdf");
   const [selection, setSelection] = useState(
     courses?.length > 0
       ? "allCourses"
@@ -92,7 +92,7 @@ export default function PrintAndExport() {
         : [];
     const postProcess =
       format === "pdf"
-        ? (svg) => null //svgToPdf(svg, mapFile)
+        ? (svg) => renderPdf(mapFile, selectedCourse.printArea, svg)
         : format === "svg"
         ? (svg) =>
             Promise.resolve(
@@ -138,6 +138,7 @@ const selectionOptions = {
 };
 
 const formatOptions = {
+  pdf: { name: "PDF", mime: "application/pdf" },
   svg: { name: "SVG", mime: "image/svg+xml" },
   png: { name: "PNG", mime: "image/png" },
 };
