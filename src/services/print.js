@@ -8,7 +8,13 @@ import SVGtoPDF from "svg-to-pdfkit";
 const mmToPt = 2.83465;
 const inToPt = 72;
 
-export function printCourse(course, mapFile, tiler, svgOptions) {
+export function printCourse(
+  course,
+  courseAppearance,
+  mapFile,
+  tiler,
+  svgOptions
+) {
   const crs = mapFile.getCrs();
   const printAreaExtent =
     course.printArea?.extent || olExtent.buffer(courseBounds(course), 10);
@@ -33,7 +39,7 @@ export function printCourse(course, mapFile, tiler, svgOptions) {
       printAreaHeightMm * (crs.scale / 1000)
     }`
   );
-  const courseGroup = courseToSvg(course, window.document);
+  const courseGroup = courseToSvg(course, courseAppearance, window.document);
 
   const mapGroup = mapSvg.querySelector("g");
   mapGroup.appendChild(courseGroup);

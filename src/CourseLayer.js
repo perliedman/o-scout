@@ -11,7 +11,7 @@ import courseFeatureStyle from "./course-feature-style";
 import useNumberPositions from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
 
-export default function CourseLayer({ eventName, course }) {
+export default function CourseLayer({ eventName, course, courseAppearance }) {
   const { map, mapFile } = useMap(getMap);
 
   const source = useMemo(() => new VectorSource(), []);
@@ -46,7 +46,8 @@ export default function CourseLayer({ eventName, course }) {
   const controlsGeoJSON = useControls(course.controls, transformCoord);
   const controlConnectionsGeoJSON = useControlConnections(
     course.controls,
-    transformCoord
+    transformCoord,
+    courseAppearance.autoLegGapSize
   );
   const controlLabelsGeoJSON = useNumberPositions(
     course.controls,

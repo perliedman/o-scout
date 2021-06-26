@@ -10,7 +10,7 @@ import { svgToBitmap } from "./services/svg-to-bitmap";
 
 export default function PrintAndExport() {
   const [state, setState] = useState("idle");
-  const { eventName, courses, selectedCourseId } = useEvent(
+  const { eventName, courseAppearance, courses, selectedCourseId } = useEvent(
     getCourses,
     shallow
   );
@@ -112,7 +112,7 @@ export default function PrintAndExport() {
 
       try {
         const course = printCourses.pop();
-        const mapSvg = printCourse(course, mapFile, tiler, {
+        const mapSvg = printCourse(course, courseAppearance, mapFile, tiler, {
           fill: format !== "pdf" ? "white" : undefined,
         });
         const output = await postProcess(mapSvg);
@@ -143,10 +143,11 @@ const formatOptions = {
   png: { name: "PNG", mime: "image/png" },
 };
 
-function getCourses({ name, courses, selectedCourseId }) {
+function getCourses({ name, courses, courseAppearance, selectedCourseId }) {
   return {
     eventName: name,
     courses,
+    courseAppearance,
     selectedCourseId,
   };
 }

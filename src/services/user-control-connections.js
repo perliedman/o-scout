@@ -5,14 +5,22 @@ import {
   startTriangleRadius,
 } from "./use-number-positions";
 
-export default function useControlConnections(controls, transformCoord) {
+export default function useControlConnections(
+  controls,
+  transformCoord,
+  autoLegGapSize = 0
+) {
   return useMemo(
-    () => createControlConnections(controls, transformCoord),
-    [controls, transformCoord]
+    () => createControlConnections(controls, transformCoord, autoLegGapSize),
+    [controls, transformCoord, autoLegGapSize]
   );
 }
 
-export function createControlConnections(controls, transformCoord) {
+export function createControlConnections(
+  controls,
+  transformCoord,
+  autoLegGapSize = 0
+) {
   return {
     type: "FeatureCollection",
     features: controls
@@ -24,8 +32,8 @@ export function createControlConnections(controls, transformCoord) {
         const dx = c2[0] - c1[0];
         const dy = c2[1] - c1[1];
         const l = Math.sqrt(dx * dx + dy * dy);
-        const startSpace = spacing(previous);
-        const endSpace = spacing(control);
+        const startSpace = spacing(previous) + autoLegGapSize / 2;
+        const endSpace = spacing(control) + autoLegGapSize / 2;
         if (l > startSpace + endSpace) {
           const vx = dx / l;
           const vy = dy / l;

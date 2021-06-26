@@ -37,6 +37,21 @@ export function courseBounds(course) {
   );
 }
 
+export function getStartRotation({ controls }) {
+  const startIndex = controls.findIndex((control) => control.kind === "start");
+  const start = controls[startIndex];
+  const next = controls[startIndex + 1];
+  if (start && next) {
+    const c1 = start.coordinates;
+    const c2 = next.coordinates;
+    const dx = c2[0] - c1[0];
+    const dy = c2[1] - c1[1];
+    const angle = Math.atan2(dy, dx) - Math.PI / 2;
+    return angle;
+  }
+  return 0;
+}
+
 //   objScale() {
 //     return this.printScale / this.event.map.scale;
 //   }

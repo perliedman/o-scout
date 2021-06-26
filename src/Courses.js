@@ -8,8 +8,14 @@ import CourseLayer from "./CourseLayer";
 import ControlDescriptionSheet from "./ControlDescriptionSheet";
 
 export default function Courses() {
-  const { eventName, courses, selectedCourseId, setSelected, setEvent } =
-    useEvent(getCourses, shallow);
+  const {
+    eventName,
+    courses,
+    courseAppearance,
+    selectedCourseId,
+    setSelected,
+    setEvent,
+  } = useEvent(getCourses, shallow);
   const mapFile = useMap(getMapFile);
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
@@ -57,7 +63,11 @@ export default function Courses() {
         onSelect={loadCourse}
       />
       {selectedCourse && (
-        <CourseLayer eventName={eventName} course={selectedCourse} />
+        <CourseLayer
+          eventName={eventName}
+          course={selectedCourse}
+          courseAppearance={courseAppearance}
+        />
       )}
     </>
   );
@@ -76,6 +86,7 @@ export default function Courses() {
 function getCourses({
   name,
   courses,
+  courseAppearance,
   selectedCourseId,
   actions: {
     event: { set },
@@ -85,6 +96,7 @@ function getCourses({
   return {
     eventName: name,
     courses,
+    courseAppearance,
     selectedCourseId,
     setSelected,
     setName,

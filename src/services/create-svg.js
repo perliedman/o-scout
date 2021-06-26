@@ -1,9 +1,14 @@
 import Coordinate from "../models/coordinate";
-import { courseDistance, courseOverPrintRgb } from "../models/course";
+import {
+  courseDistance,
+  courseOverPrintRgb,
+  getStartRotation,
+} from "../models/course";
 import { createControls } from "./use-controls";
 import {
   controlCircleOutsideDiameter,
   createNumberPositions,
+  overprintLineWidth,
 } from "./use-number-positions";
 import { createControlConnections } from "./user-control-connections";
 import fetch from "./fetch";
@@ -36,7 +41,7 @@ export const circle = ([cx, cy], r, stroke, scale) => ({
     cy,
     r: r * (scale || 1),
     stroke,
-    "stroke-width": 50 * (scale || 1),
+    "stroke-width": overprintLineWidth * 100 * (scale || 1),
   },
 });
 
@@ -48,11 +53,11 @@ export const lines = (coordinates, close, stroke, scale) => ({
       .concat(close ? ["Z"] : [])
       .join(" "),
     stroke,
-    "stroke-width": 50 * (scale || 1),
+    "stroke-width": overprintLineWidth * 100 * (scale || 1),
   },
 });
 
-export function courseToSvg(course, document) {
+export function courseToSvg(course, courseAppearance, document) {
   const controls = course.controls;
   const objScale = 1; //course.objScale();
 
@@ -63,19 +68,12 @@ export function courseToSvg(course, document) {
   return createSvgNode(document, {
     type: "g",
     children: createControls(controls, transformCoord)
-      .features.map(({ geometry: { type, coordinates } }) =>
-        type === "Point"
-          ? circle(
-              coordinates,
-              (controlCircleOutsideDiameter / 2) * 100,
-              courseOverPrintRgb
-            )
-          : lines(coordinates, true, courseOverPrintRgb)
-      )
+      .features.map(controlToSvg)
       .concat(
         createControlConnections(
           controls,
           transformCoord,
+          courseAppearance.autoLegGapSize,
           objScale
         ).features.map(({ geometry: { coordinates } }) =>
           lines(coordinates, false, courseOverPrintRgb, objScale)
@@ -108,7 +106,47 @@ export function courseToSvg(course, document) {
         )
       ),
   });
+
+  function controlToSvg({ properties: { kind }, geometry: { coordinates } }) {
+    switch (kind) {
+      case "start":
+        const rotation = getStartRotation(course);
+        return lines(
+          startTriangle.map((p) =>
+            p
+              .mul(objScale * 100)
+              .rotate(rotation)
+              .add(coordinates)
+              .toArray()
+          ),
+          true,
+          courseOverPrintRgb
+        );
+      case "normal":
+        return circle(
+          coordinates,
+          (controlCircleOutsideDiameter / 2) * 100,
+          courseOverPrintRgb
+        );
+      case "finish":
+        return {
+          type: "g",
+          children: Array.from({ length: 2 }).map((_, index) =>
+            circle(coordinates, 200 + index * 100, courseOverPrintRgb)
+          ),
+        };
+      default:
+        throw new Error(`Unknown control kind "${kind}".`);
+    }
+  }
 }
+
+const startTriangle = [
+  new Coordinate(0, 3.464),
+  new Coordinate(3, -1.732),
+  new Coordinate(-3, -1.732),
+  new Coordinate(0, 3.464),
+];
 
 export async function courseDefinitionToSvg(eventName, course) {
   const { controls } = course;

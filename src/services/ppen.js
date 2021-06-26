@@ -51,6 +51,9 @@ export function parsePPen(doc) {
     ),
     scale,
   };
+  event.courseAppearance = parseCourseAppearance(
+    eventTag.getElementsByTagName("course-appearance")[0]
+  );
 
   const courses = Array.from(doc.getElementsByTagName("course"))
     .filter((c) => c.getElementsByTagName("first").length > 0)
@@ -159,6 +162,25 @@ export function parsePPen(doc) {
       pageHeight: Number(printAreaTag.getAttribute("page-height")),
       pageMargins: Number(printAreaTag.getAttribute("page-margins")),
       pageLandscape: printAreaTag.getAttribute("page-landscape") === "true",
+    };
+  }
+
+  function parseCourseAppearance(courseAppearanceTag) {
+    if (!courseAppearanceTag)
+      return {
+        scaleSizes: "RelativeToMap",
+        scaleSizesCircleGaps: true,
+        autoLegGapSize: 0,
+        blendPurple: true,
+      };
+    return {
+      scaleSizes:
+        courseAppearanceTag.getAttribute("scale-sizes") || "RelativeToMap",
+      scaleSizesCircleGaps:
+        courseAppearanceTag.getAttribute("scale-sizes-circle-gaps") === "true",
+      autoLegGapSize:
+        Number(courseAppearanceTag.getAttribute("auto-leg-gap-size")) || 0,
+      blendPurple: courseAppearanceTag.getAttribute("blend-purple") === "true",
     };
   }
 }
