@@ -112,9 +112,16 @@ export default function PrintAndExport() {
 
       try {
         const course = printCourses.pop();
-        const mapSvg = printCourse(course, courseAppearance, mapFile, tiler, {
-          fill: format !== "pdf" ? "white" : undefined,
-        });
+        const mapSvg = await printCourse(
+          course,
+          courseAppearance,
+          eventName,
+          mapFile,
+          tiler,
+          {
+            fill: format !== "pdf" ? "white" : undefined,
+          }
+        );
         const output = await postProcess(mapSvg);
         if (output instanceof Blob) {
           downloadBlob(output, `${eventName} - ${course.name}.${format}`);

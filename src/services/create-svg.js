@@ -13,6 +13,7 @@ import {
 import { createControlConnections } from "./user-control-connections";
 import fetch from "./fetch";
 import { controlDistance } from "../models/control";
+import { createSpecialObjects } from "./use-special-objects";
 
 export function createSvgNode(document, n) {
   if (n instanceof SVGElement) {
@@ -45,7 +46,7 @@ export const circle = ([cx, cy], r, stroke, scale) => ({
   },
 });
 
-export const lines = (coordinates, close, stroke, scale) => ({
+export const lines = (coordinates, close, stroke, fill, scale) => ({
   type: "path",
   attrs: {
     d: coordinates
@@ -53,11 +54,17 @@ export const lines = (coordinates, close, stroke, scale) => ({
       .concat(close ? ["Z"] : [])
       .join(" "),
     stroke,
+    fill,
     "stroke-width": overprintLineWidth * 100 * (scale || 1),
   },
 });
 
-export function courseToSvg(course, courseAppearance, document) {
+export async function courseToSvg(
+  course,
+  courseAppearance,
+  eventName,
+  document
+) {
   const controls = course.controls;
   const objScale = 1; //course.objScale();
 
@@ -67,45 +74,108 @@ export function courseToSvg(course, courseAppearance, document) {
 
   return createSvgNode(document, {
     type: "g",
-    children: createControls(controls, transformCoord)
-      .features.map(controlToSvg)
-      .concat(
-        createControlConnections(
-          controls,
-          transformCoord,
-          courseAppearance.autoLegGapSize,
-          objScale
-        ).features.map(({ geometry: { coordinates } }) =>
-          lines(coordinates, false, courseOverPrintRgb, objScale)
-        )
-      )
-      .concat(
-        createNumberPositions(controls, transformCoord, objScale).features.map(
-          (
-            {
-              properties,
-              geometry: {
-                coordinates: [x, y],
-              },
-            },
-            i
-          ) => ({
-            type: "text",
-            attrs: {
-              x,
-              y,
-              "text-anchor": "middle",
-              fill: courseOverPrintRgb,
-              style: `font: normal ${600 * objScale}px sans-serif;`,
-            },
-            text:
-              properties.kind !== "start" && properties.kind !== "finish"
-                ? (i + 1).toString()
-                : "",
-          })
-        )
-      ),
+    children: [
+      ...controlsToSvg(),
+      ...controlConnectionsToSvg(),
+      ...controlNumbersToSvg(),
+      ...(await specialObjectsToSvg()),
+    ],
   });
+
+  function controlsToSvg() {
+    return createControls(controls, transformCoord).features.map(controlToSvg);
+  }
+
+  function controlConnectionsToSvg() {
+    return createControlConnections(
+      controls,
+      transformCoord,
+      courseAppearance.autoLegGapSize,
+      objScale
+    ).features.map(({ geometry: { coordinates } }) =>
+      lines(coordinates, false, courseOverPrintRgb, null, objScale)
+    );
+  }
+
+  function controlNumbersToSvg() {
+    return createNumberPositions(
+      controls,
+      transformCoord,
+      objScale
+    ).features.map(
+      (
+        {
+          properties,
+          geometry: {
+            coordinates: [x, y],
+          },
+        },
+        i
+      ) => ({
+        type: "text",
+        attrs: {
+          x,
+          y,
+          "text-anchor": "middle",
+          fill: courseOverPrintRgb,
+          style: `font: normal ${600 * objScale}px sans-serif;`,
+        },
+        text:
+          properties.kind !== "start" && properties.kind !== "finish"
+            ? (i + 1).toString()
+            : "",
+      })
+    );
+  }
+
+  async function specialObjectsToSvg() {
+    return (
+      await Promise.all(
+        createSpecialObjects(course.specialObjects, transformCoord)
+          // Put descriptions last, to render them on top of everything else
+          .features.sort(descriptionsOnTop)
+          .map(async (specialObject) => {
+            const {
+              properties,
+              properties: { kind },
+              geometry: { coordinates },
+            } = specialObject;
+            switch (kind) {
+              case "white-out":
+                return lines(coordinates[0], true, null, "white");
+              case "descriptions": {
+                const descriptionSvg = await courseDefinitionToSvg(
+                  eventName,
+                  course
+                );
+                const descriptionDimensions = getSvgDimensions(descriptionSvg);
+                const descriptionGroup = descriptionSvg.firstChild;
+                const extent = getControlDescriptionExtent(
+                  specialObject,
+                  descriptionSvg
+                );
+                const scale =
+                  (extent[2] - extent[0]) / descriptionDimensions[0];
+                descriptionGroup.setAttribute(
+                  "transform",
+                  `translate(${extent[0]}, ${extent[3]}) scale(${scale}) `
+                );
+                return descriptionGroup;
+              }
+              default:
+                return null;
+            }
+          })
+      )
+    ).filter(Boolean);
+  }
+
+  function descriptionsOnTop(
+    { properties: { kind: aKind } },
+    { properties: { kind: bKind } }
+  ) {
+    return aKind === "descriptions" ? 1 : bKind === "descriptions" ? -1 : 0;
+  }
 
   function controlToSvg({ properties: { kind }, geometry: { coordinates } }) {
     switch (kind) {
@@ -165,35 +235,27 @@ export async function courseDefinitionToSvg(eventName, course) {
     },
     children: [
       {
-        type: "rect",
-        attrs: {
-          x: 0,
-          y: 0,
-          width: width,
-          height: height,
-          stroke: "black",
-        },
+        type: "g",
+        children: [
+          {
+            type: "rect",
+            attrs: {
+              x: 0,
+              y: 0,
+              width: width,
+              height: height,
+              stroke: "black",
+            },
+          },
+          ...header(),
+          ...courseInfo(),
+          ...(await controlDescriptions()),
+        ],
       },
-      ...header(),
-      ...courseInfo(),
-      ...(await controlDescriptions()),
     ],
   });
 
   return svg;
-  // return new Promise((resolve, reject) => {
-  //   const svgContainer = new Image();
-  //   svgContainer.onload = () => {
-  //     resolve(svg);
-  //     debugger;
-  //   };
-  //   svgContainer.onerror = (err) => {
-  //     debugger;
-  //     reject(new Error(`Failed to load SVG: ${err}`));
-  //   };
-
-  //   svgContainer.src = svgToUrl(svg);
-  // });
 
   function header() {
     return [
@@ -213,6 +275,7 @@ export async function courseDefinitionToSvg(eventName, course) {
         ],
         false,
         "black",
+        null,
         1 / 100
       ),
     ];
@@ -350,6 +413,7 @@ export async function courseDefinitionToSvg(eventName, course) {
       ],
       false,
       "black",
+      null,
       width / 50
     );
   }
@@ -363,19 +427,20 @@ export async function courseDefinitionToSvg(eventName, course) {
       ],
       false,
       "black",
+      null,
       strokeWidth / 50
     );
   }
+}
 
-  // function grid() {
-  //   return [
-  //     // Columns
-  //     ...Array.from({length: 7}).map((_, index) => {
-  //       const x = (index + 1) * cellSize
-  //       const y = 2 * cellSize
-  //       lines([[x, 2 * cellSize], [x, height - 1]])
-  //   ]
-  // }
+export function getControlDescriptionExtent(descriptionObject, descriptionSvg) {
+  const imageSize = getSvgDimensions(descriptionSvg);
+  const aspectRatio = imageSize[1] / imageSize[0];
+  const { bbox } = descriptionObject;
+  // PPen gives size of one "cell" (column width)
+  const extentWidth = (bbox[2] - bbox[0]) * 8;
+  const extentHeight = extentWidth * aspectRatio;
+  return [bbox[0], bbox[1] - extentHeight, bbox[0] + extentWidth, bbox[1]];
 }
 
 function text(text, x, y, fill, fontSize, fontStyle = "normal") {
