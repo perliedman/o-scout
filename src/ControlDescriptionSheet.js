@@ -43,7 +43,7 @@ export default function ControlDescriptionSheet({
                   >
                     <DescriptionSymbol symbol={c.description[column]} />
                   </td>
-                ))}{" "}
+                ))}
               </>
             ) : (
               <td colSpan="8">
@@ -56,7 +56,7 @@ export default function ControlDescriptionSheet({
                     ) /
                       1000) *
                     mapScale
-                  ).toFixed(0)}{" "}
+                  ).toFixed(0)}
                   m
                 </div>
               </td>
