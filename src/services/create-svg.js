@@ -383,24 +383,35 @@ export async function courseDefinitionToSvg(eventName, course) {
       symbolXml,
       "image/svg+xml"
     );
-    const [svgWidth, svgHeight] = getSvgDimensions(
-      svg.getRootNode().firstChild
-    );
+    const svgNode = svg.getRootNode().firstChild;
+    const [svgWidth, svgHeight] = getSvgDimensions(svgNode);
     const aspectRatio = svgHeight / svgWidth;
     const ratio = svgWidth / 130;
     const imageWidth = (width - margin * 2) * ratio;
     const imageHeight = (width - margin * 2) * aspectRatio * ratio;
+    const group = svg.createElementNS("http://www.w3.org/2000/svg", "g");
+    Array.from(svgNode.children).forEach((child) => group.appendChild(child));
 
-    return {
-      type: "image",
-      attrs: {
-        href: `data:image/svg+xml,${encodeURIComponent(symbolXml)}`,
-        x: cellSize * col + cellSize / 2 - imageWidth / 2,
-        y: cellSize * row + cellSize / 2 - imageHeight / 2,
-        width: imageWidth,
-        height: imageHeight,
-      },
-    };
+    const x = cellSize * col + cellSize / 2 - imageWidth / 2;
+    const y = cellSize * row + cellSize / 2 - imageHeight / 2;
+    group.setAttribute(
+      "transform",
+      `translate(${x + imageWidth / 2}, ${y + imageHeight / 2}) scale(${
+        imageWidth / svgWidth
+      })`
+    );
+
+    return group;
+    // return {
+    //   type: "image",
+    //   attrs: {
+    //     href: `data:image/svg+xml,${encodeURIComponent(symbolXml)}`,
+    //     x: cellSize * col + cellSize / 2 - imageWidth / 2,
+    //     y: cellSize * row + cellSize / 2 - imageHeight / 2,
+    //     width: imageWidth,
+    //     height: imageHeight,
+    //   },
+    // };
   }
 
   function colLine(col, row, width) {
