@@ -26,6 +26,16 @@ describe("parsePPen", () => {
       "No course with id 0 found for special object 13."
     );
   });
+
+  test("read course appearance", () => {
+    const event = parsePpenFile("./test-data/ppen/test2.ppen");
+    const { courseAppearance } = event;
+    expect(courseAppearance).not.toBeNull();
+    expect(courseAppearance.autoLegGapSize).toBe(3.5);
+    expect(courseAppearance.scaleSizes).toBe("RelativeToMap");
+    expect(courseAppearance.scaleSizesCircleGaps).toBe(true);
+    expect(courseAppearance.blendPurple).toBe(true);
+  });
 });
 
 function parsePpenFile(path) {

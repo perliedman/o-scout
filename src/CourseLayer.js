@@ -6,7 +6,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import Coordinate from "./models/coordinate";
 import useControls from "./services/use-controls";
 import useControlConnections from "./services/user-control-connections";
-import useSpecialObjects from "./services/specia-objects";
+import useSpecialObjects from "./services/use-special-objects";
 import courseFeatureStyle from "./course-feature-style";
 import useNumberPositions from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
