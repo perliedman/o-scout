@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       width: {
-        "1/8": "12.5%",
+        sidebar: "320px",
       },
     },
   },

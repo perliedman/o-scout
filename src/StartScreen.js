@@ -14,7 +14,7 @@ export default function StartScreen() {
   return (
     <>
       <div className="flex h-screen bg-gray-100">
-        <div className="m-auto text-center bg-white p-24 rounded-lg shadow-md mt-48">
+        <div className="m-auto text-center bg-white p-24 rounded-lg shadow-md md:mt-48">
           <h3 className="text-4xl font-bold mb-8 uppercase">O-Scout</h3>
           <h3 className="text-4xl font-thin text-indigo-600">
             Web-based Course Setting for Orienteering
@@ -35,12 +35,12 @@ export default function StartScreen() {
             .
           </p>
           <div className="mt-24">
-            <span className="mr-4">
+            <span className="md:mr-4 block md:inline">
               <SelectMap type="primary" className="text-xl w-48 h-16">
                 Open a Map
               </SelectMap>
             </span>
-            <span className="ml-4">
+            <span className="md:ml-4 block md:inline mt-8 md:mt-0">
               <Button className="w-48 h-16" onClick={loadDemoMap}>
                 {state === "loading" && <Spinner className="text-indigo-600" />}
                 Open Demo Map

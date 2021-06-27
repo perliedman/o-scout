@@ -1,3 +1,4 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/outline";
 import React, { useState } from "react";
 import Courses from "./Courses";
 import MapSection from "./MapSection";
@@ -5,17 +6,41 @@ import PrintAndExport from "./PrintAndExport";
 import Toggle from "./ui/Toggle";
 
 export default function Sidebar() {
+  const [open, setOpen] = useState(true);
+
   return (
-    <div className="absolute z-10 shadow-xl border-l border-gray-200 inset-y-0 right-0 w-1/4 h-full overflow-y-auto bg-white">
-      <Section title="Map" defaultOpen={false}>
-        <MapSection />
-      </Section>
-      <Section title="Courses" defaultOpen={true}>
-        <Courses />
-      </Section>
-      <Section title="Print &amp; Export" defaultOpen={false}>
-        <PrintAndExport />
-      </Section>
+    <div className="fixed inset-y-0 right-0 flex z-20 w-8">
+      <div className="absolute flex top-0 h-screen right-0 flew-row">
+        <button
+          className="w-8 h-32 p-1 my-auto rounded text-gray-400 bg-white border border-gray-200 shadow-l text-center focus:outline-none"
+          onClick={() => setOpen(!open)}
+        >
+          <span className="block font-bold">
+            {open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </span>
+        </button>
+        <div
+          className={`
+          transition-all duration-200
+          ${open ? "w-sidebar" : "w-0"}
+          shadow-xl
+          border-l
+          border-gray-200
+          h-full
+          overflow-y-auto
+          bg-white`}
+        >
+          <Section title="Map" defaultOpen={false}>
+            <MapSection />
+          </Section>
+          <Section title="Courses" defaultOpen={true}>
+            <Courses />
+          </Section>
+          <Section title="Print &amp; Export" defaultOpen={false}>
+            <PrintAndExport />
+          </Section>
+        </div>
+      </div>
     </div>
   );
 }
