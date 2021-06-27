@@ -16,20 +16,29 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
 
   const source = useMemo(() => new VectorSource(), []);
   const featuresRef = useRef([]);
-  const style = useCallback(
-    (feature, resolution) =>
-      courseFeatureStyle(featuresRef, feature, resolution),
-    [featuresRef]
+  const mapScale = useMemo(() => mapFile.getCrs().scale, [mapFile]);
+  const objScale = useMemo(
+    () =>
+      getObjectScale(courseAppearance.scaleSizes, mapScale, course.printScale),
+    [courseAppearance, mapScale, course.printScale]
   );
   const layer = useMemo(
     () =>
       new VectorLayer({
         source,
-        style,
         zIndex: 1,
       }),
-    [source, style]
+    [source]
   );
+
+  const style = useCallback(
+    (feature, resolution) =>
+      courseFeatureStyle(featuresRef, objScale, feature, resolution),
+    [featuresRef, objScale]
+  );
+  useEffect(() => {
+    layer.setStyle(style);
+  }, [layer, style]);
 
   useEffect(() => {
     if (map) {
@@ -93,4 +102,18 @@ const toProjectedCoord = (crs, coordinate) => {
 
 function getMap({ map, mapFile }) {
   return { map, mapFile };
+}
+
+function getObjectScale(scaleSizes, mapScale, printScale) {
+  switch (scaleSizes) {
+    case "None":
+      return printScale / mapScale;
+    case "RelativeToMap":
+      // Not at all sure about why 0.75 should be there.
+      return (mapScale / printScale) * 0.75;
+    case "RelativeTo15000":
+      return 15000 / mapScale;
+    default:
+      throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
+  }
 }

@@ -11,17 +11,22 @@ import {
 import Text from "ol/style/Text";
 import Fill from "ol/style/Fill";
 
-export default function courseFeatureStyle(featuresRef, feature, resolution) {
+export default function courseFeatureStyle(
+  featuresRef,
+  objScale,
+  feature,
+  resolution
+) {
   const kind = feature.get("kind");
   if (kind === "normal") {
     const image = controlStyle.getImage();
     const stroke = image.getStroke();
-    image.setRadius((controlCircleOutsideDiameter * 10) / 2 / resolution);
-    stroke.setWidth((overprintLineWidth * 10) / resolution);
+    image.setRadius(dimension(controlCircleOutsideDiameter / 2));
+    stroke.setWidth(dimension(overprintLineWidth));
     return controlStyle;
   } else if (kind === "start") {
     const image = startStyle.getImage();
-    image.setScale(0.5 / resolution);
+    image.setScale(dimension(0.05));
 
     const next = featuresRef.current[feature.get("index") + 1];
     if (next) {
@@ -38,21 +43,26 @@ export default function courseFeatureStyle(featuresRef, feature, resolution) {
     finishStyle.forEach((style, i) => {
       const image = style.getImage();
       const stroke = image.getStroke();
-      image.setRadius((20 + i * 10) / resolution);
-      stroke.setWidth((overprintLineWidth * 10) / resolution);
+      image.setRadius(dimension(2 + i));
+      stroke.setWidth(dimension(overprintLineWidth));
     });
     return finishStyle;
   } else if (kind === "line") {
     const stroke = lineStyle.getStroke();
-    stroke.setWidth((overprintLineWidth * 10) / resolution);
+    stroke.setWidth(dimension(overprintLineWidth));
     return lineStyle;
   } else if (kind === "number") {
     const text = numberStyle.getText();
     text.setText(feature.get("label"));
-    text.setScale(6 / resolution);
+    text.setScale(dimension(0.6));
     return numberStyle;
   } else if (kind === "white-out") {
     return whiteOutStyle;
+  }
+
+  // Scales an absolute dimension (mm on paper) to current resolution and object scale
+  function dimension(x) {
+    return (x / resolution) * objScale * 10;
   }
 }
 

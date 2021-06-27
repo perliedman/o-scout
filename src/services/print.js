@@ -44,6 +44,7 @@ export async function printCourse(
     course,
     courseAppearance,
     eventName,
+    crs.scale,
     window.document
   );
 

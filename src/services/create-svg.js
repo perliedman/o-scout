@@ -63,10 +63,15 @@ export async function courseToSvg(
   course,
   courseAppearance,
   eventName,
+  mapScale,
   document
 ) {
   const controls = course.controls;
-  const objScale = 1; //course.objScale();
+  const objScale = getObjectScale(
+    courseAppearance.scaleSizes,
+    mapScale,
+    course.printScale
+  );
 
   // Convert from PPEN mm to OCAD coordinates, 1/100 mm;
   // also flip y axis since SVG y-axis increases downwards
@@ -194,14 +199,18 @@ export async function courseToSvg(
       case "normal":
         return circle(
           coordinates,
-          (controlCircleOutsideDiameter / 2) * 100,
+          (controlCircleOutsideDiameter / 2) * 100 * objScale,
           courseOverPrintRgb
         );
       case "finish":
         return {
           type: "g",
           children: Array.from({ length: 2 }).map((_, index) =>
-            circle(coordinates, 200 + index * 100, courseOverPrintRgb)
+            circle(
+              coordinates,
+              200 + index * 100 * objScale,
+              courseOverPrintRgb
+            )
           ),
         };
       default:
@@ -470,4 +479,17 @@ function text(text, x, y, fill, fontSize, fontStyle = "normal") {
 
 export function getSvgDimensions(svg) {
   return ["width", "height"].map((attr) => parseInt(svg.getAttribute(attr)));
+}
+
+function getObjectScale(scaleSizes, mapScale, printScale) {
+  switch (scaleSizes) {
+    case "None":
+      return printScale / mapScale;
+    case "RelativeToMap":
+      return 1;
+    case "RelativeTo15000":
+      return 15000 / mapScale;
+    default:
+      throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
+  }
 }
