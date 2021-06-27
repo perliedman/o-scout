@@ -5,7 +5,6 @@ import { svgToUrl } from "./services/svg-to-bitmap";
 import {
   courseDefinitionToSvg,
   getControlDescriptionExtent,
-  getSvgDimensions,
 } from "./services/create-svg";
 
 export function useControlDescriptions(

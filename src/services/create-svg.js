@@ -136,7 +136,6 @@ export async function courseToSvg(
           .features.sort(descriptionsOnTop)
           .map(async (specialObject) => {
             const {
-              properties,
               properties: { kind },
               geometry: { coordinates },
             } = specialObject;
@@ -245,6 +244,7 @@ export async function courseDefinitionToSvg(eventName, course) {
               width: width,
               height: height,
               stroke: "black",
+              fill: "white",
             },
           },
           ...header(),
