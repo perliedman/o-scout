@@ -1,15 +1,18 @@
-import useEvent, { useMap } from "./store";
+import useEvent, { useMap, useNotifications } from "./store";
 import Button from "./ui/Button";
 import Toggle from "./ui/Toggle";
 import shallow from "zustand/shallow";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { printCourse, renderPdf } from "./services/print";
 import downloadBlob, { download } from "./services/download-blob";
 import Spinner from "./ui/Spinner";
 import { svgToBitmap } from "./services/svg-to-bitmap";
+import { createCourse } from "./models/course";
+import { transformExtent } from "./services/coordinates";
 
 export default function PrintAndExport() {
   const [state, setState] = useState("idle");
+  const pushNotification = useNotifications(getPush);
   const { eventName, courseAppearance, courses, selectedCourseId } = useEvent(
     getCourses,
     shallow
@@ -28,6 +31,15 @@ export default function PrintAndExport() {
       : "map"
   );
   const [showOptions, setShowOptions] = useState(false);
+
+  useEffect(() => {
+    if (!selectionOptions[selection].enabled(courses)) {
+      const nextSelection = Object.keys(selectionOptions).find((option) =>
+        selectionOptions[option].enabled(courses)
+      );
+      setSelection(nextSelection);
+    }
+  }, [courses, selection]);
 
   return (
     <>
@@ -50,9 +62,10 @@ export default function PrintAndExport() {
                 name="selection"
                 value={option}
                 checked={option === selection}
+                disabled={!selectionOptions[option].enabled(courses)}
                 onChange={() => setSelection(option)}
               />
-              {selectionOptions[option]}
+              {selectionOptions[option].name}
             </label>
           ))}
           <div className="mt-2">Print format</div>
@@ -75,7 +88,7 @@ export default function PrintAndExport() {
       <div className="flex justify-end mt-4">
         <Button onClick={onPrint}>
           {state === "printing" && <Spinner className="text-indigo-600" />}
-          {`Print ${selectionOptions[selection]} to ${formatOptions[format].name}`}
+          {`Print ${selectionOptions[selection].name} to ${formatOptions[format].name}`}
         </Button>
       </div>
     </>
@@ -89,10 +102,15 @@ export default function PrintAndExport() {
         ? courses
         : selection === "currentCourse"
         ? [selectedCourse]
-        : [];
+        : [emptyCourse()];
     const postProcess =
       format === "pdf"
-        ? (svg) => renderPdf(mapFile, selectedCourse.printArea, svg)
+        ? (svg) =>
+            renderPdf(
+              mapFile,
+              selectedCourse?.printArea || defaultPrintArea,
+              svg
+            )
         : format === "svg"
         ? (svg) =>
             Promise.resolve(
@@ -132,22 +150,45 @@ export default function PrintAndExport() {
         setTimeout(printNext, 250);
       } catch (e) {
         console.error(e);
+        pushNotification({ type: "danger", message: "Failed to print." });
         setState("error");
       }
     }
   }
+
+  function emptyCourse() {
+    const crs = mapFile.getCrs();
+    const course = createCourse(0, "", [], crs.scale, "");
+    course.printArea = {
+      extent: transformExtent(tiler.bounds, (c) => {
+        const [x, y] = crs.toMapCoord(c);
+        return [x / 100, y / 100];
+      }),
+    };
+    return course;
+  }
 }
 
 const selectionOptions = {
-  allCourses: "All Courses",
-  currentCourse: "Current Course",
-  map: "Map",
+  allCourses: { name: "All Courses", enabled: (courses) => courses.length > 1 },
+  currentCourse: {
+    name: "Current Course",
+    enabled: (courses) => courses.length > 0,
+  },
+  map: { name: "Map", enabled: () => true },
 };
 
 const formatOptions = {
   pdf: { name: "PDF", mime: "application/pdf" },
   svg: { name: "SVG", mime: "image/svg+xml" },
   png: { name: "PNG", mime: "image/png" },
+};
+
+const defaultPrintArea = {
+  margins: 0,
+  pageLandscape: false,
+  pageWidth: 827,
+  pageHeight: 1169,
 };
 
 function getCourses({ name, courses, courseAppearance, selectedCourseId }) {
@@ -161,4 +202,8 @@ function getCourses({ name, courses, courseAppearance, selectedCourseId }) {
 
 function getMap({ mapFile, tiler }) {
   return { mapFile, tiler };
+}
+
+function getPush({ push }) {
+  return push;
 }

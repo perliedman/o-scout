@@ -10,6 +10,7 @@ export function createEvent(name, courses) {
     controls: {},
     controlList: [],
     specialObjects: [],
+    courseAppearance: {},
   };
 }
 
