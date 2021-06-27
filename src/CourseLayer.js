@@ -27,6 +27,8 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
       new VectorLayer({
         source,
         zIndex: 1,
+        updateWhileAnimating: true,
+        updateWhileInteracting: true,
       }),
     [source]
   );
