@@ -12,7 +12,23 @@ export default function Sidebar() {
     <div className="fixed inset-y-0 right-0 flex z-20 w-8">
       <div className="absolute flex top-0 h-screen right-0 flew-row">
         <button
-          className="w-8 h-32 p-1 my-auto rounded text-gray-400 bg-white border border-gray-200 shadow-l text-center focus:outline-none"
+          className="
+            w-8
+            h-32
+            p-1
+            my-auto
+            rounded
+            text-gray-600
+            bg-white
+            opacity-75
+            border
+            border-r-0
+            border-gray-200
+            shadow-l
+            text-center
+            transition-colors
+            hover:bg-gray-100
+            focus:outline-none"
           onClick={() => setOpen(!open)}
         >
           <span className="block font-bold">
