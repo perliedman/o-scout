@@ -1,11 +1,7 @@
-import Coordinate from "./coordinate";
+import { length, sub } from "./coordinate";
 
 export const controlDistance = (c1, c2) => {
-  const crd1 = c1.coordinates;
-  const crd2 = c2.coordinates;
-  const dx = crd2[0] - crd1[0];
-  const dy = crd2[1] - crd1[1];
-  return Math.sqrt(dx * dx + dy * dy);
+  return length(sub(c1.coordinates, c2.coordinates));
 };
 
 export function createControl(id, kind, code, coordinates, description) {
@@ -13,7 +9,7 @@ export function createControl(id, kind, code, coordinates, description) {
     id: id,
     kind: kind,
     code: code,
-    coordinates: new Coordinate(coordinates[0], coordinates[1]),
+    coordinates: [...coordinates],
     description: {
       C: undefined,
       D: undefined,
@@ -25,58 +21,3 @@ export function createControl(id, kind, code, coordinates, description) {
     },
   };
 }
-
-//   toGeoJson (scaleFactor, rotation) {
-//     return {
-//       type: 'Feature',
-//       id: this.id,
-//       properties: {
-//         ...this
-//       },
-//       geometry: this.kind !== 'start'
-//         ? {
-//           type: 'Point',
-//           coordinates: this.coordinates.toArray()
-//         }
-//         : {
-//           type: 'Polygon',
-//           coordinates: [startTriangle.map(p => p
-//             .mul(scaleFactor)
-//             .rotate(rotation)
-//             .add(this.coordinates).toArray())]
-//         }
-//     }
-//   }
-
-//   toSvg (rotation, objScale) {
-//     let node
-
-//     switch (this.kind) {
-//     case 'normal':
-//       node = circle(this, 300, courseOverPrintRgb, objScale)
-//       break
-//     case 'start':
-//       node = lines(
-//         startTriangle.map(p => p
-//           .mul(objScale)
-//           .rotate(rotation)
-//           .add(this.coordinates).toArray()), true, courseOverPrintRgb, objScale)
-//       break
-//     case 'finish':
-//       node = {
-//         type: 'g',
-//         children: [
-//           circle(this, 250, courseOverPrintRgb, objScale),
-//           circle(this, 350, courseOverPrintRgb, objScale)
-//         ]
-//       }
-//       break
-//     default:
-//       throw new Error(`Unhandled control kind "${this.kind}"`)
-//     }
-
-//     return createSvgNode(window.document, node)
-//   }
-// }
-
-// const startTriangle = [new Coordinate(0, 3.464), new Coordinate(3, -1.732), new Coordinate(-3, -1.732), new Coordinate(0, 3.464)]

@@ -1,4 +1,3 @@
-import Coordinate from "../models/coordinate";
 import {
   courseDistance,
   courseOverPrintRgb,
@@ -75,14 +74,21 @@ export async function courseToSvg(
 
   // Convert from PPEN mm to OCAD coordinates, 1/100 mm;
   // also flip y axis since SVG y-axis increases downwards
-  const transformCoord = ([x, y]) => new Coordinate(x * 100, -y * 100);
+  const transformCoord = ([x, y]) => [x * 100, -y * 100];
+
+  const controlConnections = createControlConnections(
+    controls,
+    transformCoord,
+    courseAppearance.autoLegGapSize,
+    objScale
+  );
 
   return createSvgNode(document, {
     type: "g",
     children: [
       ...controlsToSvg(),
-      ...controlConnectionsToSvg(),
-      ...controlNumbersToSvg(),
+      ...controlConnectionsToSvg(controlConnections),
+      ...controlNumbersToSvg(controlConnections),
       ...(await specialObjectsToSvg()),
     ],
   });
@@ -91,20 +97,16 @@ export async function courseToSvg(
     return createControls(controls, transformCoord).features.map(controlToSvg);
   }
 
-  function controlConnectionsToSvg() {
-    return createControlConnections(
-      controls,
-      transformCoord,
-      courseAppearance.autoLegGapSize,
-      objScale
-    ).features.map(({ geometry: { coordinates } }) =>
+  function controlConnectionsToSvg(controlConnections) {
+    return controlConnections.features.map(({ geometry: { coordinates } }) =>
       lines(coordinates, false, courseOverPrintRgb, null, objScale)
     );
   }
 
-  function controlNumbersToSvg() {
+  function controlNumbersToSvg(courseObjects) {
     return createNumberPositions(
       controls,
+      courseObjects,
       transformCoord,
       objScale
     ).features.map(
@@ -220,10 +222,10 @@ export async function courseToSvg(
 }
 
 const startTriangle = [
-  new Coordinate(0, 3.464),
-  new Coordinate(3, -1.732),
-  new Coordinate(-3, -1.732),
-  new Coordinate(0, 3.464),
+  [0, 3.464],
+  [3, -1.732],
+  [-3, -1.732],
+  [0, 3.464],
 ];
 
 export async function courseDefinitionToSvg(eventName, course) {

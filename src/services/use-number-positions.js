@@ -1,23 +1,26 @@
 import { useMemo } from "react";
-import Coordinate from "../models/coordinate";
+import { add, pointToGeometryDistance } from "../models/coordinate";
 
 export default function useNumberPositions(
   controls,
-  transformCoord,
+  courseObjects /* GeoJSON FeatureCollection */,
   courseObjRatio = 1
 ) {
   return useMemo(
-    () => createNumberPositions(controls, transformCoord, courseObjRatio),
-    [controls, courseObjRatio, transformCoord]
+    () => createNumberPositions(controls, courseObjects, courseObjRatio),
+    [controls, courseObjects, courseObjRatio]
   );
 }
 
 export function createNumberPositions(
   controls,
-  transformCoord,
+  courseObjects /* GeoJSON FeatureCollection */,
   courseObjRatio
 ) {
-  const objects = controls.slice();
+  const objects = [
+    ...controls.map(({ coordinates }) => ({ type: "Point", coordinates })),
+    ...courseObjects.features.map(({ geometry }) => geometry),
+  ];
   const result = [];
   controls
     .filter((c) => c.kind !== "start" && c.kind !== "finish")
@@ -29,11 +32,9 @@ export function createNumberPositions(
         courseObjRatio
       );
       objects.push({
-        coordinates: new Coordinate(textLocation.geometry.coordinates),
+        type: "Point",
+        coordinates: [textLocation.geometry.coordinates],
       });
-      textLocation.geometry.coordinates = transformCoord(
-        textLocation.geometry.coordinates
-      );
       result.push(textLocation);
     });
 
@@ -45,7 +46,7 @@ export function createNumberPositions(
   // This is more or less a re-implementation of Purple Pen's CourseFormatter's
   // text placement logic, found in
   // https://github.com/petergolde/PurplePen/blob/master/src/PurplePen/CourseFormatter.cs
-  function createTextPlacement(controls, control, label, courseObjRatio) {
+  function createTextPlacement(courseObjects, control, label, courseObjRatio) {
     let textCoord;
     if (control.numberLocation) {
       textCoord = control.coordinates.add(control.numberLocation);
@@ -55,10 +56,10 @@ export function createNumberPositions(
           controlNumberCircleDistance * courseObjRatio * controlCircleSize) *
         courseObjRatio;
       textCoord = getTextLocation(
-        control.coordinates,
+        control,
         textDistance,
         control.code,
-        controls
+        courseObjects
       );
     }
 
@@ -67,22 +68,17 @@ export function createNumberPositions(
       properties: { ...control, label, kind: "number" },
       geometry: {
         type: "Point",
-        coordinates: textCoord.toArray(),
+        coordinates: textCoord,
       },
     };
   }
 
-  function getTextLocation(
-    controlLocation,
-    distanceFromCenter,
-    text,
-    controls
-  ) {
+  function getTextLocation(control, distanceFromCenter, text, courseObjects) {
     const deltaAngle = Math.PI / 16;
-    const d = distanceFromCenter + 1.2;
+    distanceFromCenter += 1.2;
 
-    const nearbyObjects = controls.filter((c) => {
-      const d = c.coordinates.sub(controlLocation).vLength();
+    const nearbyObjects = courseObjects.filter((c) => {
+      const d = pointToGeometryDistance(control.coordinates, c);
       return d > 0 && d <= distanceFromCenter * 4;
     });
 
@@ -94,15 +90,16 @@ export function createNumberPositions(
       angle < defaultControlNumberAngle + 2 * Math.PI;
       angle += deltaAngle
     ) {
-      const pt = controlLocation.add(
-        new Coordinate(d * Math.cos(angle), d * Math.sin(angle))
-      );
+      const candidate = add(control.coordinates, [
+        distanceFromCenter * Math.cos(angle),
+        distanceFromCenter * Math.sin(angle),
+      ]);
       const distanceFromNearby = nearbyObjects.reduce(
-        (a, o) => Math.min(a, o.coordinates.sub(pt).vLength()),
+        (a, o) => Math.min(a, pointToGeometryDistance(candidate, o)),
         Number.MAX_VALUE
       );
       if (distanceFromNearby > bestDistance) {
-        bestPoint = pt;
+        bestPoint = candidate;
         bestDistance = distanceFromNearby;
       }
     }

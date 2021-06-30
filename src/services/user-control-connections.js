@@ -1,26 +1,19 @@
 import { useMemo } from "react";
+import { add } from "../models/coordinate";
 import {
   controlCircleOutsideDiameter,
   overprintLineWidth,
   startTriangleRadius,
 } from "./use-number-positions";
 
-export default function useControlConnections(
-  controls,
-  transformCoord,
-  autoLegGapSize = 0
-) {
+export default function useControlConnections(controls, autoLegGapSize = 0) {
   return useMemo(
-    () => createControlConnections(controls, transformCoord, autoLegGapSize),
-    [controls, transformCoord, autoLegGapSize]
+    () => createControlConnections(controls, autoLegGapSize),
+    [controls, autoLegGapSize]
   );
 }
 
-export function createControlConnections(
-  controls,
-  transformCoord,
-  autoLegGapSize = 0
-) {
+export function createControlConnections(controls, autoLegGapSize = 0) {
   return {
     type: "FeatureCollection",
     features: controls
@@ -37,8 +30,8 @@ export function createControlConnections(
         if (l > startSpace + endSpace) {
           const vx = dx / l;
           const vy = dy / l;
-          const startCoord = c1.add([vx * startSpace, vy * startSpace]);
-          const endCoord = c2.add([-vx * endSpace, -vy * endSpace]);
+          const startCoord = add(c1, [vx * startSpace, vy * startSpace]);
+          const endCoord = add(c2, [-vx * endSpace, -vy * endSpace]);
 
           return {
             type: "Feature",
@@ -49,10 +42,7 @@ export function createControlConnections(
             },
             geometry: {
               type: "LineString",
-              coordinates: [
-                transformCoord(startCoord),
-                transformCoord(endCoord),
-              ],
+              coordinates: [startCoord, endCoord],
             },
           };
         }

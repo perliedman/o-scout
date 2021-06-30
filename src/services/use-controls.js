@@ -1,13 +1,10 @@
 import { useMemo } from "react";
 
-export default function useControls(controls, transformCoord) {
-  return useMemo(
-    () => createControls(controls, transformCoord),
-    [controls, transformCoord]
-  );
+export default function useControls(controls) {
+  return useMemo(() => createControls(controls), [controls]);
 }
 
-export function createControls(controls, transformCoord) {
+export function createControls(controls) {
   return {
     type: "FeatureCollection",
     features: controls
@@ -16,7 +13,7 @@ export function createControls(controls, transformCoord) {
         properties: { ...control, index },
         geometry: {
           type: "Point",
-          coordinates: transformCoord(control.coordinates),
+          coordinates: control.coordinates,
         },
       }))
       .concat(),

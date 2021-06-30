@@ -38,27 +38,6 @@ export function addControl(event, { kind, coordinates, description }) {
   event.controlList.push(event.controls[id]);
 }
 
-//   deleteControl (id) {
-//     if (this.controls[id]) {
-//       this.courses.forEach(c => c.removeControl(id))
-
-//       const index = this.controlList.findIndex(c => c.id === id)
-//       delete this.controls[id]
-//       this.controlList.splice(index, 1)
-//     }
-//   }
-
-//   moveControl ({ id, coordinates }) {
-//     const control = this.controls[id]
-//     control.coordinates = new Coordinate(coordinates)
-//   }
-
-//   setControlDescription (controlId, kind, descriptionId) {
-//     const control = this.controls[controlId]
-//     control.description[kind] = descriptionId
-//   }
-// }
-
 const sequence = (start) =>
   (() => {
     let s = start - 1;

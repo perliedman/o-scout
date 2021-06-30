@@ -3,16 +3,40 @@ import VectorSource from "ol/source/Vector";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useMap } from "./store";
 import GeoJSON from "ol/format/GeoJSON";
-import Coordinate from "./models/coordinate";
 import useControls from "./services/use-controls";
 import useControlConnections from "./services/user-control-connections";
 import useSpecialObjects from "./services/use-special-objects";
 import courseFeatureStyle from "./course-feature-style";
 import useNumberPositions from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
+import Projection from "ol/proj/Projection";
+import Units from "ol/proj/Units";
+import { addCoordinateTransforms } from "ol/proj";
+import { featureCollection } from "@turf/helpers";
+
+const ppenProjection = new Projection({
+  code: "ppen",
+  units: Units.METERS,
+  axisOrientation: "enu",
+  global: false,
+  metersPerUnit: 0.001,
+});
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
   const { map, mapFile } = useMap(getMap);
+  const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
+  const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
+
+  useEffect(() => {
+    if (mapProjection && crs) {
+      addCoordinateTransforms(
+        ppenProjection,
+        mapProjection,
+        (c) => toProjectedCoord(crs, c),
+        (c) => fromProjectedCoord(crs, c)
+      );
+    }
+  }, [mapProjection, crs]);
 
   const source = useMemo(() => new VectorSource(), []);
   const featuresRef = useRef([]);
@@ -51,38 +75,35 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     }
   }, [map, layer]);
 
-  const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
-
-  const transformCoord = useCallback((c) => toProjectedCoord(crs, c), [crs]);
-  const controlsGeoJSON = useControls(course.controls, transformCoord);
+  const controlsGeoJSON = useControls(course.controls);
   const controlConnectionsGeoJSON = useControlConnections(
     course.controls,
-    transformCoord,
     courseAppearance.autoLegGapSize
   );
   const controlLabelsGeoJSON = useNumberPositions(
     course.controls,
-    transformCoord
+    controlConnectionsGeoJSON
   );
-  const specialObjectsGeoJSON = useSpecialObjects(
-    course.specialObjects,
-    transformCoord
-  );
+  const specialObjectsGeoJSON = useSpecialObjects(course.specialObjects);
   useControlDescriptions(map, eventName, course, specialObjectsGeoJSON);
 
   const features = useMemo(() => {
     const geojson = new GeoJSON();
-    return [
-      ...geojson.readFeatures(controlsGeoJSON),
-      ...geojson.readFeatures(controlConnectionsGeoJSON),
-      ...geojson.readFeatures(controlLabelsGeoJSON),
-      ...geojson.readFeatures(specialObjectsGeoJSON),
-    ];
+    return geojson.readFeatures(
+      featureCollection([
+        ...controlsGeoJSON.features,
+        ...controlConnectionsGeoJSON.features,
+        ...controlLabelsGeoJSON.features,
+        ...specialObjectsGeoJSON.features,
+      ]),
+      { dataProjection: ppenProjection, featureProjection: mapProjection }
+    );
   }, [
     controlsGeoJSON,
     controlConnectionsGeoJSON,
     controlLabelsGeoJSON,
     specialObjectsGeoJSON,
+    mapProjection,
   ]);
   featuresRef.current = features;
 
@@ -96,10 +117,16 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
 
 const mmToMeter = 0.001;
 const toProjectedCoord = (crs, coordinate) => {
-  return new Coordinate(
+  return [
     coordinate[0] * mmToMeter * crs.scale + crs.easting,
-    coordinate[1] * mmToMeter * crs.scale + crs.northing
-  );
+    coordinate[1] * mmToMeter * crs.scale + crs.northing,
+  ];
+};
+const fromProjectedCoord = (crs, coordinate) => {
+  return [
+    (coordinate[0] - crs.easting) / crs.scale / mmToMeter,
+    (coordinate[1] - crs.northing) / crs.scale / mmToMeter,
+  ];
 };
 
 function getMap({ map, mapFile }) {

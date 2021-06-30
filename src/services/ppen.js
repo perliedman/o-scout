@@ -1,5 +1,4 @@
 import flatten from "arr-flatten";
-import Coordinate from "../models/coordinate";
 import { addCourse, createEvent } from "../models/event";
 import { createControl } from "../models/control";
 import { createCourse } from "../models/course";
@@ -88,10 +87,7 @@ export function parsePPen(doc) {
   return { ...event, warnings };
 
   function parseLocation(loc) {
-    return new Coordinate(
-      Number(loc.getAttribute("x")),
-      Number(loc.getAttribute("y"))
-    );
+    return [Number(loc.getAttribute("x")), Number(loc.getAttribute("y"))];
   }
 
   function parseControl(tag) {

@@ -2,28 +2,19 @@ import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection, polygon } from "@turf/helpers";
 import { useMemo } from "react";
 
-export default function useSpecialObjects(specialObjects, transformCoord) {
-  return useMemo(
-    () => createSpecialObjects(specialObjects, transformCoord),
-    [specialObjects, transformCoord]
-  );
+export default function useSpecialObjects(specialObjects) {
+  return useMemo(() => createSpecialObjects(specialObjects), [specialObjects]);
 }
 
-export function createSpecialObjects(specialObjects, transformCoord) {
+export function createSpecialObjects(specialObjects) {
   return featureCollection(
     specialObjects
       .map(({ id, kind, locations }) => {
-        const transformedCoords = locations.map(transformCoord);
-
         switch (kind) {
           case "white-out":
-            return polygon(
-              [[...transformedCoords, transformedCoords[0]]],
-              { kind },
-              { id }
-            );
+            return polygon([[...locations, locations[0]]], { kind }, { id });
           case "descriptions":
-            return bboxPolygon(transformedCoords.flat(), {
+            return bboxPolygon(locations.flat(), {
               properties: { kind },
               id,
             });
