@@ -82,8 +82,8 @@ export function parsePPen(doc) {
 
   courses.forEach((c) => addCourse(event, c));
 
-  parseSpecialObjects(event, doc.getElementsByTagName("special-object"));
   parseAllControls(event, eventTag.getElementsByTagName("all-controls")?.[0]);
+  parseSpecialObjects(event, doc.getElementsByTagName("special-object"));
 
   return { ...event, warnings };
 
