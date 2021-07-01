@@ -10,6 +10,7 @@ export function createCourse(id, name, controls = [], printScale, type) {
     printScale: printScale,
     type: type,
     specialObjects: [],
+    labelKind: "sequence",
   };
 }
 

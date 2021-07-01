@@ -78,11 +78,13 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const controlsGeoJSON = useControls(course.controls);
   const controlConnectionsGeoJSON = useControlConnections(
     course.controls,
-    courseAppearance.autoLegGapSize
+    courseAppearance.autoLegGapSize,
+    course.labelKind
   );
   const controlLabelsGeoJSON = useNumberPositions(
     course.controls,
-    controlConnectionsGeoJSON
+    controlConnectionsGeoJSON,
+    course.labelKind
   );
   const specialObjectsGeoJSON = useSpecialObjects(course.specialObjects);
   useControlDescriptions(map, eventName, course, specialObjectsGeoJSON);

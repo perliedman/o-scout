@@ -83,6 +83,7 @@ export function parsePPen(doc) {
   courses.forEach((c) => addCourse(event, c));
 
   parseSpecialObjects(event, doc.getElementsByTagName("special-object"));
+  parseAllControls(event, eventTag.getElementsByTagName("all-controls")?.[0]);
 
   return { ...event, warnings };
 
@@ -178,6 +179,19 @@ export function parsePPen(doc) {
         Number(courseAppearanceTag.getAttribute("auto-leg-gap-size")) || 0,
       blendPurple: courseAppearanceTag.getAttribute("blend-purple") === "true",
     };
+  }
+
+  function parseAllControls(event, allControlsTag) {
+    if (!allControlsTag) return;
+
+    const allControls = createCourse(
+      "all-controls",
+      "All Controls",
+      event.controlList,
+      Number(allControlsTag.getAttribute("print-scale"))
+    );
+    allControls.labelKind = "code";
+    addCourse(event, allControls);
   }
 }
 

@@ -4,18 +4,21 @@ import { add, pointToGeometryDistance } from "../models/coordinate";
 export default function useNumberPositions(
   controls,
   courseObjects /* GeoJSON FeatureCollection */,
+  labelKind,
   courseObjRatio = 1
 ) {
   return useMemo(
-    () => createNumberPositions(controls, courseObjects, courseObjRatio),
-    [controls, courseObjects, courseObjRatio]
+    () =>
+      createNumberPositions(controls, courseObjects, courseObjRatio, labelKind),
+    [controls, courseObjects, courseObjRatio, labelKind]
   );
 }
 
 export function createNumberPositions(
   controls,
   courseObjects /* GeoJSON FeatureCollection */,
-  courseObjRatio
+  courseObjRatio,
+  labelKind
 ) {
   const objects = [
     ...controls.map(({ coordinates }) => ({ type: "Point", coordinates })),
@@ -28,7 +31,12 @@ export function createNumberPositions(
       const textLocation = createTextPlacement(
         objects,
         c,
-        (i + 1).toString(),
+        (labelKind === "sequence"
+          ? i + 1
+          : labelKind === "code"
+          ? c.code
+          : ""
+        ).toString(),
         courseObjRatio
       );
       objects.push({
