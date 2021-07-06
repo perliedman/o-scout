@@ -7,9 +7,13 @@ enablePatches();
 
 export const useMap = create((set) => ({
   mapFile: undefined,
+  clipGeometry: undefined,
   setMapFile: (mapFilename, mapFile, tiler) =>
     set((state) => ({ ...state, mapFile, mapFilename, tiler })),
   setMapInstance: (map) => set((state) => ({ ...state, map })),
+  setClipGeometry: (clipGeometry) =>
+    set((state) => ({ ...state, clipGeometry })),
+  setClipLayer: (clipLayer) => set((state) => ({ ...state, clipLayer })),
 }));
 
 const history = {};

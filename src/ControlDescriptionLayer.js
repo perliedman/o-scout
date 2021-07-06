@@ -46,14 +46,16 @@ export function useControlDescriptions(
   }, [eventName, course, specialObjectsGeoJSON]);
 
   useEffect(() => {
-    for (const descriptionLayer of descriptionLayers) {
-      map.addLayer(descriptionLayer);
-    }
-
-    return () => {
+    if (map) {
       for (const descriptionLayer of descriptionLayers) {
-        map.removeLayer(descriptionLayer);
+        map.addLayer(descriptionLayer);
       }
-    };
+
+      return () => {
+        for (const descriptionLayer of descriptionLayers) {
+          map.removeLayer(descriptionLayer);
+        }
+      };
+    }
   }, [map, descriptionLayers]);
 }

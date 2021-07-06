@@ -13,6 +13,10 @@ import Projection from "ol/proj/Projection";
 import Units from "ol/proj/Units";
 import { addCoordinateTransforms } from "ol/proj";
 import { featureCollection } from "@turf/helpers";
+import useClip from "./use-clip";
+import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
+import { transformExtent } from "./services/coordinates";
+import { Feature } from "ol";
 
 const ppenProjection = new Projection({
   code: "ppen",
@@ -23,7 +27,7 @@ const ppenProjection = new Projection({
 });
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
-  const { map, mapFile } = useMap(getMap);
+  const { map, mapFile, clipLayer } = useMap(getMap);
   const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
   const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
 
@@ -56,6 +60,19 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
       }),
     [source]
   );
+  useClip(layer);
+
+  useEffect(() => {
+    if (clipLayer) {
+      const extent = transformExtent(course.printArea?.extent, (c) =>
+        toProjectedCoord(crs, c)
+      );
+      const extentPolygon = polygonFromExtent(extent);
+      const clipSource = clipLayer.getSource();
+      clipSource.clear();
+      clipSource.addFeature(new Feature(extentPolygon));
+    }
+  }, [clipLayer, course, crs]);
 
   const style = useCallback(
     (feature, resolution) =>
@@ -131,8 +148,8 @@ const fromProjectedCoord = (crs, coordinate) => {
   ];
 };
 
-function getMap({ map, mapFile }) {
-  return { map, mapFile };
+function getMap({ map, mapFile, clipLayer }) {
+  return { map, mapFile, clipLayer };
 }
 
 function getObjectScale(scaleSizes, mapScale, printScale) {

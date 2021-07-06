@@ -4,18 +4,18 @@ import { get as getOlProjection } from "ol/proj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import proj4 from "proj4";
 import { getProjection } from "./services/epsg";
-import XYZ from "ol/source/XYZ";
 import "ol/ol.css";
-import TileLayer from "ol/layer/Tile";
-import * as olSize from "ol/size";
-import TileState from "ol/TileState";
 import { useMap, useNotifications } from "./store";
-import { svgToBitmap } from "./services/svg-to-bitmap";
 import { View } from "ol";
 import Spinner from "./ui/Spinner";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import useClip from "./use-clip";
+import useMapLayer from "./services/use-map-layer";
 
 export default function MapComponent() {
-  const { mapFile, map, tiler, setMapInstance } = useMap(getMap);
+  const { mapFile, map, tiler, setMapInstance, setClipLayer, clipLayer } =
+    useMap(getMap);
   const pushNotification = useNotifications(getPush);
 
   const container = useRef();
@@ -33,7 +33,33 @@ export default function MapComponent() {
     };
   }, [registerProjection, hasTileErrors, mapFile]);
   useEffect(createMap, [setMapInstance, mapFile, projection]);
-  useEffect(addLayer, [map, mapFile, tiler, pushNotification, projection]);
+  const onSuccess = useCallback(() => setState("idle"), []);
+  const onError = useCallback(
+    (e) => {
+      console.log(e);
+      if (!hasTileErrors.current) {
+        pushNotification(
+          "warning",
+          "Some parts of the map failed to display",
+          e.toString()
+        );
+        hasTileErrors.current = true;
+      }
+    },
+    [hasTileErrors, pushNotification]
+  );
+  const mapLayer = useMapLayer({ map, projection, tiler, onSuccess, onError });
+  useEffect(() => {
+    if (map && mapLayer) {
+      map.addLayer(mapLayer);
+      map.getView().fit(tiler.bounds);
+      return () => {
+        map.removeLayer(mapLayer);
+      };
+    }
+  }, [map, mapLayer, tiler?.bounds]);
+  useEffect(addClipLayer, [map, setClipLayer]);
+  useClip(mapLayer);
 
   return (
     <>
@@ -76,61 +102,43 @@ export default function MapComponent() {
     }
   }
 
-  function addLayer() {
-    if (map && projection) {
-      const source = new XYZ({
-        projection,
-        tileLoadFunction: loadTile,
-        url: "{z}/{x}/{y}.png",
+  function addClipLayer() {
+    if (map) {
+      const source = new VectorSource();
+      const nextClipLayer = new VectorLayer({
+        style: null,
+        source,
       });
 
-      const layer = new TileLayer({ source });
-      map.addLayer(layer);
-      map.getView().fit(tiler.bounds);
+      setClipLayer(nextClipLayer);
+      map.addLayer(nextClipLayer);
 
       return () => {
-        map.removeLayer(layer);
+        map.removeLayer(nextClipLayer);
+        setClipLayer(undefined);
       };
-
-      async function loadTile(tile) {
-        if (!tile.getImage().src) {
-          try {
-            const { tileCoord } = tile;
-            const [z] = tileCoord;
-            const tileGrid = source.getTileGrid();
-            const resolution = tileGrid.getResolution(z);
-            const tileSize = olSize.toSize(tileGrid.getTileSize(z));
-            const extent = tileGrid.getTileCoordExtent(tileCoord);
-            const svg = tiler.renderSvg(extent, resolution, {
-              DOMImplementation: document.implementation,
-            });
-
-            svg.setAttribute("width", tileSize[0]);
-            svg.setAttribute("height", tileSize[1]);
-            svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
-
-            tile.getImage().src = await svgToBitmap(svg, tileSize);
-            setState("idle");
-          } catch (e) {
-            console.log(e);
-            if (!hasTileErrors.current) {
-              pushNotification(
-                "warning",
-                "Some parts of the map failed to display",
-                e.toString()
-              );
-              hasTileErrors.current = true;
-            }
-            tile.setState(TileState.ERROR);
-          }
-        }
-      }
     }
   }
 }
 
-function getMap({ mapFile, map, tiler, setMapInstance }) {
-  return { mapFile, map, tiler, setMapInstance };
+function getMap({
+  mapFile,
+  map,
+  tiler,
+  setMapInstance,
+  clipGeometry,
+  clipLayer,
+  setClipLayer,
+}) {
+  return {
+    mapFile,
+    map,
+    tiler,
+    setMapInstance,
+    clipGeometry,
+    setClipLayer,
+    clipLayer,
+  };
 }
 
 function getPush({ push }) {
