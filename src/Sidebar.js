@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Courses from "./Courses";
 import MapSection from "./MapSection";
 import PrintAndExport from "./PrintAndExport";
-import Toggle from "./ui/Toggle";
+import Section from "./ui/Section";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(true);
@@ -46,40 +46,29 @@ export default function Sidebar() {
           overflow-y-auto
           bg-white`}
         >
-          <Section title="Map" defaultOpen={false}>
+          <Section
+            title="Map"
+            defaultOpen={false}
+            className="border-b border-gray-200"
+          >
             <MapSection />
           </Section>
-          <Section title="Courses" defaultOpen={true}>
+          <Section
+            title="Courses"
+            defaultOpen={true}
+            className="border-b border-gray-200"
+          >
             <Courses />
           </Section>
-          <Section title="Print &amp; Export" defaultOpen={false}>
+          <Section
+            title="Print &amp; Export"
+            defaultOpen={false}
+            className="border-b border-gray-200"
+          >
             <PrintAndExport />
           </Section>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Section({ title, defaultOpen, children }) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <div className="border-b border-gray-200 w-full p-4">
-      <header
-        className="flex justify-between items-center py-5 cursor-pointer select-none"
-        onClick={() => setOpen(!open)}
-      >
-        <h2
-          className={`${
-            open ? "text-indigo-700" : "text-gray-600"
-          } font-thin text-lg`}
-        >
-          {title}
-        </h2>
-        <Toggle open={open} />
-      </header>
-      {open ? <div className="font-thin">{children}</div> : null}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import useEvent, { useMap, useNotifications } from "./store";
 import Button from "./ui/Button";
-import Toggle from "./ui/Toggle";
 import shallow from "zustand/shallow";
 import { useEffect, useMemo, useState } from "react";
 import { printCourse, renderPdf } from "./services/print";
@@ -9,6 +8,7 @@ import Spinner from "./ui/Spinner";
 import { svgToBitmap } from "./services/svg-to-bitmap";
 import { createCourse } from "./models/course";
 import { transformExtent } from "./services/coordinates";
+import Section from "./ui/Section";
 
 export default function PrintAndExport() {
   const [state, setState] = useState("idle");
@@ -30,7 +30,6 @@ export default function PrintAndExport() {
       ? "selectedCourse"
       : "map"
   );
-  const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => {
     if (!selectionOptions[selection].enabled(courses)) {
@@ -43,15 +42,7 @@ export default function PrintAndExport() {
 
   return (
     <>
-      <div className="my-4 flex justify-between">
-        <div>Options</div>
-        <Toggle
-          type="small"
-          open={showOptions}
-          onClick={() => setShowOptions(!showOptions)}
-        />
-      </div>
-      {showOptions && (
+      <Section title="Options" headingComponent="h3" headingTextStyle="">
         <div className="flex flex-col ml-4 text-sm">
           <div>Print selection</div>
           {Object.keys(selectionOptions).map((option) => (
@@ -83,8 +74,7 @@ export default function PrintAndExport() {
             </label>
           ))}
         </div>
-      )}
-
+      </Section>
       <div className="flex justify-end mt-4">
         <Button onClick={onPrint}>
           {state === "printing" && <Spinner className="text-indigo-600" />}
