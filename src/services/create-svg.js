@@ -13,6 +13,7 @@ import { createControlConnections } from "./user-control-connections";
 import fetch from "./fetch";
 import { controlDistance } from "../models/control";
 import { createSpecialObjects } from "./use-special-objects";
+import { add, mul, rotate } from "../models/coordinate";
 
 export function createSvgNode(document, n) {
   if (n instanceof SVGElement) {
@@ -72,14 +73,10 @@ export async function courseToSvg(
     course.printScale
   );
 
-  // Convert from PPEN mm to OCAD coordinates, 1/100 mm;
-  // also flip y axis since SVG y-axis increases downwards
-  const transformCoord = ([x, y]) => [x * 100, -y * 100];
-
   const controlConnections = createControlConnections(
     controls,
-    transformCoord,
     courseAppearance.autoLegGapSize,
+    course.labelKind,
     objScale
   );
 
@@ -94,12 +91,18 @@ export async function courseToSvg(
   });
 
   function controlsToSvg() {
-    return createControls(controls, transformCoord).features.map(controlToSvg);
+    return createControls(controls).features.map(controlToSvg);
   }
 
   function controlConnectionsToSvg(controlConnections) {
     return controlConnections.features.map(({ geometry: { coordinates } }) =>
-      lines(coordinates, false, courseOverPrintRgb, null, objScale)
+      lines(
+        coordinates.map(toSvgCoord),
+        false,
+        courseOverPrintRgb,
+        null,
+        objScale
+      )
     );
   }
 
@@ -107,18 +110,10 @@ export async function courseToSvg(
     return createNumberPositions(
       controls,
       courseObjects,
-      transformCoord,
       objScale
-    ).features.map(
-      (
-        {
-          properties,
-          geometry: {
-            coordinates: [x, y],
-          },
-        },
-        i
-      ) => ({
+    ).features.map(({ properties, geometry: { coordinates } }, i) => {
+      const [x, y] = toSvgCoord(coordinates);
+      return {
         type: "text",
         attrs: {
           x,
@@ -131,14 +126,14 @@ export async function courseToSvg(
           properties.kind !== "start" && properties.kind !== "finish"
             ? (i + 1).toString()
             : "",
-      })
-    );
+      };
+    });
   }
 
   async function specialObjectsToSvg() {
     return (
       await Promise.all(
-        createSpecialObjects(course.specialObjects, transformCoord)
+        createSpecialObjects(course.specialObjects)
           // Put descriptions last, to render them on top of everything else
           .features.sort(descriptionsOnTop)
           .map(async (specialObject) => {
@@ -148,7 +143,12 @@ export async function courseToSvg(
             } = specialObject;
             switch (kind) {
               case "white-out":
-                return lines(coordinates[0], true, null, "white");
+                return lines(
+                  coordinates[0].map(toSvgCoord),
+                  true,
+                  null,
+                  "white"
+                );
               case "descriptions": {
                 const descriptionSvg = await courseDefinitionToSvg(
                   eventName,
@@ -156,15 +156,15 @@ export async function courseToSvg(
                 );
                 const descriptionDimensions = getSvgDimensions(descriptionSvg);
                 const descriptionGroup = descriptionSvg.firstChild;
-                const extent = getControlDescriptionExtent(
-                  specialObject,
-                  descriptionSvg
-                );
+                const [extentXmin, extentYmin, extentXmax, extentYmax] =
+                  getControlDescriptionExtent(specialObject, descriptionSvg);
+                const extentMin = toSvgCoord([extentXmin, extentYmin]);
+                const extentMax = toSvgCoord([extentXmax, extentYmax]);
                 const scale =
-                  (extent[2] - extent[0]) / descriptionDimensions[0];
+                  (extentMax[0] - extentMin[0]) / descriptionDimensions[0];
                 descriptionGroup.setAttribute(
                   "transform",
-                  `translate(${extent[0]}, ${extent[3]}) scale(${scale}) `
+                  `translate(${extentMin[0]}, ${extentMax[1]}) scale(${scale}) `
                 );
                 return descriptionGroup;
               }
@@ -189,18 +189,14 @@ export async function courseToSvg(
         const rotation = getStartRotation(course);
         return lines(
           startTriangle.map((p) =>
-            p
-              .mul(objScale * 100)
-              .rotate(rotation)
-              .add(coordinates)
-              .toArray()
+            toSvgCoord(add(rotate(mul(p, objScale), rotation), coordinates))
           ),
           true,
           courseOverPrintRgb
         );
       case "normal":
         return circle(
-          coordinates,
+          toSvgCoord(coordinates),
           (controlCircleOutsideDiameter / 2) * 100 * objScale,
           courseOverPrintRgb
         );
@@ -209,7 +205,7 @@ export async function courseToSvg(
           type: "g",
           children: Array.from({ length: 2 }).map((_, index) =>
             circle(
-              coordinates,
+              toSvgCoord(coordinates),
               200 + index * 100 * objScale,
               courseOverPrintRgb
             )
@@ -219,6 +215,10 @@ export async function courseToSvg(
         throw new Error(`Unknown control kind "${kind}".`);
     }
   }
+}
+
+function toSvgCoord([x, y]) {
+  return [x * 100, -y * 100];
 }
 
 const startTriangle = [
