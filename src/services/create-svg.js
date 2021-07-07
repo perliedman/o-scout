@@ -413,16 +413,6 @@ export async function courseDefinitionToSvg(eventName, course) {
     );
 
     return group;
-    // return {
-    //   type: "image",
-    //   attrs: {
-    //     href: `data:image/svg+xml,${encodeURIComponent(symbolXml)}`,
-    //     x: cellSize * col + cellSize / 2 - imageWidth / 2,
-    //     y: cellSize * row + cellSize / 2 - imageHeight / 2,
-    //     width: imageWidth,
-    //     height: imageHeight,
-    //   },
-    // };
   }
 
   function colLine(col, row, width) {
