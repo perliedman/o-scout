@@ -1,6 +1,4 @@
 import { getVectorContext } from "ol/render";
-import Fill from "ol/style/Fill";
-import Style from "ol/style/Style";
 import { useEffect } from "react";
 import { useMap } from "./store";
 

@@ -14,8 +14,7 @@ import useClip from "./use-clip";
 import useMapLayer from "./services/use-map-layer";
 
 export default function MapComponent() {
-  const { mapFile, map, tiler, setMapInstance, setClipLayer, clipLayer } =
-    useMap(getMap);
+  const { mapFile, map, tiler, setMapInstance, setClipLayer } = useMap(getMap);
   const pushNotification = useNotifications(getPush);
 
   const container = useRef();
@@ -127,7 +126,6 @@ function getMap({
   tiler,
   setMapInstance,
   clipGeometry,
-  clipLayer,
   setClipLayer,
 }) {
   return {
@@ -137,7 +135,6 @@ function getMap({
     setMapInstance,
     clipGeometry,
     setClipLayer,
-    clipLayer,
   };
 }
 
