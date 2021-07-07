@@ -30,17 +30,22 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const { map, mapFile, clipLayer } = useMap(getMap);
   const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
   const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
+  const paperToProjected = useCallback((c) => toProjectedCoord(crs, c), [crs]);
+  const projectedToPaper = useCallback(
+    (c) => fromProjectedCoord(crs, c),
+    [crs]
+  );
 
   useEffect(() => {
     if (mapProjection && crs) {
       addCoordinateTransforms(
         ppenProjection,
         mapProjection,
-        (c) => toProjectedCoord(crs, c),
-        (c) => fromProjectedCoord(crs, c)
+        paperToProjected,
+        projectedToPaper
       );
     }
-  }, [mapProjection, crs]);
+  }, [crs, mapProjection, paperToProjected, projectedToPaper]);
 
   const source = useMemo(() => new VectorSource(), []);
   const featuresRef = useRef([]);
@@ -104,7 +109,13 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     course.labelKind
   );
   const specialObjectsGeoJSON = useSpecialObjects(course.specialObjects);
-  useControlDescriptions(map, eventName, course, specialObjectsGeoJSON);
+  useControlDescriptions(
+    map,
+    paperToProjected,
+    eventName,
+    course,
+    specialObjectsGeoJSON
+  );
 
   const features = useMemo(() => {
     const geojson = new GeoJSON();

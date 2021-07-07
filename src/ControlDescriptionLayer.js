@@ -6,9 +6,11 @@ import {
   courseDefinitionToSvg,
   getControlDescriptionExtent,
 } from "./services/create-svg";
+import { transformExtent } from "./services/coordinates";
 
 export function useControlDescriptions(
   map,
+  toProjectedCoord,
   eventName,
   course,
   specialObjectsGeoJSON
@@ -27,9 +29,9 @@ export function useControlDescriptions(
             svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
             svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
             const url = await svgToUrl(svg);
-            const imageExtent = getControlDescriptionExtent(
-              descriptionObject,
-              svg
+            const imageExtent = transformExtent(
+              getControlDescriptionExtent(descriptionObject, svg),
+              toProjectedCoord
             );
             return new ImageLayer({
               source: new Static({
@@ -43,7 +45,7 @@ export function useControlDescriptions(
 
       setDescriptionLayers(layers);
     }
-  }, [eventName, course, specialObjectsGeoJSON]);
+  }, [eventName, course, specialObjectsGeoJSON, toProjectedCoord]);
 
   useEffect(() => {
     if (map) {

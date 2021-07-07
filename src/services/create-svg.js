@@ -385,24 +385,16 @@ export async function courseDefinitionToSvg(eventName, course) {
   async function descriptionSymbol(symbol, row, col, width = cellSize) {
     if (!symbol) return null;
 
+    const {
+      group,
+      dimensions: [svgWidth, svgHeight],
+    } = await fetchSymbolSvg(symbol);
+
     const margin = 5;
-    const svgUrl = (
-      await import(`svg-control-descriptions/symbols/${symbol}.svg`)
-    ).default;
-    const symbolXml = await fetch(svgUrl, null, { format: "text" });
-    const svg = new window.DOMParser().parseFromString(
-      symbolXml,
-      "image/svg+xml"
-    );
-    const svgNode = svg.getRootNode().firstChild;
-    const [svgWidth, svgHeight] = getSvgDimensions(svgNode);
     const aspectRatio = svgHeight / svgWidth;
     const ratio = svgWidth / 130;
     const imageWidth = (width - margin * 2) * ratio;
     const imageHeight = (width - margin * 2) * aspectRatio * ratio;
-    const group = svg.createElementNS("http://www.w3.org/2000/svg", "g");
-    Array.from(svgNode.children).forEach((child) => group.appendChild(child));
-
     const x = cellSize * col + cellSize / 2 - imageWidth / 2;
     const y = cellSize * row + cellSize / 2 - imageHeight / 2;
     group.setAttribute(
@@ -484,4 +476,20 @@ function getObjectScale(scaleSizes, mapScale, printScale) {
     default:
       throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
   }
+}
+
+async function fetchSymbolSvg(symbol) {
+  const svgUrl = (
+    await import(`svg-control-descriptions/symbols/${symbol}.svg`)
+  ).default;
+  const symbolXml = await fetch(svgUrl, null, { format: "text" });
+  const svg = new window.DOMParser().parseFromString(
+    symbolXml,
+    "image/svg+xml"
+  );
+  const svgNode = svg.getRootNode().firstChild;
+  const group = svg.createElementNS("http://www.w3.org/2000/svg", "g");
+  Array.from(svgNode.children).forEach((child) => group.appendChild(child));
+
+  return { group, dimensions: getSvgDimensions(svgNode) };
 }
