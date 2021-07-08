@@ -61,7 +61,7 @@ export function createNumberPositions(
     } else {
       const textDistance =
         (controlCircleOutsideDiameter / 2 +
-          controlNumberCircleDistance * courseObjRatio * controlCircleSize) *
+          controlNumberCircleDistance * controlCircleSize) *
         courseObjRatio;
       textCoord = getTextLocation(
         control,
