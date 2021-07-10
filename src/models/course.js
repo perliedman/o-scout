@@ -1,8 +1,16 @@
 import { controlDistance } from "./control";
+import * as PrintArea from "./print-area";
 
 export const courseOverPrintRgb = "rgba(182, 44, 152, 0.8)";
 
-export function createCourse(id, name, controls = [], printScale, type) {
+export function createCourse(
+  id,
+  name,
+  controls = [],
+  printScale,
+  type,
+  options
+) {
   return {
     id: id,
     name: name,
@@ -11,6 +19,8 @@ export function createCourse(id, name, controls = [], printScale, type) {
     type: type,
     specialObjects: [],
     labelKind: "sequence",
+    printArea: PrintArea.create(),
+    ...options,
   };
 }
 

@@ -2,6 +2,8 @@ import flatten from "arr-flatten";
 import { addCourse, createEvent } from "../models/event";
 import { createControl } from "../models/control";
 import { createCourse } from "../models/course";
+import * as PrintArea from "../models/print-area";
+import * as CourseAppearance from "../models/course-appearance";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
@@ -50,8 +52,8 @@ export function parsePPen(doc) {
     ),
     scale,
   };
-  event.courseAppearance = parseCourseAppearance(
-    eventTag.getElementsByTagName("course-appearance")[0]
+  event.courseAppearance = CourseAppearance.create(
+    parseCourseAppearance(eventTag.getElementsByTagName("course-appearance")[0])
   );
 
   const courses = Array.from(doc.getElementsByTagName("course"))
@@ -72,8 +74,8 @@ export function parsePPen(doc) {
         c.getAttribute("kind")
       );
       course.order = Number(c.getAttribute("order"));
-      course.printArea = parsePrintArea(
-        c.getElementsByTagName("print-area")?.[0]
+      course.printArea = PrintArea.create(
+        parsePrintArea(c.getElementsByTagName("print-area")?.[0])
       );
 
       return course;

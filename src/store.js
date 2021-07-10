@@ -21,7 +21,14 @@ let currentVersion = -1;
 const maxHistoryLength = 40;
 
 const useEvent = create((set) => ({
-  ...createEvent("New event", [createCourse(1, "New course")]),
+  ...createEvent("New event", [
+    createCourse(1, "New course", [], 15000, "normal", {
+      printArea: { auto: true, restrictToPage: true },
+    }),
+    createCourse("all-controls", "All Controls", [], 15000, "all-controls", {
+      labelKind: "code",
+    }),
+  ]),
   actions: {
     event: {
       set: (event) =>

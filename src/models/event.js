@@ -1,4 +1,5 @@
 import { createControl } from "./control";
+import * as CourseAppearance from "./course-appearance";
 
 export function createEvent(name, courses) {
   return {
@@ -10,7 +11,8 @@ export function createEvent(name, courses) {
     controls: {},
     controlList: [],
     specialObjects: [],
-    courseAppearance: {},
+    courseAppearance: CourseAppearance.create(),
+    selectedCourseId: courses?.[0]?.id,
   };
 }
 

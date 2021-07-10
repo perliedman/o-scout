@@ -17,6 +17,7 @@ import useClip from "./use-clip";
 import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
 import { transformExtent } from "./services/coordinates";
 import { Feature } from "ol";
+import * as PrintArea from "./models/print-area";
 
 const ppenProjection = new Projection({
   code: "ppen",
@@ -69,8 +70,9 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
 
   useEffect(() => {
     if (clipLayer) {
-      const extent = transformExtent(course.printArea?.extent, (c) =>
-        toProjectedCoord(crs, c)
+      const extent = transformExtent(
+        PrintArea.getExtent(course.printArea, course),
+        (c) => toProjectedCoord(crs, c)
       );
       const extentPolygon = polygonFromExtent(extent);
       const clipSource = clipLayer.getSource();
