@@ -22,9 +22,7 @@ const maxHistoryLength = 40;
 
 const useEvent = create((set) => ({
   ...createEvent("New event", [
-    createCourse(1, "New course", [], 15000, "normal", {
-      printArea: { auto: true, restrictToPage: true },
-    }),
+    createCourse(1, "New course", [], 15000, "normal"),
     createCourse("all-controls", "All Controls", [], 15000, "all-controls", {
       labelKind: "code",
     }),
@@ -48,6 +46,18 @@ const useEvent = create((set) => ({
             if (!draftCourse)
               throw new Error(`Can't find course with id ${courseId}`);
             draftCourse.name = name;
+          })
+        ),
+      setPrintAreaExtent: (courseId, extent) =>
+        set(
+          undoable((draft) => {
+            const draftCourse = draft.courses.find((c) => c.id === courseId);
+            if (!draftCourse) {
+              throw new Error(`Can't find course with id ${courseId}`);
+            }
+
+            draftCourse.printArea.auto = false;
+            draftCourse.printArea.extent = extent;
           })
         ),
     },

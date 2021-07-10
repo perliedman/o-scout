@@ -15,7 +15,11 @@ import { addCoordinateTransforms } from "ol/proj";
 import { featureCollection } from "@turf/helpers";
 import useClip from "./use-clip";
 import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
-import { transformExtent } from "./services/coordinates";
+import {
+  fromProjectedCoord,
+  toProjectedCoord,
+  transformExtent,
+} from "./services/coordinates";
 import { Feature } from "ol";
 import * as PrintArea from "./models/print-area";
 
@@ -147,20 +151,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
 
   return null;
 }
-
-const mmToMeter = 0.001;
-const toProjectedCoord = (crs, coordinate) => {
-  return [
-    coordinate[0] * mmToMeter * crs.scale + crs.easting,
-    coordinate[1] * mmToMeter * crs.scale + crs.northing,
-  ];
-};
-const fromProjectedCoord = (crs, coordinate) => {
-  return [
-    (coordinate[0] - crs.easting) / crs.scale / mmToMeter,
-    (coordinate[1] - crs.northing) / crs.scale / mmToMeter,
-  ];
-};
 
 function getMap({ map, mapFile, clipLayer }) {
   return { map, mapFile, clipLayer };
