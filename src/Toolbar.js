@@ -25,11 +25,12 @@ function ToolButton({ onClick, disabled, children }) {
       className={`
         px-2
         py-1
-        first:rounded-l
-        last:rounded-r
+        first:rounded-bl-md
+        last:rounded-br-md
         -ml-px
         first:ml-auto
         border
+        border-t-0
         border-gray-300
         ${disabled ? "text-gray-400" : "text-gray-600"}
         font-thin
