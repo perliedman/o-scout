@@ -10,30 +10,11 @@ import {
   overprintLineWidth,
 } from "./use-number-positions";
 import { createControlConnections } from "./user-control-connections";
-import fetch from "./fetch";
 import { controlDistance } from "../models/control";
 import { createSpecialObjects } from "./use-special-objects";
 import { add, mul, rotate } from "../models/coordinate";
-
-export function createSvgNode(document, n) {
-  if (n instanceof SVGElement) {
-    return n;
-  }
-
-  const node = document.createElementNS("http://www.w3.org/2000/svg", n.type);
-  n.id && (node.id = n.id);
-  n.attrs &&
-    Object.keys(n.attrs).forEach((attrName) =>
-      node.setAttribute(attrName, n.attrs[attrName])
-    );
-  n.text && node.appendChild(document.createTextNode(n.text));
-  n.children &&
-    n.children.forEach((child) =>
-      node.appendChild(createSvgNode(document, child))
-    );
-
-  return node;
-}
+import fetchSymbolSvg from "./fetch-symbol-svg";
+import { createSvgNode, getSvgDimensions } from "./svg-utils";
 
 export const circle = ([cx, cy], r, stroke, scale) => ({
   type: "circle",
@@ -461,10 +442,6 @@ function text(text, x, y, fill, fontSize, fontStyle = "normal") {
   };
 }
 
-export function getSvgDimensions(svg) {
-  return ["width", "height"].map((attr) => parseInt(svg.getAttribute(attr)));
-}
-
 function getObjectScale(scaleSizes, mapScale, printScale) {
   switch (scaleSizes) {
     case "None":
@@ -476,20 +453,4 @@ function getObjectScale(scaleSizes, mapScale, printScale) {
     default:
       throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
   }
-}
-
-async function fetchSymbolSvg(symbol) {
-  const svgUrl = (
-    await import(`svg-control-descriptions/symbols/${symbol}.svg`)
-  ).default;
-  const symbolXml = await fetch(svgUrl, null, { format: "text" });
-  const svg = new window.DOMParser().parseFromString(
-    symbolXml,
-    "image/svg+xml"
-  );
-  const svgNode = svg.getRootNode().firstChild;
-  const group = svg.createElementNS("http://www.w3.org/2000/svg", "g");
-  Array.from(svgNode.children).forEach((child) => group.appendChild(child));
-
-  return { group, dimensions: getSvgDimensions(svgNode) };
 }

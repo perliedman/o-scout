@@ -1,6 +1,4 @@
-import { readFileSync } from "fs";
-import { DOMParser } from "xmldom";
-import { parsePPen } from "./ppen";
+import { parsePpenFile } from "../test-utils";
 
 describe("parsePPen", () => {
   test.each`
@@ -38,9 +36,3 @@ describe("parsePPen", () => {
     expect(courseAppearance.blendPurple).toBe(true);
   });
 });
-
-function parsePpenFile(path) {
-  const ppenStr = readFileSync(path, "utf-8");
-  const doc = new DOMParser().parseFromString(ppenStr, "text/xml");
-  return parsePPen(doc);
-}

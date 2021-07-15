@@ -60,5 +60,10 @@
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.2",
     "xmldom": "^0.6.0"
   },
-  "license": "AGPL-3.0-or-later"
+  "license": "AGPL-3.0-or-later",
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/(?!ol)"
+    ]
+  }
 }

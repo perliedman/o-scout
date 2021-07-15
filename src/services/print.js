@@ -1,10 +1,11 @@
 import * as olExtent from "ol/extent";
 import { courseBounds } from "../models/course";
-import { courseToSvg, getSvgDimensions } from "./create-svg";
+import { courseToSvg } from "./create-svg";
 import PDFDocument from "@react-pdf/pdfkit";
 import blobStream from "blob-stream";
 import SVGtoPDF from "svg-to-pdfkit";
 import { transformExtent } from "./coordinates";
+import { getSvgDimensions } from "./svg-utils";
 
 const mmToPt = 2.83465;
 const inToPt = 72;
