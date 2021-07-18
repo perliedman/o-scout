@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useEvent, { useCrs, useMap } from "../store";
 import ModifyInteraction from "ol/interaction/Modify";
-import SelectInteraction from "ol/interaction/Select";
 import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
 import { never } from "ol/events/condition";
 import { courseFeatureStyle } from "../course-feature-style";
 import { useHotkeys } from "react-hotkeys-hook";
+import useSelect from "../ol/use-select";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -52,13 +52,22 @@ export default function EditControls() {
     [featuresRef, objScale]
   );
 
-  const select = useMemo(
-    () =>
-      new SelectInteraction({
-        style,
-        layers: (layer) => layer.getSource() === controlsSource,
-      }),
+  const [selectedControlId, setSelectedControlId] = useState();
+  const selectOptions = useMemo(
+    () => ({
+      style,
+      layers: (layer) => layer.getSource() === controlsSource,
+    }),
     [style, controlsSource]
+  );
+  const selectedFeature = controlsSource
+    .getFeatures()
+    .find((feature) => feature.get("id") === selectedControlId);
+  useSelect(
+    map,
+    selectedFeature,
+    (feature) => setSelectedControlId(feature?.get("id")),
+    selectOptions
   );
 
   useEffect(() => {
@@ -78,9 +87,7 @@ export default function EditControls() {
       });
 
       map.addInteraction(modify);
-      map.addInteraction(select);
       return () => {
-        map.removeInteraction(select);
         map.removeInteraction(modify);
       };
     }
@@ -92,16 +99,47 @@ export default function EditControls() {
     setControlCoordinates,
     selectedCourseId,
     style,
-    select,
   ]);
 
-  useHotkeys("delete,backspace", () => {
-    select.getFeatures().forEach((feature) => {
-      removeControl(selectedCourseId, feature.get("id"));
-    });
-  });
+  useHotkeys(
+    "delete,backspace",
+    () => {
+      removeControl(selectedCourseId, selectedFeature.get("id"));
+    },
+    [selectedFeature]
+  );
+  useHotkeys("up", () => moveSelected(0, 1), [
+    selectedFeature,
+    map,
+    setControlCoordinates,
+  ]);
+  useHotkeys("down", () => moveSelected(0, -1), [
+    selectedFeature,
+    map,
+    setControlCoordinates,
+  ]);
+  useHotkeys("left", () => moveSelected(-1, 0), [
+    selectedFeature,
+    map,
+    setControlCoordinates,
+  ]);
+  useHotkeys("right", () => moveSelected(1, 0), [
+    selectedFeature,
+    map,
+    setControlCoordinates,
+  ]);
 
   return null;
+
+  function moveSelected(dx, dy) {
+    const resolution = map.getView().getResolution();
+    const [x, y] = selectedFeature.getGeometry().getCoordinates();
+    setControlCoordinates(
+      selectedCourseId,
+      selectedFeature.get("id"),
+      fromProjectedCoord(crs, [x + dx * resolution, y + dy * resolution])
+    );
+  }
 }
 
 function getMap({ map, controlsSource }) {
