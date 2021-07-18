@@ -127,7 +127,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   );
   useEffect(() => {
     setControlsSource(controlsSource);
-  }, [controlsSource]);
+  }, [controlsSource, setControlsSource]);
   const { layer: objectsLayer } = useVector(
     map,
     objectFeatures,
