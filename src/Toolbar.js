@@ -12,7 +12,7 @@ const modes = [Modes.editControls, Modes.printArea];
 
 export default function Toolbar() {
   const { undo, redo } = useUndo();
-  const [activeMode, setActiveMode] = useState();
+  const [activeMode, setActiveMode] = useState(modes[0].id);
   const ActiveModeComponent = Modes[activeMode]?.component;
 
   useHotkeys("ctrl+z", undo || voidFn, [undo]);
