@@ -74,7 +74,7 @@ const useEvent = create((set) => ({
         set(
           undoable((draft) => {
             const draftCourse = findCourse(draft, courseId);
-            const controlIndex = draftCourse.controls.find(
+            const controlIndex = draftCourse.controls.findIndex(
               ({ id }) => id === controlId
             );
             draftCourse.controls.splice(controlIndex, 1);

@@ -5,6 +5,7 @@ import SelectInteraction from "ol/interaction/Select";
 import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
 import { never } from "ol/events/condition";
 import { courseFeatureStyle } from "../course-feature-style";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -51,12 +52,17 @@ export default function EditControls() {
     [featuresRef, objScale]
   );
 
-  useEffect(() => {
-    if (map && controlsSource) {
-      const select = new SelectInteraction({
+  const select = useMemo(
+    () =>
+      new SelectInteraction({
         style,
         layers: (layer) => layer.getSource() === controlsSource,
-      });
+      }),
+    [style, controlsSource]
+  );
+
+  useEffect(() => {
+    if (map && controlsSource) {
       const modify = new ModifyInteraction({
         deleteCondition: never,
         source: controlsSource,
@@ -86,7 +92,14 @@ export default function EditControls() {
     setControlCoordinates,
     selectedCourseId,
     style,
+    select,
   ]);
+
+  useHotkeys("delete,backspace", () => {
+    select.getFeatures().forEach((feature) => {
+      removeControl(selectedCourseId, feature.get("id"));
+    });
+  });
 
   return null;
 }
