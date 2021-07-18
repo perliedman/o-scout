@@ -60,9 +60,12 @@ export default function EditControls() {
     }),
     [style, controlsSource]
   );
-  const selectedFeature = controlsSource
-    .getFeatures()
-    .find((feature) => feature.get("id") === selectedControlId);
+  const selectedFeature =
+    controlsSource && selectedControlId
+      ? controlsSource
+          .getFeatures()
+          .find((feature) => feature.get("id") === selectedControlId)
+      : null;
   useSelect(
     map,
     selectedFeature,
@@ -104,7 +107,9 @@ export default function EditControls() {
   useHotkeys(
     "delete,backspace",
     () => {
-      removeControl(selectedCourseId, selectedFeature.get("id"));
+      if (selectedFeature) {
+        removeControl(selectedCourseId, selectedFeature.get("id"));
+      }
     },
     [selectedFeature]
   );
@@ -132,6 +137,8 @@ export default function EditControls() {
   return null;
 
   function moveSelected(dx, dy) {
+    if (!selectedFeature) return;
+
     const resolution = map.getView().getResolution();
     const [x, y] = selectedFeature.getGeometry().getCoordinates();
     setControlCoordinates(
