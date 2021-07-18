@@ -49,6 +49,12 @@ const useEvent = create((set) => ({
           ...event,
           selectedCourseId: event.courses?.[0]?.id,
         })),
+      setName: (name) =>
+        set(
+          undoable((draft) => {
+            draft.name = name;
+          })
+        ),
     },
     course: {
       setSelected: (selectedCourseId) =>
@@ -111,8 +117,8 @@ export const useUndo = () => useEvent(getUndoRedo);
 
 function getUndoRedo({ undo, redo }) {
   return {
-    undo: currentVersion >= 0 && undo,
-    redo: history[currentVersion + 1] && redo,
+    undo: history[currentVersion]?.undo && undo,
+    redo: history[currentVersion + 1]?.redo && redo,
   };
 }
 
@@ -127,12 +133,12 @@ function undoable(fn) {
 }
 
 function undo(state) {
-  if (currentVersion < 0) return;
+  if (!history[currentVersion]?.undo) return;
   return applyPatches(state, history[currentVersion--].undo);
 }
 
 function redo(state) {
-  if (!history[currentVersion + 1]) return;
+  if (!history[currentVersion + 1]?.redo) return;
   return applyPatches(state, history[++currentVersion].redo);
 }
 
