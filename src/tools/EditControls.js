@@ -19,11 +19,13 @@ export default function EditControls() {
 
   const featuresRef = useRef();
   useEffect(() => {
-    featuresRef.current = controlsSource.getFeatures();
-    controlsSource.on("changed", update);
-    return () => {
-      controlsSource.un("changed", update);
-    };
+    if (controlsSource) {
+      featuresRef.current = controlsSource.getFeatures();
+      controlsSource.on("changed", update);
+      return () => {
+        controlsSource.un("changed", update);
+      };
+    }
     function update() {
       featuresRef.current = controlsSource.getFeatures();
     }
