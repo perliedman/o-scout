@@ -2,6 +2,7 @@ import create from "zustand";
 import produce, { applyPatches, enablePatches } from "immer";
 import { createEvent } from "./models/event";
 import { createCourse } from "./models/course";
+import { useMemo } from "react";
 
 enablePatches();
 
@@ -19,6 +20,15 @@ export const useMap = create((set) => ({
   setControlsSource: (controlsSource) =>
     set((state) => ({ ...state, controlsSource })),
 }));
+
+export function useCrs() {
+  const mapFile = useMap(getMapFile);
+  return useMemo(() => mapFile?.getCrs(), [mapFile]);
+}
+
+function getMapFile({ mapFile }) {
+  return mapFile;
+}
 
 const history = {};
 let currentVersion = -1;

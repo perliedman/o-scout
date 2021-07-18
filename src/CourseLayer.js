@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useMap } from "./store";
+import { useCrs, useMap } from "./store";
 import GeoJSON from "ol/format/GeoJSON";
 import useControls from "./services/use-controls";
 import useControlConnections from "./services/user-control-connections";
@@ -32,7 +32,7 @@ const ppenProjection = new Projection({
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
   const { map, mapFile, clipLayer, setControlsSource } = useMap(getMap);
-  const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
+  const crs = useCrs();
   const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
   const paperToProjected = useCallback((c) => toProjectedCoord(crs, c), [crs]);
   const projectedToPaper = useCallback(

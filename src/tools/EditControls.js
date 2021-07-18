@@ -1,13 +1,13 @@
-import { useEffect, useMemo } from "react";
-import useEvent, { useMap } from "../store";
+import { useEffect } from "react";
+import useEvent, { useCrs, useMap } from "../store";
 import ModifyInteraction from "ol/interaction/Modify";
 import { fromProjectedCoord } from "../services/coordinates";
 
 export default function EditControls() {
-  const { map, mapFile, controlsSource } = useMap(getMap);
+  const { map, controlsSource } = useMap(getMap);
   const { selectedCourseId, setControlCoordinates } = useEvent(getEvent);
 
-  const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
+  const crs = useCrs();
 
   useEffect(() => {
     if (map && controlsSource) {
@@ -32,8 +32,8 @@ export default function EditControls() {
   return null;
 }
 
-function getMap({ map, mapFile, controlsSource }) {
-  return { map, mapFile, controlsSource };
+function getMap({ map, controlsSource }) {
+  return { map, controlsSource };
 }
 
 function getEvent({
