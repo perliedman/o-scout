@@ -10,13 +10,20 @@ import {
 } from "./services/use-number-positions";
 import Text from "ol/style/Text";
 import Fill from "ol/style/Fill";
+import { useCallback, useEffect } from "react";
 
-export default function courseFeatureStyle(
-  featuresRef,
-  objScale,
-  feature,
-  resolution
-) {
+export default function useStyle(layer, featuresRef, objScale) {
+  const styleFn = useCallback(
+    (feature, resolution) =>
+      courseFeatureStyle(featuresRef, objScale, feature, resolution),
+    [featuresRef, objScale]
+  );
+  useEffect(() => {
+    layer.setStyle(styleFn);
+  }, [layer, styleFn]);
+}
+
+export function courseFeatureStyle(featuresRef, objScale, feature, resolution) {
   const kind = feature.get("kind");
   if (kind === "normal") {
     const image = controlStyle.getImage();

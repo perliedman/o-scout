@@ -4,7 +4,6 @@ import GeoJSON from "ol/format/GeoJSON";
 import useControls from "./services/use-controls";
 import useControlConnections from "./services/user-control-connections";
 import useSpecialObjects from "./services/use-special-objects";
-import courseFeatureStyle from "./course-feature-style";
 import useNumberPositions from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
 import Projection from "ol/proj/Projection";
@@ -21,6 +20,7 @@ import {
 import { Feature } from "ol";
 import * as PrintArea from "./models/print-area";
 import useVector from "./ol/use-vector";
+import useStyle from "./course-feature-style";
 
 const ppenProjection = new Projection({
   code: "ppen",
@@ -51,7 +51,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     }
   }, [crs, mapProjection, paperToProjected, projectedToPaper]);
 
-  const featuresRef = useRef([]);
   const mapScale = useMemo(() => mapFile.getCrs().scale, [mapFile]);
   const objScale = useMemo(
     () =>
@@ -93,11 +92,20 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     specialObjectsGeoJSON
   );
 
-  const features = useMemo(() => {
+  const controlFeaturesRef = useRef();
+  const controlFeatures = useMemo(() => {
+    const geojson = new GeoJSON();
+    return geojson.readFeatures(controlsGeoJSON, {
+      dataProjection: ppenProjection,
+      featureProjection: mapProjection,
+    });
+  }, [controlsGeoJSON, mapProjection]);
+  controlFeaturesRef.current = controlFeatures;
+  const objectFeaturesRef = useRef([]);
+  const objectFeatures = useMemo(() => {
     const geojson = new GeoJSON();
     return geojson.readFeatures(
       featureCollection([
-        ...controlsGeoJSON.features,
         ...controlConnectionsGeoJSON.features,
         ...controlLabelsGeoJSON.features,
         ...specialObjectsGeoJSON.features,
@@ -105,30 +113,27 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
       { dataProjection: ppenProjection, featureProjection: mapProjection }
     );
   }, [
-    controlsGeoJSON,
     controlConnectionsGeoJSON,
     controlLabelsGeoJSON,
     specialObjectsGeoJSON,
     mapProjection,
   ]);
-  featuresRef.current = features;
+  objectFeaturesRef.current = objectFeatures;
 
-  const { layer } = useVector(map, features, {
-    layerOptions: {
-      zIndex: 1,
-      updateWhileAnimating: true,
-      updateWhileInteracting: true,
-    },
-  });
-  const style = useCallback(
-    (feature, resolution) =>
-      courseFeatureStyle(featuresRef, objScale, feature, resolution),
-    [featuresRef, objScale]
+  const { layer: controlsLayer } = useVector(
+    map,
+    controlFeatures,
+    vectorLayerOptions
   );
-  useEffect(() => {
-    layer.setStyle(style);
-  }, [layer, style]);
-  useClip(layer);
+  const { layer: objectsLayer } = useVector(
+    map,
+    objectFeatures,
+    vectorLayerOptions
+  );
+  useStyle(controlsLayer, controlFeaturesRef, objScale);
+  useStyle(objectsLayer, objectFeaturesRef, objScale);
+  useClip(controlsLayer);
+  useClip(objectsLayer);
 
   return null;
 }
@@ -152,3 +157,11 @@ function getObjectScale(scaleSizes, mapScale, printScale) {
       throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
   }
 }
+
+const vectorLayerOptions = {
+  layerOptions: {
+    zIndex: 1,
+    updateWhileAnimating: true,
+    updateWhileInteracting: true,
+  },
+};
