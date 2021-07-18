@@ -1,18 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { getExtent } from "./models/print-area";
-import useEvent, { useMap, useUndo } from "./store";
-import ExtentInteraction from "ol/interaction/Extent";
-import {
-  fromProjectedCoord,
-  toProjectedCoord,
-  transformExtent,
-} from "./services/coordinates";
-import Style from "ol/style/Style";
-import Stroke from "ol/style/Stroke";
+import React, { useState } from "react";
+import { useUndo } from "./store";
+import EditControls from "./tools/EditControls";
+import PrintArea from "./tools/PrintArea";
 
 const Modes = idHash({
   printArea: { label: "Print Area", component: PrintArea },
+  editControls: { label: "Edit", component: EditControls },
 });
+const modes = [Modes.editControls, Modes.printArea];
 
 export default function Toolbar() {
   const { undo, redo } = useUndo();
@@ -22,7 +17,7 @@ export default function Toolbar() {
   return (
     <div className="relative">
       <div className="absolute left-1/2 transform -translate-x-1/2 z-10 top-0">
-        {[Modes.printArea].map(({ id, label }) => (
+        {modes.map(({ id, label }) => (
           <ModeButton
             key={id}
             active={id === activeMode}
@@ -80,69 +75,6 @@ function ToolButton({
       {children}
     </button>
   );
-}
-
-function PrintArea() {
-  const { map, mapFile } = useMap(getMap);
-  const { course, setPrintAreaExtent } = useEvent(getSelectedCourse);
-
-  const crs = useMemo(() => mapFile?.getCrs(), [mapFile]);
-  const currentExtent = useRef();
-
-  useEffect(() => {
-    if (map && course) {
-      const interaction = new ExtentInteraction({
-        extent: transformExtent(getExtent(course.printArea, course), (c) =>
-          toProjectedCoord(crs, c)
-        ),
-        boxStyle,
-      });
-      interaction.on(
-        "extentchanged",
-        ({ extent }) => (currentExtent.current = extent)
-      );
-      map.on("pointerup", commitExtent);
-      map.addInteraction(interaction);
-
-      return () => {
-        map.removeInteraction(interaction);
-        map.un("pointerup", commitExtent);
-      };
-
-      function commitExtent() {
-        setPrintAreaExtent(
-          course.id,
-          transformExtent(currentExtent.current, (c) =>
-            fromProjectedCoord(crs, c)
-          )
-        );
-      }
-    }
-  }, [crs, mapFile, map, course, setPrintAreaExtent]);
-
-  return null;
-}
-
-const boxStyle = new Style({
-  stroke: new Stroke({ color: "steelblue", width: 5 }),
-  fill: null,
-});
-
-function getMap({ map, mapFile }) {
-  return { map, mapFile };
-}
-
-function getSelectedCourse({
-  courses,
-  selectedCourseId,
-  actions: {
-    course: { setPrintAreaExtent },
-  },
-}) {
-  return {
-    course: courses.find(({ id }) => id === selectedCourseId),
-    setPrintAreaExtent,
-  };
 }
 
 function idHash(object) {

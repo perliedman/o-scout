@@ -31,7 +31,7 @@ const ppenProjection = new Projection({
 });
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
-  const { map, mapFile, clipLayer } = useMap(getMap);
+  const { map, mapFile, clipLayer, setControlsSource } = useMap(getMap);
   const crs = useMemo(() => mapFile.getCrs(), [mapFile]);
   const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
   const paperToProjected = useCallback((c) => toProjectedCoord(crs, c), [crs]);
@@ -120,11 +120,14 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   ]);
   objectFeaturesRef.current = objectFeatures;
 
-  const { layer: controlsLayer } = useVector(
+  const { layer: controlsLayer, source: controlsSource } = useVector(
     map,
     controlFeatures,
     vectorLayerOptions
   );
+  useEffect(() => {
+    setControlsSource(controlsSource);
+  }, [controlsSource]);
   const { layer: objectsLayer } = useVector(
     map,
     objectFeatures,
@@ -138,8 +141,8 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   return null;
 }
 
-function getMap({ map, mapFile, clipLayer }) {
-  return { map, mapFile, clipLayer };
+function getMap({ map, mapFile, clipLayer, setControlsSource }) {
+  return { map, mapFile, clipLayer, setControlsSource };
 }
 
 function getObjectScale(scaleSizes, mapScale, printScale) {

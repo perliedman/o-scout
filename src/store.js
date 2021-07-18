@@ -7,13 +7,17 @@ enablePatches();
 
 export const useMap = create((set) => ({
   mapFile: undefined,
+  mapInstance: undefined,
   clipGeometry: undefined,
+  clipLayer: undefined,
   setMapFile: (mapFilename, mapFile, tiler) =>
     set((state) => ({ ...state, mapFile, mapFilename, tiler })),
   setMapInstance: (map) => set((state) => ({ ...state, map })),
   setClipGeometry: (clipGeometry) =>
     set((state) => ({ ...state, clipGeometry })),
   setClipLayer: (clipLayer) => set((state) => ({ ...state, clipLayer })),
+  setControlsSource: (controlsSource) =>
+    set((state) => ({ ...state, controlsSource })),
 }));
 
 const history = {};
@@ -60,6 +64,22 @@ const useEvent = create((set) => ({
             draftCourse.printArea.extent = extent;
           })
         ),
+    },
+    control: {
+      setCoordinates: (courseId, controlId, coordinates) => {
+        set(
+          undoable((draft) => {
+            const draftCourse = draft.courses.find((c) => c.id === courseId);
+            if (!draftCourse) {
+              throw new Error(`Can't find course with id ${courseId}`);
+            }
+            const draftControl = draftCourse.controls.find(
+              (c) => c.id === controlId
+            );
+            draftControl.coordinates = coordinates;
+          })
+        );
+      },
     },
   },
   undo: () => set(undo),
