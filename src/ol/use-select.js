@@ -23,14 +23,16 @@ export default function useSelect(
   );
 
   useEffect(() => {
-    map.addInteraction(select);
+    if (map) {
+      map.addInteraction(select);
 
-    select.on("select", listener);
+      select.on("select", listener);
 
-    return () => {
-      map.removeInteraction(select);
-      select.un("select", listener);
-    };
+      return () => {
+        map.removeInteraction(select);
+        select.un("select", listener);
+      };
+    }
 
     function listener(event) {
       onSelect && onSelect(event.selected[0]);
