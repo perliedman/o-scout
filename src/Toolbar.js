@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useUndo } from "./store";
 import EditControls from "./tools/EditControls";
 import PrintArea from "./tools/PrintArea";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const Modes = idHash({
   printArea: { label: "Print Area", component: PrintArea },
@@ -13,6 +14,9 @@ export default function Toolbar() {
   const { undo, redo } = useUndo();
   const [activeMode, setActiveMode] = useState();
   const ActiveModeComponent = Modes[activeMode]?.component;
+
+  useHotkeys("ctrl+z", undo || voidFn, [undo]);
+  useHotkeys("ctrl+y", redo || voidFn, [redo]);
 
   return (
     <div className="relative">
@@ -83,3 +87,5 @@ function idHash(object) {
   });
   return object;
 }
+
+function voidFn() {}

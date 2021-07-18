@@ -127,10 +127,12 @@ function undoable(fn) {
 }
 
 function undo(state) {
+  if (currentVersion < 0) return;
   return applyPatches(state, history[currentVersion--].undo);
 }
 
 function redo(state) {
+  if (!history[currentVersion + 1]) return;
   return applyPatches(state, history[++currentVersion].redo);
 }
 
