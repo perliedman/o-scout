@@ -1,17 +1,66 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import useEvent, { useCrs, useMap } from "../store";
 import ModifyInteraction from "ol/interaction/Modify";
-import { fromProjectedCoord } from "../services/coordinates";
+import SelectInteraction from "ol/interaction/Select";
+import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
+import { never } from "ol/events/condition";
+import { courseFeatureStyle } from "../course-feature-style";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
-  const { selectedCourseId, setControlCoordinates } = useEvent(getEvent);
+  const {
+    selectedCourseId,
+    selectedCourse,
+    courseAppearance,
+    setControlCoordinates,
+    removeControl,
+  } = useEvent(getEvent);
+
+  const featuresRef = useRef();
+  useEffect(() => {
+    featuresRef.current = controlsSource.getFeatures();
+    controlsSource.on("changed", update);
+    return () => {
+      controlsSource.un("changed", update);
+    };
+    function update() {
+      featuresRef.current = controlsSource.getFeatures();
+    }
+  }, [controlsSource]);
 
   const crs = useCrs();
+  const objScale = useMemo(
+    () =>
+      getObjectScale(
+        courseAppearance.scaleSizes,
+        crs.scale,
+        selectedCourse.printScale
+      ),
+    [courseAppearance, crs.scale, selectedCourse.printScale]
+  );
+  const style = useCallback(
+    (feature, resolution) => {
+      return courseFeatureStyle(
+        featuresRef,
+        objScale,
+        true,
+        feature,
+        resolution
+      );
+    },
+    [featuresRef, objScale]
+  );
 
   useEffect(() => {
     if (map && controlsSource) {
-      const modify = new ModifyInteraction({ source: controlsSource });
+      const select = new SelectInteraction({
+        style,
+        layers: (layer) => layer.getSource() === controlsSource,
+      });
+      const modify = new ModifyInteraction({
+        deleteCondition: never,
+        source: controlsSource,
+      });
       modify.on("modifyend", (e) => {
         e.features.forEach((feature) =>
           setControlCoordinates(
@@ -23,11 +72,21 @@ export default function EditControls() {
       });
 
       map.addInteraction(modify);
+      map.addInteraction(select);
       return () => {
+        map.removeInteraction(select);
         map.removeInteraction(modify);
       };
     }
-  }, [map, crs, controlsSource, setControlCoordinates, selectedCourseId]);
+  }, [
+    map,
+    crs,
+    controlsSource,
+    removeControl,
+    setControlCoordinates,
+    selectedCourseId,
+    style,
+  ]);
 
   return null;
 }
@@ -38,9 +97,20 @@ function getMap({ map, controlsSource }) {
 
 function getEvent({
   selectedCourseId,
+  courses,
+  courseAppearance,
   actions: {
-    control: { setCoordinates: setControlCoordinates },
+    control: { remove: removeControl, setCoordinates: setControlCoordinates },
   },
 }) {
-  return { selectedCourseId, setControlCoordinates };
+  const selectedCourse = courses.find(
+    (course) => course.id === selectedCourseId
+  );
+  return {
+    selectedCourseId,
+    selectedCourse,
+    courseAppearance,
+    setControlCoordinates,
+    removeControl,
+  };
 }

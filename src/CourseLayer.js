@@ -14,6 +14,7 @@ import useClip from "./use-clip";
 import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
 import {
   fromProjectedCoord,
+  getObjectScale,
   toProjectedCoord,
   transformExtent,
 } from "./services/coordinates";
@@ -143,22 +144,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
 
 function getMap({ map, mapFile, clipLayer, setControlsSource }) {
   return { map, mapFile, clipLayer, setControlsSource };
-}
-
-function getObjectScale(scaleSizes, mapScale, printScale) {
-  // TODO: Need to verify that these are really correct
-  // Especially the 1.5 for RelativeToMap looks weird but matches
-  // output from some PDFs.
-  switch (scaleSizes) {
-    case "None":
-      return printScale / mapScale;
-    case "RelativeToMap":
-      return 1.5;
-    case "RelativeTo15000":
-      return 15000 / mapScale;
-    default:
-      throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
-  }
 }
 
 const vectorLayerOptions = {

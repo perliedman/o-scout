@@ -2,6 +2,8 @@ import { controlDistance } from "./control";
 import * as PrintArea from "./print-area";
 
 export const courseOverPrintRgb = "rgba(182, 44, 152, 0.8)";
+//export const selectedOverPrintRgb = "rgba(182, 44, 152, 1)";
+export const selectedOverPrintRgb = "red";
 
 export function createCourse(
   id,

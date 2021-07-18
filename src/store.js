@@ -56,45 +56,54 @@ const useEvent = create((set) => ({
       setName: (courseId, name) =>
         set(
           undoable((draft) => {
-            const draftCourse = draft.courses.find((c) => c.id === courseId);
-            if (!draftCourse)
-              throw new Error(`Can't find course with id ${courseId}`);
+            const draftCourse = findCourse(draft, courseId);
             draftCourse.name = name;
           })
         ),
       setPrintAreaExtent: (courseId, extent) =>
         set(
           undoable((draft) => {
-            const draftCourse = draft.courses.find((c) => c.id === courseId);
-            if (!draftCourse) {
-              throw new Error(`Can't find course with id ${courseId}`);
-            }
-
+            const draftCourse = findCourse(draft, courseId);
             draftCourse.printArea.auto = false;
             draftCourse.printArea.extent = extent;
           })
         ),
     },
     control: {
-      setCoordinates: (courseId, controlId, coordinates) => {
+      remove: (courseId, controlId) =>
         set(
           undoable((draft) => {
-            const draftCourse = draft.courses.find((c) => c.id === courseId);
-            if (!draftCourse) {
-              throw new Error(`Can't find course with id ${courseId}`);
-            }
+            const draftCourse = findCourse(draft, courseId);
+            const controlIndex = draftCourse.controls.find(
+              ({ id }) => id === controlId
+            );
+            draftCourse.controls.splice(controlIndex, 1);
+          })
+        ),
+      setCoordinates: (courseId, controlId, coordinates) =>
+        set(
+          undoable((draft) => {
+            const draftCourse = findCourse(draft, courseId);
             const draftControl = draftCourse.controls.find(
               (c) => c.id === controlId
             );
             draftControl.coordinates = coordinates;
           })
-        );
-      },
+        ),
     },
   },
   undo: () => set(undo),
   redo: () => set(redo),
 }));
+
+function findCourse(event, courseId) {
+  const course = event.courses.find((c) => c.id === courseId);
+  if (course) {
+    return course;
+  } else {
+    throw new Error(`Can't find course with id ${courseId}`);
+  }
+}
 
 export default useEvent;
 
