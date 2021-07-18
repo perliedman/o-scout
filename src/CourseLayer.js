@@ -1,5 +1,3 @@
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useMap } from "./store";
 import GeoJSON from "ol/format/GeoJSON";
@@ -22,6 +20,7 @@ import {
 } from "./services/coordinates";
 import { Feature } from "ol";
 import * as PrintArea from "./models/print-area";
+import useVector from "./ol/use-vector";
 
 const ppenProjection = new Projection({
   code: "ppen",
@@ -52,7 +51,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     }
   }, [crs, mapProjection, paperToProjected, projectedToPaper]);
 
-  const source = useMemo(() => new VectorSource(), []);
   const featuresRef = useRef([]);
   const mapScale = useMemo(() => mapFile.getCrs().scale, [mapFile]);
   const objScale = useMemo(
@@ -60,17 +58,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
       getObjectScale(courseAppearance.scaleSizes, mapScale, course.printScale),
     [courseAppearance, mapScale, course.printScale]
   );
-  const layer = useMemo(
-    () =>
-      new VectorLayer({
-        source,
-        zIndex: 1,
-        updateWhileAnimating: true,
-        updateWhileInteracting: true,
-      }),
-    [source]
-  );
-  useClip(layer);
 
   useEffect(() => {
     if (clipLayer) {
@@ -84,24 +71,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
       clipSource.addFeature(new Feature(extentPolygon));
     }
   }, [clipLayer, course, crs]);
-
-  const style = useCallback(
-    (feature, resolution) =>
-      courseFeatureStyle(featuresRef, objScale, feature, resolution),
-    [featuresRef, objScale]
-  );
-  useEffect(() => {
-    layer.setStyle(style);
-  }, [layer, style]);
-
-  useEffect(() => {
-    if (map) {
-      map.addLayer(layer);
-      return () => {
-        map.removeLayer(layer);
-      };
-    }
-  }, [map, layer]);
 
   const controlsGeoJSON = useControls(course.controls);
   const controlConnectionsGeoJSON = useControlConnections(
@@ -144,10 +113,22 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   ]);
   featuresRef.current = features;
 
+  const { layer } = useVector(map, features, {
+    layerOptions: {
+      zIndex: 1,
+      updateWhileAnimating: true,
+      updateWhileInteracting: true,
+    },
+  });
+  const style = useCallback(
+    (feature, resolution) =>
+      courseFeatureStyle(featuresRef, objScale, feature, resolution),
+    [featuresRef, objScale]
+  );
   useEffect(() => {
-    source.clear();
-    source.addFeatures(features);
-  }, [source, features]);
+    layer.setStyle(style);
+  }, [layer, style]);
+  useClip(layer);
 
   return null;
 }
