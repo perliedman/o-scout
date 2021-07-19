@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { controlStyle, finishStyle, startStyle } from "../course-feature-style";
 import { courseOverPrintRgb } from "../models/course";
 import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
@@ -9,11 +9,11 @@ import {
 import useEvent, { useCrs, useMap } from "../store";
 import DrawInteraction from "ol/interaction/Draw";
 import GeometryType from "ol/geom/GeometryType";
-import { useHotkeys } from "react-hotkeys-hook";
-import hotkeys from "hotkeys-js";
-import { click, noModifierKeys, primaryAction } from "ol/events/condition";
+import { primaryAction } from "ol/events/condition";
+import { ModeButton } from "../ui/ToolButton";
 
 export default function CreateCourse() {
+  const [activeMode, setActiveMode] = useState("Control");
   const { map, controlsSource } = useMap(getMap);
   const { selectedCourseId, selectedCourse, courseAppearance, addControl } =
     useEvent(getEvent);
@@ -44,7 +44,8 @@ export default function CreateCourse() {
     [courseAppearance, crs.scale, selectedCourse.printScale]
   );
 
-  const shiftPressed = useRef();
+  const activeModeRef = useRef(activeMode);
+  const savedMode = useRef();
   useEffect(() => {
     document.addEventListener("keydown", isShiftDown);
     document.addEventListener("keyup", isShiftUp);
@@ -56,21 +57,24 @@ export default function CreateCourse() {
 
     function isShiftDown(event) {
       if (event.shiftKey) {
-        shiftPressed.current = true;
+        savedMode.current = activeModeRef.current;
+        activeModeRef.current = "Finish";
+        setActiveMode("Finish");
       }
     }
     function isShiftUp(event) {
       if (!event.shiftKey) {
-        shiftPressed.current = false;
+        activeModeRef.current = savedMode.current;
+        setActiveMode(savedMode.current);
       }
     }
-  }, [shiftPressed]);
+  }, [activeModeRef, savedMode, setActiveMode]);
 
   const style = useCallback(
     (_, resolution) => {
       const numberControls = controlsSource.getFeatures().length;
 
-      if (shiftPressed.current) {
+      if (activeModeRef.current === "Finish") {
         finishStyle.forEach((style, i) => {
           const image = style.getImage();
           const stroke = image.getStroke();
@@ -105,18 +109,18 @@ export default function CreateCourse() {
         type: GeometryType.POINT,
         style,
         condition: (event) => {
-          shiftPressed.current = event.originalEvent.shiftKey;
           return primaryAction(event);
         },
       });
 
       draw.on("drawend", (event) => {
         const numberControls = controlsSource.getFeatures().length;
-        const kind = shiftPressed.current
-          ? "finish"
-          : numberControls > 0
-          ? "normal"
-          : "start";
+        const kind =
+          activeModeRef.current === "Finish"
+            ? "finish"
+            : numberControls > 0
+            ? "normal"
+            : "start";
         addControl(
           {
             kind,
@@ -132,31 +136,25 @@ export default function CreateCourse() {
 
       map.addInteraction(draw);
 
-      map.on("keydown", (event) => {
-        debugger;
-      });
-
-      // map.on("dblclick", createFinish);
-
       return () => {
-        // map.un("dblclick", createFinish);
         map.removeInteraction(draw);
       };
-
-      // function createFinish({ coordinate }) {
-      //   addControl(
-      //     {
-      //       kind: "finish",
-      //       coordinates: fromProjectedCoord(crs, coordinate),
-      //       description: {},
-      //     },
-      //     selectedCourseId
-      //   );
-      // }
     }
   }, [map, crs, controlsSource, addControl, selectedCourseId, style]);
 
-  return null;
+  return (
+    <div>
+      {["Control", "Finish"].map((mode) => (
+        <ModeButton
+          key={mode}
+          active={mode === activeMode}
+          onClick={() => setActiveMode(mode !== activeMode ? mode : null)}
+        >
+          {mode}
+        </ModeButton>
+      ))}
+    </div>
+  );
 }
 
 function getMap({ map, controlsSource }) {
