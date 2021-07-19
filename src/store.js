@@ -49,6 +49,19 @@ const useEvent = create((set) => ({
           ...event,
           selectedCourseId: event.courses?.[0]?.id,
         })),
+      setMap: (mapFile) =>
+        set((state) => {
+          const mapScale = mapFile.getCrs().scale;
+          return {
+            ...state,
+            mapScale,
+            courses: state.courses.map((course) =>
+              course.controls.length > 0
+                ? course
+                : { ...course, printScale: mapScale }
+            ),
+          };
+        }),
       setName: (name) =>
         set(
           undoable((draft) => {
