@@ -122,6 +122,7 @@ export const startStyle = new Style({
       width: overprintLineWidth * 10 * 2,
     }),
     fill: invisible,
+    rotateWithView: true,
   }),
 });
 
@@ -134,6 +135,7 @@ export const selectedStartStyle = new Style({
       width: overprintLineWidth * 10 * 2,
     }),
     fill: invisible,
+    rotateWithView: true,
   }),
 });
 
@@ -165,7 +167,10 @@ export const lineStyle = new Style({
 });
 
 export const numberStyle = new Style({
-  text: new Text({ fill: new Fill({ color: courseOverPrintRgb }) }),
+  text: new Text({
+    fill: new Fill({ color: courseOverPrintRgb }),
+    rotateWithView: true,
+  }),
 });
 
 export const whiteOutStyle = new Style({
