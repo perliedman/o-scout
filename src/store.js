@@ -74,8 +74,9 @@ const useEvent = create((set) => ({
             const control = Event.addControl(draft, options);
             if (courseId) {
               const draftCourse = findCourse(draft, courseId);
-
               draftCourse.controls.push(control);
+              const allControls = findAllControls(draft);
+              allControls.controls.push(control);
             }
           })
         ),
@@ -133,6 +134,10 @@ function findCourse(event, courseId) {
   } else {
     throw new Error(`Can't find course with id ${courseId}`);
   }
+}
+
+function findAllControls(event) {
+  return event.courses.find((c) => c.id === "all-controls");
 }
 
 export default useEvent;
