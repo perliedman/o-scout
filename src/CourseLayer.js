@@ -76,7 +76,8 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const controlConnectionsGeoJSON = useControlConnections(
     course.controls,
     courseAppearance.autoLegGapSize,
-    course.labelKind
+    course.labelKind,
+    objScale
   );
   const controlLabelsGeoJSON = useNumberPositions(
     course.controls,
@@ -134,8 +135,9 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     objectFeatures,
     vectorLayerOptions
   );
-  useStyle(controlsLayer, controlFeaturesRef, objScale);
-  useStyle(objectsLayer, objectFeaturesRef, objScale);
+  const f = mapScale / 1000;
+  useStyle(controlsLayer, controlFeaturesRef, f * objScale);
+  useStyle(objectsLayer, objectFeaturesRef, f * objScale);
   useClip(controlsLayer);
   useClip(objectsLayer);
 

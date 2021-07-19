@@ -22,15 +22,17 @@ export const fromProjectedCoord = (crs, coordinate) => {
   ];
 };
 
+/**
+ * Calculate scale for objects (control circles etc.) given the type
+ * of scaling, the background map's scale and the course's print scale.
+ */
 export function getObjectScale(scaleSizes, mapScale, printScale) {
-  // TODO: Need to verify that these are really correct
-  // Especially the 1.5 for RelativeToMap looks weird but matches
-  // output from some PDFs.
   switch (scaleSizes) {
     case "None":
-      return printScale / mapScale;
+      return 1;
     case "RelativeToMap":
-      return 1.5;
+      // TODO: Don't know what 2 does here, but otherwise sizes do not match.
+      return (printScale / mapScale) * 2;
     case "RelativeTo15000":
       return 15000 / mapScale;
     default:

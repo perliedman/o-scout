@@ -94,9 +94,9 @@ export function courseFeatureStyle(
 
   return style;
 
-  // Scales an absolute dimension (mm on paper) to current resolution and object scale
+  // Scales an absolute dimension (mm on paper) to pixels in current resolution
   function dimension(x) {
-    return (x / resolution) * objScale * 10;
+    return (x / resolution) * objScale;
   }
 }
 

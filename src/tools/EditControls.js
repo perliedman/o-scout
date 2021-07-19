@@ -43,15 +43,16 @@ export default function EditControls() {
   );
   const style = useCallback(
     (feature, resolution) => {
+      const f = crs.scale / 1000;
       return courseFeatureStyle(
         featuresRef,
-        objScale,
+        f * objScale,
         true,
         feature,
         resolution
       );
     },
-    [featuresRef, objScale]
+    [crs, featuresRef, objScale]
   );
 
   const [selectedControlId, setSelectedControlId] = useState();

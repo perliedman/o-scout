@@ -35,6 +35,7 @@ export default function CreateCourse() {
   const crs = useCrs();
   const objScale = useMemo(
     () =>
+      (crs.scale / 1000) *
       getObjectScale(
         courseAppearance.scaleSizes,
         crs.scale,
@@ -92,7 +93,7 @@ export default function CreateCourse() {
       }
 
       function dimension(x) {
-        return (x / resolution) * objScale * 10;
+        return (x / resolution) * objScale;
       }
     },
     [controlsSource, objScale]

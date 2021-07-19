@@ -61,7 +61,8 @@ export function createNumberPositions(
     } else {
       const textDistance =
         (controlCircleOutsideDiameter / 2 +
-          controlNumberCircleDistance * controlCircleSize) *
+          overprintLineWidth +
+          controlNumberCircleDistance) *
         courseObjRatio;
       textCoord = getTextLocation(
         control,
@@ -122,4 +123,3 @@ export const controlCircleOutsideDiameter = 5.0;
 export const overprintLineWidth = 0.35;
 const controlNumberCircleDistance = 1.825;
 const defaultControlNumberAngle = Math.PI / 6;
-const controlCircleSize = 1;
