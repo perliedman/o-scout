@@ -6,6 +6,7 @@ import { never } from "ol/events/condition";
 import { courseFeatureStyle } from "../course-feature-style";
 import { useHotkeys } from "react-hotkeys-hook";
 import useSelect from "../ol/use-select";
+import ToolButton from "../ui/ToolButton";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -107,15 +108,7 @@ export default function EditControls() {
     style,
   ]);
 
-  useHotkeys(
-    "delete,backspace",
-    () => {
-      if (selectedFeature) {
-        removeControl(selectedCourseId, selectedFeature.get("id"));
-      }
-    },
-    [selectedFeature]
-  );
+  useHotkeys("delete,backspace", deleteSelected, [selectedFeature]);
   useHotkeys("up", () => moveSelected(0, 1), [
     selectedFeature,
     map,
@@ -137,7 +130,13 @@ export default function EditControls() {
     setControlCoordinates,
   ]);
 
-  return null;
+  return (
+    <div>
+      <ToolButton disabled={!selectedControlId} onClick={deleteSelected}>
+        Delete
+      </ToolButton>
+    </div>
+  );
 
   function moveSelected(dx, dy) {
     if (!selectedFeature) return;
@@ -149,6 +148,13 @@ export default function EditControls() {
       selectedFeature.get("id"),
       fromProjectedCoord(crs, [x + dx * resolution, y + dy * resolution])
     );
+  }
+
+  function deleteSelected() {
+    if (selectedFeature) {
+      removeControl(selectedCourseId, selectedFeature.get("id"));
+      setSelectedControlId(null);
+    }
   }
 }
 
