@@ -41,7 +41,7 @@ export function createNumberPositions(
       );
       objects.push({
         type: "Point",
-        coordinates: [textLocation.geometry.coordinates],
+        coordinates: textLocation.geometry.coordinates,
       });
       result.push(textLocation);
     });
