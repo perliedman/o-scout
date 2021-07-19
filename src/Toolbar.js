@@ -3,12 +3,14 @@ import { useUndo } from "./store";
 import EditControls from "./tools/EditControls";
 import PrintArea from "./tools/PrintArea";
 import { useHotkeys } from "react-hotkeys-hook";
+import CreateCourse from "./tools/CreateCourse";
 
 const Modes = idHash({
-  printArea: { label: "Print Area", component: PrintArea },
+  printArea: { label: "Area", component: PrintArea },
   editControls: { label: "Edit", component: EditControls },
+  createCourse: { label: "Create", component: CreateCourse },
 });
-const modes = [Modes.editControls, Modes.printArea];
+const modes = [Modes.createCourse, Modes.editControls, Modes.printArea];
 
 export default function Toolbar() {
   const { undo, redo } = useUndo();

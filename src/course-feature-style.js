@@ -102,7 +102,7 @@ export function courseFeatureStyle(
 
 const invisible = new Fill({ color: "rgba(0,0,0,0)" });
 
-const controlStyle = new Style({
+export const controlStyle = new Style({
   image: new Circle({
     radius: 16,
     stroke: new Stroke({
@@ -113,7 +113,7 @@ const controlStyle = new Style({
   }),
 });
 
-const startStyle = new Style({
+export const startStyle = new Style({
   image: new RegularShape({
     points: 3,
     radius: startTriangleRadius * 10 * 2,
@@ -125,7 +125,7 @@ const startStyle = new Style({
   }),
 });
 
-const selectedStartStyle = new Style({
+export const selectedStartStyle = new Style({
   image: new RegularShape({
     points: 3,
     radius: startTriangleRadius * 10 * 2,
@@ -137,7 +137,7 @@ const selectedStartStyle = new Style({
   }),
 });
 
-const finishStyle = [
+export const finishStyle = [
   new Style({
     image: new Circle({
       radius: 128,
@@ -160,14 +160,14 @@ const finishStyle = [
   }),
 ];
 
-const lineStyle = new Style({
+export const lineStyle = new Style({
   stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
 });
 
-const numberStyle = new Style({
+export const numberStyle = new Style({
   text: new Text({ fill: new Fill({ color: courseOverPrintRgb }) }),
 });
 
-const whiteOutStyle = new Style({
+export const whiteOutStyle = new Style({
   fill: new Fill({ color: "white" }),
 });

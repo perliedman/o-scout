@@ -1,5 +1,5 @@
 import flatten from "arr-flatten";
-import { addCourse, createEvent } from "../models/event";
+import * as Event from "../models/event";
 import { createControl } from "../models/control";
 import { createCourse } from "../models/course";
 import * as PrintArea from "../models/print-area";
@@ -42,7 +42,7 @@ export function parsePPen(doc) {
     return [control].concat(next ? getCourseControls(next, sequence + 1) : []);
   };
 
-  const event = createEvent(
+  const event = Event.create(
     eventTag.getElementsByTagName("title")[0].textContent,
     []
   );
@@ -82,7 +82,7 @@ export function parsePPen(doc) {
     })
     .sort((a, b) => a.order - b.order);
 
-  courses.forEach((c) => addCourse(event, c));
+  courses.forEach((c) => Event.addCourse(event, c));
 
   parseAllControls(event, eventTag.getElementsByTagName("all-controls")?.[0]);
   parseSpecialObjects(event, doc.getElementsByTagName("special-object"));
@@ -193,7 +193,7 @@ export function parsePPen(doc) {
       Number(allControlsTag.getAttribute("print-scale"))
     );
     allControls.labelKind = "code";
-    addCourse(event, allControls);
+    Event.addCourse(event, allControls);
   }
 }
 

@@ -1,6 +1,6 @@
 import create from "zustand";
 import produce, { applyPatches, enablePatches } from "immer";
-import { createEvent } from "./models/event";
+import * as Event from "./models/event";
 import { createCourse } from "./models/course";
 import { useMemo } from "react";
 
@@ -35,7 +35,7 @@ let currentVersion = -1;
 const maxHistoryLength = 40;
 
 const useEvent = create((set) => ({
-  ...createEvent("New event", [
+  ...Event.create("New event", [
     createCourse(1, "New course", [], 15000, "normal"),
     createCourse("all-controls", "All Controls", [], 15000, "all-controls", {
       labelKind: "code",
@@ -53,6 +53,17 @@ const useEvent = create((set) => ({
         set(
           undoable((draft) => {
             draft.name = name;
+          })
+        ),
+      addControl: (options, courseId) =>
+        set(
+          undoable((draft) => {
+            const control = Event.addControl(draft, options);
+            if (courseId) {
+              const draftCourse = findCourse(draft, courseId);
+
+              draftCourse.controls.push(control);
+            }
           })
         ),
     },

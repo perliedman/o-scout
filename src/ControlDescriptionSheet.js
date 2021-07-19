@@ -49,14 +49,16 @@ export default function ControlDescriptionSheet({
               <td colSpan="8">
                 <DescriptionSymbol symbol={c.description.all} />
                 <div className="relative -top-6 font-bold h-0">
-                  {(
-                    (controlDistance(
-                      course.controls[i - 1],
-                      course.controls[i]
-                    ) /
-                      1000) *
-                    mapScale
-                  ).toFixed(0)}
+                  {i > 0
+                    ? (
+                        (controlDistance(
+                          course.controls[i - 1],
+                          course.controls[i]
+                        ) /
+                          1000) *
+                        mapScale
+                      ).toFixed(0)
+                    : ""}
                   m
                 </div>
               </td>

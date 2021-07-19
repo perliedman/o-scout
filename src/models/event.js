@@ -1,7 +1,7 @@
 import { createControl } from "./control";
 import * as CourseAppearance from "./course-appearance";
 
-export function createEvent(name, courses) {
+export function create(name, courses) {
   return {
     name: name,
     courses: courses || [],
@@ -28,7 +28,7 @@ export function addCourse(event, course) {
 
 export function addControl(event, { kind, coordinates, description }) {
   const id = event.idGenerator.next();
-  event.controls[id] = createControl(
+  const control = (event.controls[id] = createControl(
     id,
     kind,
     kind !== "start" && kind !== "finish"
@@ -36,8 +36,9 @@ export function addControl(event, { kind, coordinates, description }) {
       : null,
     coordinates,
     description
-  );
-  event.controlList.push(event.controls[id]);
+  ));
+  event.controlList.push(control);
+  return control;
 }
 
 const sequence = (start) =>
