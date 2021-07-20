@@ -15,6 +15,8 @@ export default function Courses() {
     selectedCourseId,
     setSelected,
     setEvent,
+    setEventName,
+    setCourseName,
   } = useEvent(getCourses, shallow);
   const mapFile = useMap(getMapFile);
   const selectedCourse = useMemo(
@@ -46,6 +48,10 @@ export default function Courses() {
                   eventName={eventName}
                   course={course}
                   mapScale={mapScale}
+                  onChangeEventName={setEventName}
+                  onChangeCourseName={(name) =>
+                    setCourseName(selectedCourseId, name)
+                  }
                 />
               </div>
             )}
@@ -89,8 +95,8 @@ function getCourses({
   courseAppearance,
   selectedCourseId,
   actions: {
-    event: { set },
-    course: { setSelected, setName },
+    event: { set, setName: setEventName },
+    course: { setSelected, setName: setCourseName },
   },
 }) {
   return {
@@ -99,8 +105,9 @@ function getCourses({
     courseAppearance,
     selectedCourseId,
     setSelected,
-    setName,
     setEvent: set,
+    setEventName,
+    setCourseName,
   };
 }
 

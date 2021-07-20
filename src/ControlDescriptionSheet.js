@@ -6,18 +6,31 @@ export default function ControlDescriptionSheet({
   eventName,
   course,
   mapScale,
+  onChangeEventName,
+  onChangeCourseName,
+  onChangeDescription,
 }) {
   return (
     <table className="control-sheet">
       <tbody>
         <tr>
-          <td colSpan="8" className="font-bold">
-            {eventName}
+          <td colSpan="8">
+            <input
+              type="text"
+              value={eventName}
+              className="font-bold w-full text-center focus:outline-none"
+              onChange={(e) => onChangeEventName(e.target.value)}
+            />
           </td>
         </tr>
         <tr>
           <td colSpan="3" className="heavy-right font-bold">
-            {course.name}
+            <input
+              type="text"
+              value={course.name}
+              className="font-bold w-full text-center focus:outline-none"
+              onChange={(e) => onChangeCourseName(e.target.value)}
+            />
           </td>
           <td colSpan="3" className="heavy-right font-bold">
             {courseDistance(course, mapScale).toFixed(1)} km
