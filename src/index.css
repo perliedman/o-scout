@@ -14,7 +14,8 @@
   @apply border border-black w-10;
 }
 
-.control-sheet img {
+.control-sheet img,
+.description-selector img {
   @apply m-auto;
   zoom: 0.175;
 }

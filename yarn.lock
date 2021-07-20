@@ -11113,10 +11113,10 @@ supports-hyperlinks@^2.0.0:
     has-flag "^4.0.0"
     supports-color "^7.0.0"
 
-svg-control-descriptions@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/svg-control-descriptions/-/svg-control-descriptions-1.0.0.tgz#c900d9d62153e6aaafec4621751a0bc14acbdcc1"
-  integrity sha512-jLCsyc4GRvIC5lIjhxbDUTngzqoPZkoodtYczvzS3b1jEoMSJzRa0uEPzXQHbRoagw+4uEqgs5k5gj+C8o/3Iw==
+svg-control-descriptions@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/svg-control-descriptions/-/svg-control-descriptions-1.1.0.tgz#f492a810a456d4f69cbd38a4b4fd399f2d0a0b7d"
+  integrity sha512-E08H+UsYzuSZAmcLQmTrhu8VgJA4rtqIupjPCOoZyNA9/6E9cSDGZM5lov2cBMWG79HxA04XPAPMJUqECITPwg==
 
 svg-parser@^2.0.2:
   version "2.0.4"

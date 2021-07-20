@@ -17,6 +17,7 @@ export default function Courses() {
     setEvent,
     setEventName,
     setCourseName,
+    setControlDescription,
   } = useEvent(getCourses, shallow);
   const mapFile = useMap(getMapFile);
   const selectedCourse = useMemo(
@@ -51,6 +52,9 @@ export default function Courses() {
                   onChangeEventName={setEventName}
                   onChangeCourseName={(name) =>
                     setCourseName(selectedCourseId, name)
+                  }
+                  onChangeDescription={(controlId, description) =>
+                    setControlDescription(controlId, description)
                   }
                 />
               </div>
@@ -97,6 +101,7 @@ function getCourses({
   actions: {
     event: { set, setName: setEventName },
     course: { setSelected, setName: setCourseName },
+    control: { setDescription: setControlDescription },
   },
 }) {
   return {
@@ -108,6 +113,7 @@ function getCourses({
     setEvent: set,
     setEventName,
     setCourseName,
+    setControlDescription,
   };
 }
 

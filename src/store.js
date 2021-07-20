@@ -121,6 +121,17 @@ const useEvent = create((set) => ({
             draftControl.coordinates = coordinates;
           })
         ),
+      setDescription: (controlId, description) =>
+        set(
+          undoable((draft) => {
+            draft.controls[controlId].description = description;
+            draft.courses.forEach((course) =>
+              course.controls
+                .filter(({ id }) => id === controlId)
+                .forEach((control) => (control.description = description))
+            );
+          })
+        ),
     },
   },
   undo: () => set(undo),
