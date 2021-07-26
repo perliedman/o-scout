@@ -66,7 +66,7 @@ export async function courseToSvg(
     children: [
       ...controlsToSvg(),
       ...controlConnectionsToSvg(controlConnections),
-      ...controlNumbersToSvg(controlConnections),
+      ...controlNumbersToSvg(controlConnections, course.labelKind),
       ...(await specialObjectsToSvg()),
     ],
   });
@@ -87,11 +87,12 @@ export async function courseToSvg(
     );
   }
 
-  function controlNumbersToSvg(courseObjects) {
+  function controlNumbersToSvg(courseObjects, labelKind) {
     return createNumberPositions(
       controls,
       courseObjects,
-      objScale
+      objScale,
+      labelKind
     ).features.map(({ properties, geometry: { coordinates } }, i) => {
       const [x, y] = toSvgCoord(coordinates);
       return {
@@ -103,10 +104,7 @@ export async function courseToSvg(
           fill: courseOverPrintRgb,
           style: `font: normal ${600 * objScale}px sans-serif;`,
         },
-        text:
-          properties.kind !== "start" && properties.kind !== "finish"
-            ? (i + 1).toString()
-            : "",
+        text: properties.label,
       };
     });
   }
