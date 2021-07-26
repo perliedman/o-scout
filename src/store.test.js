@@ -71,4 +71,48 @@ describe("store", () => {
     }
     expect(result.current.name).toBe("9");
   });
+
+  test("can set control description", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "normal", coordinates: [0, 0] },
+        result.current.courses[0].id
+      )
+    );
+
+    const controlId = Math.max(...Object.keys(result.current.controls));
+
+    act(() =>
+      result.current.actions.control.setDescription(controlId, { all: "14.03" })
+    );
+
+    expect(result.current.controls[controlId].description.all).toBe("14.03");
+    expect(result.current.courses[0].controls[0].description.all).toBe("14.03");
+  });
+
+  test("can undo set control description", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "normal", coordinates: [0, 0] },
+        result.current.courses[0].id
+      )
+    );
+
+    const controlId = Math.max(...Object.keys(result.current.controls));
+
+    act(() =>
+      result.current.actions.control.setDescription(controlId, { all: "14.03" })
+    );
+
+    act(() => result.current.undo());
+
+    expect(result.current.controls[controlId].description.all).toBeFalsy();
+    expect(
+      result.current.courses[0].controls[
+        result.current.courses[0].controls.length - 1
+      ].description.all
+    ).toBeFalsy();
+  });
 });

@@ -1,6 +1,6 @@
 import flatten from "arr-flatten";
 import * as Event from "../models/event";
-import { createControl } from "../models/control";
+import * as Control from "../models/control";
 import { createCourse } from "../models/course";
 import * as PrintArea from "../models/print-area";
 import * as CourseAppearance from "../models/course-appearance";
@@ -96,16 +96,19 @@ export function parsePPen(doc) {
   function parseControl(tag) {
     const codeTag = tag.getElementsByTagName("code")[0];
     const id = tag.getAttribute("id");
-    return createControl(
-      Number(id),
-      tag.getAttribute("kind"),
-      codeTag ? codeTag.textContent : undefined,
-      parseLocation(tag.getElementsByTagName("location")[0]),
-      Array.from(tag.getElementsByTagName("description")).reduce((a, dtag) => {
-        a[dtag.getAttribute("box")] = dtag.getAttribute("iof-2004-ref");
-        return a;
-      }, {})
-    );
+    return Control.create({
+      id: Number(id),
+      kind: tag.getAttribute("kind"),
+      code: codeTag ? codeTag.textContent : undefined,
+      coordinates: parseLocation(tag.getElementsByTagName("location")[0]),
+      description: Array.from(tag.getElementsByTagName("description")).reduce(
+        (a, dtag) => {
+          a[dtag.getAttribute("box")] = dtag.getAttribute("iof-2004-ref");
+          return a;
+        },
+        {}
+      ),
+    });
   }
 
   function parseSpecialObjects(event, specialObjectsTags) {

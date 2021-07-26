@@ -1,6 +1,7 @@
 import create from "zustand";
 import produce, { applyPatches, enablePatches } from "immer";
 import * as Event from "./models/event";
+import * as Control from "./models/control";
 import { createCourse } from "./models/course";
 import { useMemo } from "react";
 
@@ -71,12 +72,13 @@ const useEvent = create((set) => ({
       addControl: (options, courseId) =>
         set(
           undoable((draft) => {
-            const control = Event.addControl(draft, options);
+            const control = Control.create(options);
+            Event.addControl(draft, control);
             if (courseId) {
               const draftCourse = findCourse(draft, courseId);
-              draftCourse.controls.push(control);
+              draftCourse.controls.push(Control.clone(control));
               const allControls = findAllControls(draft);
-              allControls.controls.push(control);
+              allControls.controls.push(Control.clone(control));
             }
           })
         ),
@@ -114,22 +116,17 @@ const useEvent = create((set) => ({
       setCoordinates: (courseId, controlId, coordinates) =>
         set(
           undoable((draft) => {
-            const draftCourse = findCourse(draft, courseId);
-            const draftControl = draftCourse.controls.find(
-              (c) => c.id === controlId
-            );
-            draftControl.coordinates = coordinates;
+            Event.updateControl(draft, controlId, (control) => {
+              control.coordinates = coordinates;
+            });
           })
         ),
       setDescription: (controlId, description) =>
         set(
           undoable((draft) => {
-            draft.controls[controlId].description = description;
-            draft.courses.forEach((course) =>
-              course.controls
-                .filter(({ id }) => id === controlId)
-                .forEach((control) => (control.description = description))
-            );
+            Event.updateControl(draft, controlId, (control) => {
+              control.description = description;
+            });
           })
         ),
     },
