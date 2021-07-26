@@ -6,6 +6,7 @@ import FilePicker from "./FilePicker";
 import { parsePPen } from "./services/ppen";
 import CourseLayer from "./CourseLayer";
 import ControlDescriptionSheet from "./ControlDescriptionSheet";
+import * as Course from "./models/course";
 
 export default function Courses() {
   const {
@@ -19,6 +20,7 @@ export default function Courses() {
     setCourseName,
     setControlDescription,
     makeNewEvent,
+    newCourse,
   } = useEvent(getCourses, shallow);
   const mapFile = useMap(getMapFile);
   const selectedCourse = useMemo(
@@ -65,6 +67,15 @@ export default function Courses() {
       </ul>
       <div className="flex justify-end">
         <Dropdown>
+          <DropdownItem
+            onClick={() =>
+              newCourse(
+                Course.create(null, "New course", [], mapScale, "normal")
+              )
+            }
+          >
+            Add new course
+          </DropdownItem>
           <DropdownItem onClick={selectCourse}>Load courses...</DropdownItem>
           <DropdownItem onClick={newEvent}>New event</DropdownItem>
         </Dropdown>
@@ -112,7 +123,7 @@ function getCourses({
   selectedCourseId,
   actions: {
     event: { set, setName: setEventName, newEvent: makeNewEvent },
-    course: { setSelected, setName: setCourseName },
+    course: { setSelected, setName: setCourseName, new: newCourse },
     control: { setDescription: setControlDescription },
   },
 }) {
@@ -127,6 +138,7 @@ function getCourses({
     setCourseName,
     setControlDescription,
     makeNewEvent,
+    newCourse,
   };
 }
 

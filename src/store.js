@@ -2,7 +2,7 @@ import create from "zustand";
 import produce, { applyPatches, enablePatches } from "immer";
 import * as Event from "./models/event";
 import * as Control from "./models/control";
-import { createCourse } from "./models/course";
+import * as Course from "./models/course";
 import { useMemo } from "react";
 
 enablePatches();
@@ -80,6 +80,12 @@ const useEvent = create((set) => ({
       newEvent: () => set((state) => ({ ...state, ...createNewEvent(state) })),
     },
     course: {
+      new: (course) =>
+        set(
+          undoable((draft) => {
+            Event.addCourse(draft, course);
+          })
+        ),
       setSelected: (selectedCourseId) =>
         set((state) => ({ ...state, selectedCourseId })),
       setName: (courseId, name) =>
@@ -190,8 +196,8 @@ function createNewEvent(state) {
   const scale = state?.mapScale || 15000;
 
   return Event.create("New event", [
-    createCourse(1, "New course", [], scale, "normal"),
-    createCourse("all-controls", "All Controls", [], scale, "all-controls", {
+    Course.create(1, "New course", [], scale, "normal"),
+    Course.create("all-controls", "All Controls", [], scale, "all-controls", {
       labelKind: "code",
     }),
   ]);

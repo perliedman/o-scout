@@ -16,12 +16,22 @@ export function create(name, courses) {
 }
 
 export function addCourse(event, course) {
+  if (!course.id) {
+    course.id = event.idGenerator.next();
+  }
   course.controls.forEach((c) => {
     if (!event.controls[c.id]) {
       event.controls[c.id] = Control.clone(c);
     }
   });
-  event.courses.push(course);
+  const allControlsIndex = event.courses.findIndex(
+    ({ id }) => id === "all-controls"
+  );
+  event.courses.splice(
+    allControlsIndex >= 0 ? allControlsIndex : event.courses.length,
+    0,
+    course
+  );
 }
 
 export function addControl(event, control) {

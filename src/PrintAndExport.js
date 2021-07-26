@@ -6,7 +6,7 @@ import { printCourse, renderPdf } from "./services/print";
 import downloadBlob, { download } from "./services/download-blob";
 import Spinner from "./ui/Spinner";
 import { svgToBitmap } from "./services/svg-to-bitmap";
-import { createCourse } from "./models/course";
+import * as Course from "./models/course";
 import { transformExtent } from "./services/coordinates";
 import Section from "./ui/Section";
 
@@ -148,7 +148,7 @@ export default function PrintAndExport() {
 
   function emptyCourse() {
     const crs = mapFile.getCrs();
-    const course = createCourse(0, "", [], crs.scale, "");
+    const course = Course.create(0, "", [], crs.scale, "");
     course.printArea = {
       extent: transformExtent(tiler.bounds, (c) => {
         const [x, y] = crs.toMapCoord(c);

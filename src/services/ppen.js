@@ -1,7 +1,7 @@
 import flatten from "arr-flatten";
 import * as Event from "../models/event";
 import * as Control from "../models/control";
-import { createCourse } from "../models/course";
+import * as Course from "../models/course";
 import * as PrintArea from "../models/print-area";
 import * as CourseAppearance from "../models/course-appearance";
 
@@ -66,7 +66,7 @@ export function parsePPen(doc) {
       const optionsTag = c.getElementsByTagName("options")[0];
       const printScale =
         (optionsTag && Number(optionsTag.getAttribute("print-scale"))) || scale;
-      const course = createCourse(
+      const course = Course.create(
         c.getAttribute("id"),
         c.getElementsByTagName("name")[0].textContent,
         courseControls,
@@ -189,7 +189,7 @@ export function parsePPen(doc) {
   function parseAllControls(event, allControlsTag) {
     if (!allControlsTag) return;
 
-    const allControls = createCourse(
+    const allControls = Course.create(
       "all-controls",
       "All Controls",
       event.controlList,

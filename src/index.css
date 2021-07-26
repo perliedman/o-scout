@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .control-sheet {
-  @apply border border-black text-center;
+  @apply border border-black text-center min-w-full;
 }
 
 .control-sheet tr {
