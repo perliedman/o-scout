@@ -18,6 +18,7 @@ export default function Courses() {
     setEventName,
     setCourseName,
     setControlDescription,
+    makeNewEvent,
   } = useEvent(getCourses, shallow);
   const mapFile = useMap(getMapFile);
   const selectedCourse = useMemo(
@@ -65,6 +66,7 @@ export default function Courses() {
       <div className="flex justify-end">
         <Dropdown>
           <DropdownItem onClick={selectCourse}>Load courses...</DropdownItem>
+          <DropdownItem onClick={newEvent}>New event</DropdownItem>
         </Dropdown>
       </div>
       <FilePicker
@@ -91,6 +93,16 @@ export default function Courses() {
     );
     setEvent(event);
   }
+
+  function newEvent() {
+    if (
+      window.confirm(
+        "Clear all current courses and create a new event -\n\nAre you sure?"
+      )
+    ) {
+      makeNewEvent();
+    }
+  }
 }
 
 function getCourses({
@@ -99,7 +111,7 @@ function getCourses({
   courseAppearance,
   selectedCourseId,
   actions: {
-    event: { set, setName: setEventName },
+    event: { set, setName: setEventName, newEvent: makeNewEvent },
     course: { setSelected, setName: setCourseName },
     control: { setDescription: setControlDescription },
   },
@@ -114,6 +126,7 @@ function getCourses({
     setEventName,
     setCourseName,
     setControlDescription,
+    makeNewEvent,
   };
 }
 

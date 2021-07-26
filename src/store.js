@@ -36,12 +36,7 @@ let currentVersion = -1;
 const maxHistoryLength = 40;
 
 const useEvent = create((set) => ({
-  ...Event.create("New event", [
-    createCourse(1, "New course", [], 15000, "normal"),
-    createCourse("all-controls", "All Controls", [], 15000, "all-controls", {
-      labelKind: "code",
-    }),
-  ]),
+  ...createNewEvent(),
   actions: {
     event: {
       set: (event) =>
@@ -82,6 +77,7 @@ const useEvent = create((set) => ({
             }
           })
         ),
+      newEvent: () => set((state) => ({ ...state, ...createNewEvent(state) })),
     },
     course: {
       setSelected: (selectedCourseId) =>
@@ -189,3 +185,14 @@ export const useNotifications = create((set) => ({
   pop: () =>
     set((state) => ({ ...state, notifications: state.notifications.slice(1) })),
 }));
+
+function createNewEvent(state) {
+  const scale = state?.mapScale || 15000;
+
+  return Event.create("New event", [
+    createCourse(1, "New course", [], scale, "normal"),
+    createCourse("all-controls", "All Controls", [], scale, "all-controls", {
+      labelKind: "code",
+    }),
+  ]);
+}
