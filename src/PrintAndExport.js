@@ -89,7 +89,7 @@ export default function PrintAndExport() {
 
     const printCourses =
       selection === "allCourses"
-        ? courses
+        ? [...courses]
         : selection === "currentCourse"
         ? [selectedCourse]
         : [emptyCourse()];
