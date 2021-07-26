@@ -1,4 +1,9 @@
-import { InformationCircleIcon, XIcon } from "@heroicons/react/outline";
+import {
+  InformationCircleIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  XIcon,
+} from "@heroicons/react/outline";
 
 export default function Alert({ message, detail, type = "info", onClose }) {
   const background =
@@ -11,13 +16,14 @@ export default function Alert({ message, detail, type = "info", onClose }) {
       : type === "danger"
       ? "bg-red-500"
       : "bg-white";
+  const Icon = getIcon(type);
   return (
     <div className="container">
       <div
         className={`container w-96 ${background} flex items-center text-white text-sm font-bold px-4 py-3 relative`}
         role="alert"
       >
-        <InformationCircleIcon className="h-7 w-7 mr-2" />
+        <Icon className="h-7 w-7 mr-2" />
         <div>
           <p>{message}</p>
           <p className="font-thin">{detail}</p>
@@ -31,4 +37,18 @@ export default function Alert({ message, detail, type = "info", onClose }) {
       </div>
     </div>
   );
+}
+
+function getIcon(type) {
+  switch (type) {
+    case "info":
+      return InformationCircleIcon;
+    case "success":
+      return CheckCircleIcon;
+    case "warning":
+    case "danger":
+      return ExclamationCircleIcon;
+    default:
+      console.warn(`Unknown alert type "${type}"`);
+  }
 }

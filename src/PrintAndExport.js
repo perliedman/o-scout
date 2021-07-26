@@ -140,7 +140,7 @@ export default function PrintAndExport() {
         setTimeout(printNext, 250);
       } catch (e) {
         console.error(e);
-        pushNotification({ type: "danger", message: "Failed to print." });
+        pushNotification("warning", "Failed to print.", e.toString());
         setState("error");
       }
     }
