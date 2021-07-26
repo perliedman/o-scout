@@ -139,8 +139,11 @@ function DescriptionSymbol({ symbol }) {
   const [svg, setSvg] = useState();
 
   useEffect(() => {
-    symbol &&
+    if (symbol) {
       import(`svg-control-descriptions/symbols/${symbol}.svg`).then(setSvg);
+    } else {
+      setSvg(null);
+    }
   }, [symbol]);
   return svg ? <img src={svg.default} alt={symbol} /> : null;
 }
