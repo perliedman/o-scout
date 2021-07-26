@@ -41,7 +41,7 @@ export default function Dropdown({ children }) {
           className={`relative transition ease-out duration-100 ${
             open
               ? "transform opacity-100 scale-100"
-              : "transform opacity-0 scale-95"
+              : "transform opacity-0 scale-95 pointer-events-none"
           }`}
         >
           <div
