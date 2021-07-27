@@ -28,7 +28,7 @@ export default function SelectMap({
           className={className}
           onClick={() => {
             fileRef.current.value = "";
-            fileRef.current.click();
+            setTimeout(() => fileRef.current.click());
           }}
         >
           {state === "loading" && <Spinner />}
@@ -52,7 +52,6 @@ export default function SelectMap({
       const [blob] = e.target.files;
       const map = await readMap(blob);
       setMap(blob.name, map, new OcadTiler(map));
-      setEventMap(map);
     } catch (e) {
       console.error(e);
       setState("error");

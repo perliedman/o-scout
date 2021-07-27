@@ -15,6 +15,30 @@ export function create(name, courses) {
   };
 }
 
+export function load(data) {
+  const maxId =
+    Math.max(
+      ...[
+        ...Object.keys(data.controls),
+        ...data.courses.map((course) => course.id),
+      ]
+        .map(Number)
+        .filter((x) => !isNaN(x))
+    ) || 0;
+  const maxControlCode =
+    Math.max(
+      ...[...Object.keys(data.controls).map((id) => data.controls[id].code)]
+        .map(Number)
+        .filter((x) => !isNaN(x))
+    ) || 29;
+  debugger;
+  return {
+    ...data,
+    idGenerator: sequence(maxId + 1),
+    controlCodeGenerator: sequence(maxControlCode + 1),
+  };
+}
+
 export function addCourse(event, course) {
   if (!course.id) {
     course.id = event.idGenerator.next();

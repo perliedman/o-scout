@@ -1,4 +1,5 @@
 import create from "zustand";
+import { persist } from "zustand/middleware";
 import produce, { applyPatches, enablePatches } from "immer";
 import * as Event from "./models/event";
 import * as Control from "./models/control";
@@ -35,107 +36,124 @@ const history = {};
 let currentVersion = -1;
 const maxHistoryLength = 40;
 
-const useEvent = create((set) => ({
-  ...createNewEvent(),
-  actions: {
-    event: {
-      set: (event) =>
-        set((state) => ({
-          ...state,
-          ...event,
-          selectedCourseId: event.courses?.[0]?.id,
-        })),
-      setMap: (mapFile) =>
-        set((state) => {
-          const mapScale = mapFile.getCrs().scale;
-          return {
-            ...state,
-            mapScale,
-            courses: state.courses.map((course) =>
-              course.controls.length > 0
-                ? course
-                : { ...course, printScale: mapScale }
+const useEvent = create(
+  persist(
+    (set) => ({
+      ...createNewEvent(),
+      actions: {
+        event: {
+          set: (event) =>
+            set((state) => ({
+              ...state,
+              ...event,
+              selectedCourseId: event.courses?.[0]?.id,
+            })),
+          setMap: (mapFile, mapFilename) =>
+            set((state) => {
+              const mapScale = mapFile.getCrs().scale;
+              return {
+                ...state,
+                mapScale,
+                mapFilename,
+                courses: state.courses.map((course) =>
+                  course.controls.length > 0
+                    ? course
+                    : { ...course, printScale: mapScale }
+                ),
+              };
+            }),
+          setName: (name) =>
+            set(
+              undoable((draft) => {
+                draft.name = name;
+              })
             ),
-          };
-        }),
-      setName: (name) =>
-        set(
-          undoable((draft) => {
-            draft.name = name;
-          })
-        ),
-      addControl: (options, courseId) =>
-        set(
-          undoable((draft) => {
-            const control = Control.create(options);
-            Event.addControl(draft, control);
-            if (courseId) {
-              const draftCourse = findCourse(draft, courseId);
-              draftCourse.controls.push(Control.clone(control));
-              const allControls = findAllControls(draft);
-              allControls.controls.push(Control.clone(control));
-            }
-          })
-        ),
-      newEvent: () => set((state) => ({ ...state, ...createNewEvent(state) })),
-    },
-    course: {
-      new: (course) =>
-        set(
-          undoable((draft) => {
-            Event.addCourse(draft, course);
-          })
-        ),
-      setSelected: (selectedCourseId) =>
-        set((state) => ({ ...state, selectedCourseId })),
-      setName: (courseId, name) =>
-        set(
-          undoable((draft) => {
-            const draftCourse = findCourse(draft, courseId);
-            draftCourse.name = name;
-          })
-        ),
-      setPrintAreaExtent: (courseId, extent) =>
-        set(
-          undoable((draft) => {
-            const draftCourse = findCourse(draft, courseId);
-            draftCourse.printArea.auto = false;
-            draftCourse.printArea.extent = extent;
-          })
-        ),
-    },
-    control: {
-      remove: (courseId, controlId) =>
-        set(
-          undoable((draft) => {
-            const draftCourse = findCourse(draft, courseId);
-            const controlIndex = draftCourse.controls.findIndex(
-              ({ id }) => id === controlId
-            );
-            draftCourse.controls.splice(controlIndex, 1);
-          })
-        ),
-      setCoordinates: (courseId, controlId, coordinates) =>
-        set(
-          undoable((draft) => {
-            Event.updateControl(draft, controlId, (control) => {
-              control.coordinates = coordinates;
-            });
-          })
-        ),
-      setDescription: (controlId, description) =>
-        set(
-          undoable((draft) => {
-            Event.updateControl(draft, controlId, (control) => {
-              control.description = description;
-            });
-          })
-        ),
-    },
-  },
-  undo: () => set(undo),
-  redo: () => set(redo),
-}));
+          addControl: (options, courseId) =>
+            set(
+              undoable((draft) => {
+                const control = Control.create(options);
+                Event.addControl(draft, control);
+                if (courseId) {
+                  const draftCourse = findCourse(draft, courseId);
+                  draftCourse.controls.push(Control.clone(control));
+                  const allControls = findAllControls(draft);
+                  allControls.controls.push(Control.clone(control));
+                }
+              })
+            ),
+          newEvent: () =>
+            set((state) => ({ ...state, ...createNewEvent(state) })),
+        },
+        course: {
+          new: (course) =>
+            set(
+              undoable((draft) => {
+                Event.addCourse(draft, course);
+                draft.selectedCourseId = course.id;
+              })
+            ),
+          setSelected: (selectedCourseId) =>
+            set((state) => ({ ...state, selectedCourseId })),
+          setName: (courseId, name) =>
+            set(
+              undoable((draft) => {
+                const draftCourse = findCourse(draft, courseId);
+                draftCourse.name = name;
+              })
+            ),
+          setPrintAreaExtent: (courseId, extent) =>
+            set(
+              undoable((draft) => {
+                const draftCourse = findCourse(draft, courseId);
+                draftCourse.printArea.auto = false;
+                draftCourse.printArea.extent = extent;
+              })
+            ),
+        },
+        control: {
+          remove: (courseId, controlId) =>
+            set(
+              undoable((draft) => {
+                const draftCourse = findCourse(draft, courseId);
+                const controlIndex = draftCourse.controls.findIndex(
+                  ({ id }) => id === controlId
+                );
+                draftCourse.controls.splice(controlIndex, 1);
+              })
+            ),
+          setCoordinates: (courseId, controlId, coordinates) =>
+            set(
+              undoable((draft) => {
+                Event.updateControl(draft, controlId, (control) => {
+                  control.coordinates = coordinates;
+                });
+              })
+            ),
+          setDescription: (controlId, description) =>
+            set(
+              undoable((draft) => {
+                Event.updateControl(draft, controlId, (control) => {
+                  control.description = description;
+                });
+              })
+            ),
+        },
+      },
+      undo: () => set(undo),
+      redo: () => set(redo),
+    }),
+    {
+      name: "o-scout-event",
+      blacklist: ["actions"],
+      deserialize: (str) => {
+        const storage = JSON.parse(str);
+        storage.state = Event.load(storage.state);
+        storage.state.isRestored = true;
+        return storage;
+      },
+    }
+  )
+);
 
 function findCourse(event, courseId) {
   const course = event.courses.find((c) => c.id === courseId);

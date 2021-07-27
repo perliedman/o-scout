@@ -59,8 +59,8 @@ export default function StartScreen() {
       const response = await window.fetch("demo-map.ocd");
       const blob = await response.blob();
       const mapFile = await readMap(blob);
-      setMap("Demo Map", mapFile, new OcadTiler(mapFile));
-      setEventMap(mapFile);
+      const mapFilename = "Demo Map";
+      setMap(mapFilename, mapFile, new OcadTiler(mapFile));
     } catch (e) {
       console.error(e);
       setState("error");
