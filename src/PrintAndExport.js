@@ -17,7 +17,7 @@ export default function PrintAndExport() {
     getCourses,
     shallow
   );
-  const { mapFile, tiler } = useMap(getMap);
+  const { mapFile, tiler } = useMap(getMap, shallow);
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]

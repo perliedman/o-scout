@@ -7,6 +7,7 @@ import { courseFeatureStyle } from "../course-feature-style";
 import { useHotkeys } from "react-hotkeys-hook";
 import useSelect from "../ol/use-select";
 import ToolButton from "../ui/ToolButton";
+import shallow from "zustand/shallow";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -16,7 +17,7 @@ export default function EditControls() {
     courseAppearance,
     setControlCoordinates,
     removeControl,
-  } = useEvent(getEvent);
+  } = useEvent(getEvent, shallow);
 
   const featuresRef = useRef();
   useEffect(() => {

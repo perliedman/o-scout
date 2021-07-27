@@ -9,10 +9,11 @@ import {
   transformExtent,
 } from "../services/coordinates";
 import useEvent, { useMap } from "../store";
+import shallow from "zustand/shallow";
 
 export default function PrintArea() {
   const { map, mapFile } = useMap(getMap);
-  const { course, setPrintAreaExtent } = useEvent(getSelectedCourse);
+  const { course, setPrintAreaExtent } = useEvent(getSelectedCourse, shallow);
 
   const crs = useMemo(() => mapFile?.getCrs(), [mapFile]);
   const currentExtent = useRef();
