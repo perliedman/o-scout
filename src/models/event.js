@@ -1,22 +1,21 @@
 import * as Control from "./control";
 import * as CourseAppearance from "./course-appearance";
 
-export function create(name, courses) {
+export function create(name) {
   return {
     name: name,
-    courses: courses || [],
+    courses: [],
     controlCodeGenerator: sequence(30),
     idGenerator: sequence(1),
     map: { scale: 15000 },
     controls: {},
     specialObjects: [],
     courseAppearance: CourseAppearance.create(),
-    selectedCourseId: courses?.[0]?.id,
   };
 }
 
 export function load(data) {
-  const maxId =
+  const maxId = toFinite(
     Math.max(
       ...[
         ...Object.keys(data.controls),
@@ -24,14 +23,18 @@ export function load(data) {
       ]
         .map(Number)
         .filter((x) => !isNaN(x))
-    ) || 0;
-  const maxControlCode =
+    ),
+    0
+  );
+  const maxControlCode = toFinite(
     Math.max(
       ...[...Object.keys(data.controls).map((id) => data.controls[id].code)]
         .map(Number)
         .filter((x) => !isNaN(x))
-    ) || 29;
-  debugger;
+    ),
+    29
+  );
+
   return {
     ...data,
     idGenerator: sequence(maxId + 1),
@@ -87,3 +90,7 @@ const sequence = (start) =>
       current: () => s,
     };
   })();
+
+function toFinite(x, fallback) {
+  return !isNaN(x) && Math.abs(x) !== Infinity ? x : fallback;
+}

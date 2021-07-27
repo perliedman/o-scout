@@ -212,11 +212,18 @@ export const useNotifications = create((set) => ({
 
 function createNewEvent(state) {
   const scale = state?.mapScale || 15000;
+  const event = Event.create("New event");
 
-  return Event.create("New event", [
-    Course.create(1, "New course", [], scale, "normal"),
+  Event.addCourse(
+    event,
+    Course.create(event.idGenerator.next(), "New course", [], scale, "normal")
+  );
+  Event.addCourse(
+    event,
     Course.create("all-controls", "All Controls", [], scale, "all-controls", {
       labelKind: "code",
-    }),
-  ]);
+    })
+  );
+
+  return event;
 }
