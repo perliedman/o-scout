@@ -11,12 +11,13 @@ import DrawInteraction from "ol/interaction/Draw";
 import GeometryType from "ol/geom/GeometryType";
 import { primaryAction } from "ol/events/condition";
 import { ModeButton } from "../ui/ToolButton";
+import shallow from "zustand/shallow";
 
 export default function CreateCourse() {
   const [activeMode, setActiveMode] = useState("Control");
   const { map, controlsSource } = useMap(getMap);
   const { selectedCourseId, selectedCourse, courseAppearance, addControl } =
-    useEvent(getEvent);
+    useEvent(getEvent, shallow);
 
   const featuresRef = useRef();
   useEffect(() => {
