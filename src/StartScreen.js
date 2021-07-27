@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SelectMap from "./SelectMap";
 import { readMap } from "./services/map";
-import useEvent, { useMap, useNotifications } from "./store";
+import { useMap, useNotifications } from "./store";
 import Button from "./ui/Button";
 import Spinner from "./ui/Spinner";
 import OcadTiler from "ocad-tiler";
@@ -9,7 +9,6 @@ import OcadTiler from "ocad-tiler";
 export default function StartScreen() {
   const [state, setState] = useState("idle");
   const setMap = useMap(getSetter);
-  const setEventMap = useEvent(getSetEventMap);
   const pushNotification = useNotifications(getPush);
 
   return (
@@ -71,14 +70,6 @@ export default function StartScreen() {
 
 function getSetter(state) {
   return state.setMapFile;
-}
-
-function getSetEventMap({
-  actions: {
-    event: { setMap: setEventMap },
-  },
-}) {
-  return setEventMap;
 }
 
 function getPush({ push }) {

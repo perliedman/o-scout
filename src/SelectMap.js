@@ -3,7 +3,7 @@ import Spinner from "./ui/Spinner";
 import Button from "./ui/Button";
 import OcadTiler from "ocad-tiler";
 
-import useEvent, { useMap, useNotifications } from "./store";
+import { useMap, useNotifications } from "./store";
 import { readMap } from "./services/map";
 
 export default function SelectMap({
@@ -15,7 +15,6 @@ export default function SelectMap({
   const [state, setState] = useState("idle");
   const fileRef = useRef();
   const setMap = useMap(getSetter);
-  const setEventMap = useEvent(getSetEventMap);
   const pushNotification = useNotifications(getPush);
 
   return (
@@ -62,14 +61,6 @@ export default function SelectMap({
 
 function getSetter(state) {
   return state.setMapFile;
-}
-
-function getSetEventMap({
-  actions: {
-    event: { setMap: setEventMap },
-  },
-}) {
-  return setEventMap;
 }
 
 function getPush({ push }) {
