@@ -13,11 +13,11 @@ export default function Section({
 
   return (
     <div className={`w-full p-4 ${className}`}>
-      <button
-        className="py-5 w-full cursor-pointer select-none focus:outline-none"
-        onClick={() => setOpen(!open)}
-      >
-        <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center">
+        <button
+          className="py-5 w-full cursor-pointer select-none focus:outline-none text-left"
+          onClick={() => setOpen(!open)}
+        >
           <HeadingComponent
             className={`${
               open ? "text-indigo-700" : "text-gray-600"
@@ -25,9 +25,9 @@ export default function Section({
           >
             {title}
           </HeadingComponent>
-          <Toggle open={open} />
-        </div>
-      </button>
+        </button>
+        <Toggle open={open} onClick={() => setOpen(!open)} />
+      </div>
       {open ? <div className="font-thin">{children}</div> : null}
     </div>
   );
