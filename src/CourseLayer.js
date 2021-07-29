@@ -135,6 +135,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     objectFeatures,
     vectorLayerOptions
   );
+  // Paper millimeters to world meters factor
   const f = mapScale / 1000;
   useStyle(controlsLayer, controlFeaturesRef, f * objScale);
   useStyle(objectsLayer, objectFeaturesRef, f * objScale);
