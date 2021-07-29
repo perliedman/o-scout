@@ -10,5 +10,7 @@ export function create(options) {
 }
 
 export function getExtent(printArea, course) {
-  return printArea.extent || buffer(courseBounds(course), 10);
+  return !printArea.auto && printArea.extent
+    ? printArea.extent
+    : buffer(courseBounds(course), 10);
 }
