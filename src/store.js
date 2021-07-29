@@ -109,6 +109,22 @@ const useEvent = create(
                 draftCourse.printArea.extent = extent;
               })
             ),
+          setPrintScale: (courseId, scale) =>
+            set(
+              undoable((draft) => {
+                const draftCourse = findCourse(draft, courseId);
+                draftCourse.printScale = scale;
+              })
+            ),
+          setPrintArea: (courseId, printAreaProps) =>
+            set(
+              undoable((draft) => {
+                const draftCourse = findCourse(draft, courseId);
+                Object.keys(printAreaProps).forEach((prop) => {
+                  draftCourse.printArea[prop] = printAreaProps[prop];
+                });
+              })
+            ),
         },
         control: {
           remove: (courseId, controlId) =>

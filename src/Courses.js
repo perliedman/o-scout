@@ -7,6 +7,8 @@ import { parsePPen } from "./services/ppen";
 import CourseLayer from "./CourseLayer";
 import ControlDescriptionSheet from "./ControlDescriptionSheet";
 import * as Course from "./models/course";
+import Section from "./ui/Section";
+import CourseOptions from "./CourseOptions";
 
 export default function Courses() {
   const {
@@ -18,6 +20,8 @@ export default function Courses() {
     setEvent,
     setEventName,
     setCourseName,
+    setPrintScale,
+    setPrintArea,
     setControlDescription,
     makeNewEvent,
     newCourse,
@@ -38,7 +42,7 @@ export default function Courses() {
           <li key={course.id}>
             <button
               onClick={() => setSelected(course.id)}
-              className={`focus:outline-none focus:ring-2 rounded p-1 ring-indigo-600 ${
+              className={`focus:outline-none focus:ring-2 rounded py-2 ring-indigo-600 border-t border-gray-200 w-full text-left ${
                 selectedCourseId === course.id
                   ? "text-indigo-600"
                   : "text-gray-600"
@@ -60,6 +64,20 @@ export default function Courses() {
                     setControlDescription(controlId, description)
                   }
                 />
+                <Section
+                  title="Options"
+                  headingComponent="h3"
+                  headingTextStyle=""
+                >
+                  <CourseOptions
+                    course={course}
+                    mapScale={mapScale}
+                    setPrintScale={(scale) => setPrintScale(course.id, scale)}
+                    setPrintArea={(printAreaProps) =>
+                      setPrintArea(course.id, printAreaProps)
+                    }
+                  />
+                </Section>
               </div>
             )}
           </li>
@@ -123,7 +141,13 @@ function getCourses({
   selectedCourseId,
   actions: {
     event: { set, setName: setEventName, newEvent: makeNewEvent },
-    course: { setSelected, setName: setCourseName, new: newCourse },
+    course: {
+      setSelected,
+      setName: setCourseName,
+      new: newCourse,
+      setPrintScale,
+      setPrintArea,
+    },
     control: { setDescription: setControlDescription },
   },
 }) {
@@ -139,6 +163,8 @@ function getCourses({
     setControlDescription,
     makeNewEvent,
     newCourse,
+    setPrintScale,
+    setPrintArea,
   };
 }
 

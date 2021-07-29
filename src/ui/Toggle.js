@@ -1,16 +1,16 @@
-import { ChevronUpIcon } from "@heroicons/react/outline";
+import styles from "./Toggle.module.css";
 
-export default function Toggle({ open, type, onClick }) {
+export default function Toggle({ active, alt, onChange }) {
   return (
     <button
-      className={`focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform ${
-        open ? "border-indigo-600 bg-indigo-600 rotate-180" : "border-grey"
-      } ${
-        type === "small" ? "w-4 h-4" : "w-7 h-7"
-      } flex items-center justify-center transition-transform`}
-      onClick={onClick}
+      type="button"
+      className={`${styles.toggle} ${active ? styles.active : ""}`}
+      role="switch"
+      aria-checked="false"
+      onClick={() => onChange(!active)}
     >
-      <ChevronUpIcon className={open ? "text-white" : "text-grey"} />
+      <span className="sr-only">{alt}</span>
+      <span aria-hidden="true" className={styles.knob}></span>
     </button>
   );
 }

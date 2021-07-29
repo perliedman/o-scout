@@ -104,3 +104,14 @@ export function renderPdf(
     });
   });
 }
+
+export const PAPER_SIZES = [
+  { name: "A2", dimensions: [1654, 2339] },
+  { name: "A3", dimensions: [1169, 1654] },
+  { name: "A4", dimensions: [827, 1169] },
+  { name: "A5", dimensions: [583, 827] },
+  { name: "A6", dimensions: [413, 583] },
+  { name: "Letter", dimensions: [850, 1100] },
+  { name: "Legal", dimensions: [850, 1400] },
+  { name: "Tabloid", dimensions: [1100, 1700] },
+];
