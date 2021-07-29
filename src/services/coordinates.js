@@ -7,7 +7,7 @@ export function transformExtent(extent, fn) {
     .flat();
 }
 
-const mmToMeter = 0.001;
+export const mmToMeter = 0.001;
 export const toProjectedCoord = (crs, coordinate) => {
   return [
     coordinate[0] * mmToMeter * crs.scale + crs.easting,

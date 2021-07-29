@@ -23,7 +23,7 @@ export const circle = ([cx, cy], r, stroke, scale) => ({
     cy,
     r: r * (scale || 1),
     stroke,
-    "stroke-width": overprintLineWidth * 100 * (scale || 1),
+    "stroke-width": overprintLineWidth * (scale || 1),
   },
 });
 
@@ -36,7 +36,7 @@ export const lines = (coordinates, close, stroke, fill, scale) => ({
       .join(" "),
     stroke,
     fill,
-    "stroke-width": overprintLineWidth * 100 * (scale || 1),
+    "stroke-width": overprintLineWidth * (scale || 1),
   },
 });
 
@@ -48,11 +48,10 @@ export async function courseToSvg(
   document
 ) {
   const controls = course.controls;
-  const objScale = getObjectScale(
-    courseAppearance.scaleSizes,
-    mapScale,
-    course.printScale
-  );
+  const objScale =
+    getObjectScale(courseAppearance.scaleSizes, mapScale, course.printScale) *
+    // TODO: can't explain why this is correct, but gives ok result (?)
+    (7500 / course.printScale);
 
   const controlConnections = createControlConnections(
     controls,
@@ -102,7 +101,7 @@ export async function courseToSvg(
           y,
           "text-anchor": "middle",
           fill: courseOverPrintRgb,
-          style: `font: normal ${600 * objScale}px sans-serif;`,
+          style: `font: normal ${6 * objScale}px sans-serif;`,
         },
         text: properties.label,
       };
@@ -126,7 +125,8 @@ export async function courseToSvg(
                   coordinates[0].map(toSvgCoord),
                   true,
                   null,
-                  "white"
+                  "white",
+                  objScale
                 );
               case "descriptions": {
                 const descriptionSvg = await courseDefinitionToSvg(
@@ -171,13 +171,16 @@ export async function courseToSvg(
             toSvgCoord(add(rotate(mul(p, objScale), rotation), coordinates))
           ),
           true,
-          courseOverPrintRgb
+          courseOverPrintRgb,
+          null,
+          objScale
         );
       case "normal":
         return circle(
           toSvgCoord(coordinates),
-          (controlCircleOutsideDiameter / 2) * 100 * objScale,
-          courseOverPrintRgb
+          controlCircleOutsideDiameter / 2,
+          courseOverPrintRgb,
+          objScale
         );
       case "finish":
         return {
@@ -185,8 +188,9 @@ export async function courseToSvg(
           children: Array.from({ length: 2 }).map((_, index) =>
             circle(
               toSvgCoord(coordinates),
-              200 + index * 100 * objScale,
-              courseOverPrintRgb
+              2 + index,
+              courseOverPrintRgb,
+              objScale
             )
           ),
         };
@@ -197,7 +201,7 @@ export async function courseToSvg(
 }
 
 function toSvgCoord([x, y]) {
-  return [x * 100, -y * 100];
+  return [x, -y];
 }
 
 const startTriangle = [
@@ -266,7 +270,7 @@ export async function courseDefinitionToSvg(eventName, course) {
         false,
         "black",
         null,
-        1 / 100
+        1
       ),
     ];
   }
@@ -284,6 +288,7 @@ export async function courseDefinitionToSvg(eventName, course) {
         "middle"
       ),
       text(
+        // TODO: Use correct map scale
         `${courseDistance(course, 15000).toFixed(1)} km`,
         cellSize * 3 + (cellSize * 3) / 2,
         y,
@@ -325,6 +330,7 @@ export async function courseDefinitionToSvg(eventName, course) {
                         course.controls[index]
                       ) /
                         1000) *
+                      // TODO: Use correct map scale
                       15000
                     ).toFixed(0) + " m",
                     cellSize * 4 + cellSize / 2,
@@ -397,7 +403,7 @@ export async function courseDefinitionToSvg(eventName, course) {
       false,
       "black",
       null,
-      width / 50
+      width
     );
   }
 
@@ -411,7 +417,7 @@ export async function courseDefinitionToSvg(eventName, course) {
       false,
       "black",
       null,
-      strokeWidth / 50
+      strokeWidth
     );
   }
 }
@@ -446,8 +452,8 @@ function getObjectScale(scaleSizes, mapScale, printScale) {
       return printScale / mapScale;
     case "RelativeToMap":
       return 1;
-    case "RelativeTo15000":
-      return 15000 / mapScale;
+    case "RelativeTo150":
+      return 150 / mapScale;
     default:
       throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
   }

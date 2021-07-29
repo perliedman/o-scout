@@ -17,7 +17,8 @@ export default function CourseOptions({
   );
 
   const extent = useMemo(
-    () => printArea?.extent || getExtent(printArea, course)
+    () => printArea?.extent || getExtent(printArea, course),
+    [printArea, course]
   );
 
   return (

@@ -1,6 +1,7 @@
 import fetchSymbolSvg from "./fetch-symbol-svg";
 import { courseToSvg } from "./create-svg";
 import { parsePpenFile, createDocument } from "../test-utils";
+import { controlCircleOutsideDiameter } from "./use-number-positions";
 
 jest.mock("./fetch-symbol-svg");
 
@@ -22,7 +23,20 @@ describe("create-svg", () => {
         courseAppearance,
         name: eventName,
       } = parsePpenFile("./test-data/ppen/test1.ppen");
-      await courseToSvg(course, courseAppearance, eventName, 15000, document);
+      const svg = await courseToSvg(
+        course,
+        courseAppearance,
+        eventName,
+        15000,
+        document
+      );
+
+      const circles = Array.from(svg.getElementsByTagName("circle"));
+      const controlCircles = circles.filter(
+        (circle) =>
+          Number(circle.getAttribute("r")) === controlCircleOutsideDiameter / 2
+      );
+      expect(controlCircles.length).toBe(6);
     });
   });
 });

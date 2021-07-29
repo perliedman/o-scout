@@ -4,11 +4,39 @@ import { courseToSvg } from "./create-svg";
 import PDFDocument from "@react-pdf/pdfkit";
 import blobStream from "blob-stream";
 import SVGtoPDF from "svg-to-pdfkit";
-import { transformExtent } from "./coordinates";
+import { mmToMeter, transformExtent } from "./coordinates";
 import { getSvgDimensions } from "./svg-utils";
 
 const mmToPt = 2.83465;
 const inToPt = 72;
+
+/*
+  Printing a map correctly is a complex task, since it involves data in
+  a lot of different coordinate systems:
+
+  * The source map's (OCAD) coordinates are in 1/100 mm units of paper,
+    at the source map's scale (often 1:15000, but far from always)
+  * The course setting objects (controls, special objects etc.) are in
+    mm of paper at the source map's scale
+  * The source map rendered to SVG (by ocad-tiler), where the source map's
+    coordinates are transformed (using an SVG transform) to real-world-meters,
+    that is, they are geographic distances in the world the map depicts,
+    no longer paper coordinates. The origin is the geographic coordinate
+    corresponding to the print area's top left corner. (As a side note,
+    this is not very useful for O-Scout's purpose, but it is how ocad-tiler
+    works for other reasons.) Also, SVG coordinates have the y-axis flipped
+    compared to OCAD and course setting coordinates (paper coordinates use
+    y-grows-up, SVG uses y-grows-down)
+  * So, the coordinates inside the SVG are in real-world meters,
+    y-grows-down; we set the SVGs viewbox to the real world meters
+    area that correspond to the print area
+  * To make the print output the correct size, we set the SVG's
+    width and height attributes. These attributes are calculated by 
+    determining the size of the print area (which is in the source map's
+    scale) in the print scale, measured as points (pt); this will ensure
+    the SVG is printed with the correct size when we convert it to PDF,
+    where all units are points (pt).
+*/
 
 export async function printCourse(
   course,
@@ -37,8 +65,8 @@ export async function printCourse(
   mapSvg.setAttribute("height", outputHeightPt);
   mapSvg.setAttribute(
     "viewBox",
-    `0 0 ${printAreaWidthMm * (crs.scale / 1000)} ${
-      printAreaHeightMm * (crs.scale / 1000)
+    `0 0 ${printAreaWidthMm * (crs.scale * mmToMeter)} ${
+      printAreaHeightMm * (crs.scale * mmToMeter)
     }`
   );
   const courseGroup = await courseToSvg(
@@ -48,9 +76,11 @@ export async function printCourse(
     crs.scale,
     window.document
   );
-
-  const mapGroup = mapSvg.querySelector("g");
-  mapGroup.appendChild(courseGroup);
+  const transform = `scale(${
+    mmToMeter * crs.scale
+  }) translate(${-printAreaExtent[0]}, ${printAreaExtent[3]})`;
+  courseGroup.setAttributeNS("", "transform", transform);
+  mapSvg.appendChild(courseGroup);
 
   return mapSvg;
 }
