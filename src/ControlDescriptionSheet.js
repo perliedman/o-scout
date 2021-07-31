@@ -24,7 +24,7 @@ export default function ControlDescriptionSheet({
               <input
                 type="text"
                 value={eventName}
-                className="font-bold w-full text-center focus:outline-none"
+                className="border-0 font-bold w-full text-center focus:outline-none"
                 onChange={(e) => onChangeEventName(e.target.value)}
               />
             </td>
@@ -34,7 +34,7 @@ export default function ControlDescriptionSheet({
               <input
                 type="text"
                 value={course.name}
-                className="font-bold w-full text-center focus:outline-none"
+                className="border-0 font-bold w-full text-center focus:outline-none"
                 onChange={(e) => onChangeCourseName(e.target.value)}
               />
             </td>
