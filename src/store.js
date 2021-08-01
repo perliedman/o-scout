@@ -49,19 +49,11 @@ const useEvent = create(
               selectedCourseId: event.courses?.[0]?.id,
             })),
           setMap: (mapFile, mapFilename) =>
-            set((state) => {
-              const mapScale = mapFile.getCrs().scale;
-              return {
-                ...state,
-                mapScale,
-                mapFilename,
-                courses: state.courses.map((course) =>
-                  course.controls.length > 0
-                    ? course
-                    : { ...course, printScale: mapScale }
-                ),
-              };
-            }),
+            set((state) =>
+              produce(state, (draft) =>
+                Event.setMap(draft, mapFile, mapFilename)
+              )
+            ),
           setName: (name) =>
             set(
               undoable((draft) => {
@@ -73,11 +65,9 @@ const useEvent = create(
               undoable((draft) => {
                 const control = Control.create(options);
                 Event.addControl(draft, control);
-                if (courseId) {
+                if (courseId && courseId !== Event.ALL_CONTROLS_ID) {
                   const draftCourse = findCourse(draft, courseId);
                   draftCourse.controls.push(Control.clone(control));
-                  const allControls = findAllControls(draft);
-                  allControls.controls.push(Control.clone(control));
                 }
               })
             ),
@@ -104,25 +94,44 @@ const useEvent = create(
           setPrintAreaExtent: (courseId, extent) =>
             set(
               undoable((draft) => {
-                const draftCourse = findCourse(draft, courseId);
-                draftCourse.printArea.auto = false;
-                draftCourse.printArea.extent = extent;
+                const isAllControls = courseId === Event.ALL_CONTROLS_ID;
+                const printArea = isAllControls
+                  ? draft.printArea
+                  : findCourse(draft, courseId).printArea;
+                printArea.auto = false;
+                printArea.extent = extent;
+
+                if (isAllControls) {
+                  Event.updateAllControls(draft);
+                }
               })
             ),
           setPrintScale: (courseId, scale) =>
             set(
               undoable((draft) => {
-                const draftCourse = findCourse(draft, courseId);
-                draftCourse.printScale = scale;
+                if (courseId !== Event.ALL_CONTROLS_ID) {
+                  const draftCourse = findCourse(draft, courseId);
+                  draftCourse.printScale = scale;
+                } else {
+                  draft.allControls.printScale = scale;
+                  Event.updateAllControls(draft);
+                }
               })
             ),
           setPrintArea: (courseId, printAreaProps) =>
             set(
               undoable((draft) => {
-                const draftCourse = findCourse(draft, courseId);
+                const isAllControls = courseId === Event.ALL_CONTROLS_ID;
+                const printArea = isAllControls
+                  ? draft.printArea
+                  : findCourse(draft, courseId).printArea;
                 Object.keys(printAreaProps).forEach((prop) => {
-                  draftCourse.printArea[prop] = printAreaProps[prop];
+                  printArea[prop] = printAreaProps[prop];
                 });
+
+                if (isAllControls) {
+                  Event.updateAllControls(draft);
+                }
               })
             ),
         },
@@ -180,10 +189,6 @@ function findCourse(event, courseId) {
   }
 }
 
-function findAllControls(event) {
-  return event.courses.find((c) => c.id === "all-controls");
-}
-
 export default useEvent;
 
 export const useUndo = () => useEvent(getUndoRedo);
@@ -233,12 +238,6 @@ function createNewEvent(state) {
   Event.addCourse(
     event,
     Course.create(event.idGenerator.next(), "New course", [], scale, "normal")
-  );
-  Event.addCourse(
-    event,
-    Course.create("all-controls", "All Controls", [], scale, "all-controls", {
-      labelKind: "code",
-    })
   );
 
   return event;

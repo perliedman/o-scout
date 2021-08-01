@@ -1,3 +1,4 @@
+import { ALL_CONTROLS_ID } from "../models/event";
 import { parsePpenFile } from "../test-utils";
 
 describe("parsePPen", () => {
@@ -34,5 +35,13 @@ describe("parsePPen", () => {
     expect(courseAppearance.scaleSizes).toBe("RelativeToMap");
     expect(courseAppearance.scaleSizesCircleGaps).toBe(true);
     expect(courseAppearance.blendPurple).toBe(true);
+  });
+
+  test("all controls gets correct scale", () => {
+    const event = parsePpenFile("./test-data/ppen/test2.ppen");
+    const allControls = event.courses.find(
+      (course) => course.id === ALL_CONTROLS_ID
+    );
+    expect(allControls.printScale).toBe(7500);
   });
 });

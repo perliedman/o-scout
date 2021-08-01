@@ -55,6 +55,9 @@ export function parsePPen(doc) {
   event.courseAppearance = CourseAppearance.create(
     parseCourseAppearance(eventTag.getElementsByTagName("course-appearance")[0])
   );
+  event.printArea = parsePrintArea(
+    eventTag.getElementsByTagName("print-area")[0]
+  );
 
   const courses = Array.from(doc.getElementsByTagName("course"))
     .filter((c) => c.getElementsByTagName("first").length > 0)
@@ -82,9 +85,9 @@ export function parsePPen(doc) {
     })
     .sort((a, b) => a.order - b.order);
 
+  parseAllControls(event, eventTag.getElementsByTagName("all-controls")?.[0]);
   courses.forEach((c) => Event.addCourse(event, c));
 
-  parseAllControls(event, eventTag.getElementsByTagName("all-controls")?.[0]);
   parseSpecialObjects(event, doc.getElementsByTagName("special-object"));
 
   return { ...event, warnings };
@@ -189,14 +192,9 @@ export function parsePPen(doc) {
   function parseAllControls(event, allControlsTag) {
     if (!allControlsTag) return;
 
-    const allControls = Course.create(
-      "all-controls",
-      "All Controls",
-      event.controlList,
-      Number(allControlsTag.getAttribute("print-scale"))
-    );
-    allControls.labelKind = "code";
-    Event.addCourse(event, allControls);
+    event.allControls = {
+      printScale: Number(allControlsTag.getAttribute("print-scale")),
+    };
   }
 }
 

@@ -49,7 +49,11 @@ export default function ControlDescriptionSheet({
                 <>
                   <td className="font-bold">
                     {c.kind !== "start" ? (
-                      i
+                      course.labelKind === "sequence" ? (
+                        i
+                      ) : (
+                        ""
+                      )
                     ) : (
                       <DescriptionSymbol symbol="start" />
                     )}
