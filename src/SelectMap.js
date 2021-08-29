@@ -11,6 +11,7 @@ export default function SelectMap({
   children,
   type = "normal",
   component,
+  onMapLoaded,
 }) {
   const [state, setState] = useState("idle");
   const fileRef = useRef();
@@ -20,16 +21,9 @@ export default function SelectMap({
   return (
     <>
       {component ? (
-        <div onClick={() => fileRef.current.click()}>{component}</div>
+        <div onClick={activateFilePicker}>{component}</div>
       ) : (
-        <Button
-          type={type}
-          className={className}
-          onClick={() => {
-            fileRef.current.value = "";
-            setTimeout(() => fileRef.current.click());
-          }}
-        >
+        <Button type={type} className={className} onClick={activateFilePicker}>
           {state === "loading" && <Spinner />}
           {children}
         </Button>
@@ -45,12 +39,19 @@ export default function SelectMap({
     </>
   );
 
+  function activateFilePicker() {
+    fileRef.current.value = "";
+    setTimeout(() => fileRef.current.click());
+  }
+
   async function loadMap(e) {
     setState("loading");
     try {
       const [blob] = e.target.files;
       const map = await readMap(blob);
       setMap(blob.name, map, new OcadTiler(map));
+      onMapLoaded && onMapLoaded(map, blob.name);
+      setState("idle");
     } catch (e) {
       console.error(e);
       setState("error");

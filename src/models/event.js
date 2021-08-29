@@ -55,8 +55,7 @@ export function load(data) {
   };
 }
 
-export function setMap(event, mapFile, mapFilename) {
-  const mapScale = mapFile.getCrs().scale;
+export function setMap(event, mapScale, mapFilename) {
   event.mapScale = mapScale;
   event.mapFilename = mapFilename;
   event.courses

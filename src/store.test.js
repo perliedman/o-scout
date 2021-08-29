@@ -115,4 +115,62 @@ describe("store", () => {
       ].description.all
     ).toBeFalsy();
   });
+
+  test("setting map sets print scale for course without controls", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.setMap(
+        { getCrs: () => ({ scale: 4000 }) },
+        "olle.ocd"
+      )
+    );
+
+    result.current.courses.forEach((course) =>
+      expect(course.printScale).toBe(4000)
+    );
+  });
+
+  test("setting map leaves print scale for course with controls", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "normal", coordinates: [0, 0] },
+        result.current.courses[0].id
+      )
+    );
+
+    act(() =>
+      result.current.actions.event.setMap(
+        { getCrs: () => ({ scale: 4000 }) },
+        "olle.ocd"
+      )
+    );
+
+    expect(result.current.courses[0].printScale).toBe(15000);
+  });
+
+  test("setting map sets event's map name", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.setMap(
+        { getCrs: () => ({ scale: 4000 }) },
+        "olle.ocd"
+      )
+    );
+
+    expect(result.current.mapFilename).toBe("olle.ocd");
+  });
+
+  test("creating a new event sets event's map name to current map", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.setMap(
+        { getCrs: () => ({ scale: 4000 }) },
+        "olle.ocd"
+      )
+    );
+    act(() => result.current.actions.event.newEvent());
+
+    expect(result.current.mapFilename).toBe("olle.ocd");
+  });
 });

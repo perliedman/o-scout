@@ -51,7 +51,7 @@ const useEvent = create(
           setMap: (mapFile, mapFilename) =>
             set((state) =>
               produce(state, (draft) =>
-                Event.setMap(draft, mapFile, mapFilename)
+                Event.setMap(draft, mapFile.getCrs().scale, mapFilename)
               )
             ),
           setName: (name) =>
@@ -234,6 +234,8 @@ export const useNotifications = create((set) => ({
 function createNewEvent(state) {
   const scale = state?.mapScale || 15000;
   const event = Event.create("New event");
+
+  Event.setMap(event, state?.mapScale, state?.mapFilename);
 
   Event.addCourse(
     event,

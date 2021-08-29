@@ -25,7 +25,7 @@ export default function Alert({ message, detail, type = "info", onClose }) {
       >
         <Icon className="h-7 w-7 mr-2" />
         <div>
-          <p>{message}</p>
+          <p className="mb-4">{message}</p>
           <p className="font-thin">{detail}</p>
         </div>
 

@@ -46,12 +46,10 @@ export function parsePPen(doc) {
     eventTag.getElementsByTagName("title")[0].textContent,
     []
   );
-  event.map = {
-    name: mapAbsPath.substring(
-      Math.max(mapAbsPath.lastIndexOf("/"), mapAbsPath.lastIndexOf("\\") + 1)
-    ),
-    scale,
-  };
+  event.mapFilename = mapAbsPath.substring(
+    Math.max(mapAbsPath.lastIndexOf("/"), mapAbsPath.lastIndexOf("\\") + 1)
+  );
+  event.mapScale = scale;
   event.courseAppearance = CourseAppearance.create(
     parseCourseAppearance(eventTag.getElementsByTagName("course-appearance")[0])
   );

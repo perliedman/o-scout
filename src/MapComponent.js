@@ -13,7 +13,7 @@ import VectorSource from "ol/source/Vector";
 import useClip from "./use-clip";
 import useMapLayer from "./services/use-map-layer";
 import shallow from "zustand/shallow";
-import Button from "./ui/Button";
+import EventMapMismatchDialog from "./EventMapMismatchDialog";
 
 export default function MapComponent() {
   const { mapFile, map, tiler, setMapInstance, setClipLayer } = useMap(
@@ -149,25 +149,15 @@ function getPush({ push }) {
   return push;
 }
 
-function getEvent({
-  isRestored,
-  mapFilename,
-  actions: {
-    event: { setMap: setEventMap },
-  },
-}) {
-  return { mapFilename, isRestored, setEventMap };
+function getEvent({ isRestored, mapFilename }) {
+  return { mapFilename, isRestored };
 }
 
 function useRestoredData() {
-  const {
-    isRestored,
-    mapFilename: eventMapName,
-    setEventMap,
-  } = useEvent(getEvent, shallow);
-  const { mapFilename: currentMapFilename, mapFile } = useMap(
-    ({ mapFilename, mapFile }) => ({ mapFilename, mapFile })
-  );
+  const { isRestored, mapFilename: eventMapName } = useEvent(getEvent, shallow);
+  const { mapFilename: currentMapFilename } = useMap(({ mapFilename }) => ({
+    mapFilename,
+  }));
   const { push, pop } = useNotifications(
     ({ push, pop }) => ({
       push,
@@ -176,42 +166,12 @@ function useRestoredData() {
     shallow
   );
   useEffect(() => {
-    if (isRestored && eventMapName !== currentMapFilename) {
+    if (isRestored && eventMapName && eventMapName !== currentMapFilename) {
       push(
         "info",
         "Event's map does not match selected map",
-        <>
-          <div>
-            The current event uses a map named
-            <div className="max-w-xs overflow-hidden overflow-ellipsis">
-              {" "}
-              <strong>{eventMapName}</strong>
-            </div>
-            but the current map is named
-            <div className="max-w-xs overflow-hidden overflow-ellipsis">
-              {" "}
-              <strong>{currentMapFilename}</strong>
-            </div>
-            Please ensure this is the correct map.
-          </div>
-          <div className="flex justify-end mt-2">
-            <Button
-              type="primary"
-              onClick={() => {
-                setEventMap(mapFile, currentMapFilename);
-                pop();
-              }}
-              className="mr-2"
-            >
-              This is correct
-            </Button>
-            <Button type="primary" onClick={() => pop()}>
-              Incorrect map
-            </Button>
-          </div>
-        </>
+        <EventMapMismatchDialog onClose={pop} />
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMapFilename]);
+  }, [push, pop, isRestored, currentMapFilename, eventMapName]);
 }

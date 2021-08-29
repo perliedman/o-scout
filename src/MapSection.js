@@ -1,12 +1,13 @@
 import React from "react";
 import SelectMap from "./SelectMap";
-import { useMap } from "./store";
+import useEvent, { useMap } from "./store";
 import { ExclamationIcon } from "@heroicons/react/outline";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 import Section from "./ui/Section";
 
 export default function MapSection() {
   const { mapFilename, mapFile } = useMap(getState);
+  const setMap = useEvent(getSetMap);
 
   return (
     <>
@@ -22,6 +23,7 @@ export default function MapSection() {
         <Dropdown>
           <SelectMap
             component={<DropdownItem>Select new map...</DropdownItem>}
+            onMapLoaded={setMap}
           />
         </Dropdown>
       </div>
@@ -30,6 +32,14 @@ export default function MapSection() {
 }
 function getState({ mapFilename, mapFile }) {
   return { mapFilename, mapFile };
+}
+
+function getSetMap({
+  actions: {
+    event: { setMap },
+  },
+}) {
+  return setMap;
 }
 
 function Details({ mapFile }) {

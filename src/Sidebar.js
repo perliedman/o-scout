@@ -10,7 +10,7 @@ export default function Sidebar() {
 
   return (
     <div className="fixed inset-y-0 right-0 flex z-20 w-8">
-      <div className="absolute flex top-0 h-screen right-0 flew-row">
+      <div className="absolute flex top-0 h-screen right-0">
         <button
           className="
             w-8
@@ -24,7 +24,7 @@ export default function Sidebar() {
             border
             border-r-0
             border-gray-200
-            shadow-l
+            shadow-lg
             text-center
             transition-colors
             hover:bg-gray-100
