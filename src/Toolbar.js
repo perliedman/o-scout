@@ -29,7 +29,7 @@ export default function Toolbar() {
             <ModeButton
               key={id}
               active={id === activeMode}
-              onClick={() => setActiveMode(id !== activeMode ? id : null)}
+              onClick={() => setActiveMode(id)}
             >
               {label}
             </ModeButton>

@@ -151,7 +151,7 @@ export default function CreateCourse() {
         <ModeButton
           key={mode}
           active={mode === activeMode}
-          onClick={() => setActiveMode(mode !== activeMode ? mode : null)}
+          onClick={() => setActiveMode(mode)}
         >
           {mode}
         </ModeButton>
