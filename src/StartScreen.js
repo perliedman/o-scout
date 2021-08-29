@@ -59,7 +59,7 @@ export default function StartScreen() {
       const blob = await response.blob();
       const mapFile = await readMap(blob);
       const mapFilename = "Demo Map";
-      setMap(mapFilename, mapFile.getCrs().scale, new OcadTiler(mapFile));
+      setMap(mapFilename, mapFile, new OcadTiler(mapFile));
     } catch (e) {
       console.error(e);
       setState("error");
