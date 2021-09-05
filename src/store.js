@@ -237,5 +237,7 @@ function createNewEvent(state) {
     Course.create(event.idGenerator.next(), "New course", [], scale, "normal")
   );
 
+  event.selectedCourseId = event.courses[0].id;
+
   return event;
 }

@@ -173,4 +173,12 @@ describe("store", () => {
 
     expect(result.current.mapFilename).toBe("olle.ocd");
   });
+
+  test("creating a new event resets the selected course", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() => result.current.actions.course.setSelected(9999));
+    act(() => result.current.actions.event.newEvent());
+
+    expect(result.current.selectedCourseId).toBe(result.current.courses[0].id);
+  });
 });
