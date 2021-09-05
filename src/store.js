@@ -43,8 +43,7 @@ const useEvent = create(
       actions: {
         event: {
           set: (event) =>
-            set((state) => ({
-              ...state,
+            set(() => ({
               ...event,
               selectedCourseId: event.courses?.[0]?.id,
             })),
@@ -71,8 +70,7 @@ const useEvent = create(
                 }
               })
             ),
-          newEvent: () =>
-            set((state) => ({ ...state, ...createNewEvent(state) })),
+          newEvent: () => set((state) => createNewEvent(state)),
         },
         course: {
           new: (course) =>
@@ -82,8 +80,7 @@ const useEvent = create(
                 draft.selectedCourseId = course.id;
               })
             ),
-          setSelected: (selectedCourseId) =>
-            set((state) => ({ ...state, selectedCourseId })),
+          setSelected: (selectedCourseId) => set(() => ({ selectedCourseId })),
           setName: (courseId, name) =>
             set(
               undoable((draft) => {
@@ -224,11 +221,9 @@ export const useNotifications = create((set) => ({
   notifications: [],
   push: (type, message, detail) =>
     set((state) => ({
-      ...state,
       notifications: [...state.notifications, { type, message, detail }],
     })),
-  pop: () =>
-    set((state) => ({ ...state, notifications: state.notifications.slice(1) })),
+  pop: () => set((state) => ({ notifications: state.notifications.slice(1) })),
 }));
 
 function createNewEvent(state) {
