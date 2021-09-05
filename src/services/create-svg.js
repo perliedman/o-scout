@@ -469,7 +469,7 @@ function getObjectScale(scaleSizes, mapScale, printScale) {
     case "RelativeToMap":
       return 1;
     case "RelativeTo15000":
-      return 150 / mapScale;
+      return 15000 / mapScale;
     default:
       throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
   }
