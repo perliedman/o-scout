@@ -1,7 +1,11 @@
 import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
 import Stroke from "ol/style/Stroke";
-import { courseOverPrintRgb, selectedOverPrintRgb } from "./models/course";
+import {
+  courseOverPrintRgb,
+  palette,
+  selectedOverPrintRgb,
+} from "./models/course";
 import RegularShape from "ol/style/RegularShape";
 import {
   controlCircleOutsideDiameter,
@@ -36,7 +40,11 @@ export function courseFeatureStyle(
   resolution
 ) {
   const kind = feature.get("kind");
-  const color = selected ? selectedOverPrintRgb : courseOverPrintRgb;
+  const color = selected
+    ? selectedOverPrintRgb
+    : feature.get("color")
+    ? palette[feature.get("color")]
+    : courseOverPrintRgb;
   let style;
 
   // Note: where applicable, always use setRadius *last*, since that is what
@@ -76,7 +84,7 @@ export function courseFeatureStyle(
     style = finishStyle;
   } else if (kind === "line") {
     const stroke = lineStyle.getStroke();
-    stroke.setWidth(dimension(overprintLineWidth));
+    stroke.setWidth(dimension(feature.get("lineWidth") || overprintLineWidth));
     stroke.setColor(color);
     style = lineStyle;
   } else if (kind === "number") {

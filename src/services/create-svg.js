@@ -2,10 +2,12 @@ import {
   courseDistance,
   courseOverPrintRgb,
   getStartRotation,
+  palette,
 } from "../models/course";
 import { createControls } from "./use-controls";
 import {
   controlCircleOutsideDiameter,
+  courseObjectsGeoJSON,
   createNumberPositions,
   overprintLineWidth,
 } from "./use-number-positions";
@@ -59,13 +61,17 @@ export async function courseToSvg(
     course.labelKind,
     objScale
   );
+  const specialObjects = createSpecialObjects(course.specialObjects);
 
   return createSvgNode(document, {
     type: "g",
     children: [
       ...controlsToSvg(),
       ...controlConnectionsToSvg(controlConnections),
-      ...controlNumbersToSvg(controlConnections, course.labelKind),
+      ...controlNumbersToSvg(
+        courseObjectsGeoJSON(controlConnections, specialObjects),
+        course.labelKind
+      ),
       ...(await specialObjectsToSvg()),
     ],
   });
@@ -128,6 +134,15 @@ export async function courseToSvg(
                   "white",
                   objScale
                 );
+              case "line":
+                const { color } = specialObject.properties;
+                return lines(
+                  coordinates.map(toSvgCoord),
+                  false,
+                  palette[color] || courseOverPrintRgb,
+                  null,
+                  objScale
+                );
               case "descriptions": {
                 const descriptionSvg = await courseDefinitionToSvg(
                   eventName,
@@ -148,6 +163,7 @@ export async function courseToSvg(
                 return descriptionGroup;
               }
               default:
+                console.warn(`Unhandled special object kind "${kind}".`);
                 return null;
             }
           })
@@ -452,7 +468,7 @@ function getObjectScale(scaleSizes, mapScale, printScale) {
       return printScale / mapScale;
     case "RelativeToMap":
       return 1;
-    case "RelativeTo150":
+    case "RelativeTo15000":
       return 150 / mapScale;
     default:
       throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);

@@ -114,8 +114,12 @@ export function parsePPen(doc) {
 
   function parseSpecialObjects(event, specialObjectsTags) {
     for (const specialObjectTag of Array.from(specialObjectsTags)) {
-      const id = specialObjectTag.getAttribute("id");
-      const kind = specialObjectTag.getAttribute("kind");
+      const attributes = {
+        ...mapAttributes(specialObjectTag),
+        ...mapAttributes(
+          specialObjectTag.getElementsByTagName("appearance")?.[0]
+        ),
+      };
       const coursesTag = specialObjectTag.getElementsByTagName("courses")[0];
       const isAllCourses = coursesTag.getAttribute("all") === "true";
       const courseIds = isAllCourses
@@ -132,8 +136,7 @@ export function parsePPen(doc) {
       );
 
       const specialObject = {
-        id,
-        kind,
+        ...attributes,
         isAllCourses,
         locations,
       };
@@ -144,7 +147,7 @@ export function parsePPen(doc) {
           course.specialObjects.push(specialObject);
         } else {
           warnings.push(
-            `No course with id ${courseId} found for special object ${id}.`
+            `No course with id ${courseId} found for special object ${attributes.id}.`
           );
         }
       });
@@ -308,4 +311,17 @@ export function writePpen(event) {
 
   doc.appendChild(root);
   return doc;
+}
+
+function mapAttributes(tag) {
+  if (!tag) return {};
+  const attributes = {};
+  for (const attribute of Array.from(tag.getAttributeNames())) {
+    const attributeValue = tag.getAttribute(attribute);
+    attributes[attribute] = !isNaN(attributeValue)
+      ? Number(attributeValue)
+      : attributeValue;
+  }
+
+  return attributes;
 }

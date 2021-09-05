@@ -1,3 +1,4 @@
+import { featureCollection } from "@turf/helpers";
 import { useMemo } from "react";
 import { add, pointToGeometryDistance } from "../models/coordinate";
 
@@ -123,3 +124,15 @@ export const controlCircleOutsideDiameter = 5.0;
 export const overprintLineWidth = 0.35;
 const controlNumberCircleDistance = 1.825;
 const defaultControlNumberAngle = Math.PI / 6;
+
+export function courseObjectsGeoJSON(
+  controlConnectionsGeoJSON,
+  specialObjectsGeoJSON
+) {
+  return featureCollection([
+    ...controlConnectionsGeoJSON?.features,
+    ...specialObjectsGeoJSON?.features.filter(
+      ({ properties: { kind } }) => kind === "line"
+    ),
+  ]);
+}

@@ -4,7 +4,9 @@ import GeoJSON from "ol/format/GeoJSON";
 import useControls from "./services/use-controls";
 import useControlConnections from "./services/user-control-connections";
 import useSpecialObjects from "./services/use-special-objects";
-import useNumberPositions from "./services/use-number-positions";
+import useNumberPositions, {
+  courseObjectsGeoJSON,
+} from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
 import Projection from "ol/proj/Projection";
 import Units from "ol/proj/Units";
@@ -79,13 +81,18 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     course.labelKind,
     objScale
   );
+  const specialObjectsGeoJSON = useSpecialObjects(course.specialObjects);
+  const courseObjects = useMemo(
+    () =>
+      courseObjectsGeoJSON(controlConnectionsGeoJSON, specialObjectsGeoJSON),
+    [controlConnectionsGeoJSON, specialObjectsGeoJSON]
+  );
   const controlLabelsGeoJSON = useNumberPositions(
     course.controls,
-    controlConnectionsGeoJSON,
+    courseObjects,
     course.labelKind,
     objScale
   );
-  const specialObjectsGeoJSON = useSpecialObjects(course.specialObjects);
   useControlDescriptions(
     map,
     paperToProjected,
