@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useUndo } from "./store";
 import EditControls from "./tools/EditControls";
 import PrintArea from "./tools/PrintArea";
@@ -54,4 +54,6 @@ function idHash(object) {
   return object;
 }
 
-function voidFn() {}
+function voidFn() {
+  return undefined;
+}

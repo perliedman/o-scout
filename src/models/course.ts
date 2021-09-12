@@ -1,5 +1,19 @@
-import { controlDistance } from "./control";
+import { Extent } from "ol/extent";
+import { Control, controlDistance } from "./control";
 import * as PrintArea from "./print-area";
+import { PrintArea as PrintAreaType } from "./print-area";
+import { SpecialObject } from "./special-object";
+
+export interface Course {
+  id: number;
+  name: string;
+  controls: Control[];
+  printScale: number;
+  type: string;
+  specialObjects: SpecialObject[];
+  labelKind: string;
+  printArea: PrintAreaType;
+}
 
 export const palette = {
   purple: "rgba(182, 44, 152, 0.8)",
@@ -10,7 +24,14 @@ export const courseOverPrintRgb = palette.purple;
 //export const selectedOverPrintRgb = "rgba(182, 44, 152, 1)";
 export const selectedOverPrintRgb = "red";
 
-export function create(id, name, controls = [], printScale, type, options) {
+export function create(
+  id: number,
+  name: string,
+  controls: Control[] = [],
+  printScale: number,
+  type: string,
+  options?: Partial<Course>
+): Course {
   return {
     id: id,
     name: name,
@@ -24,7 +45,7 @@ export function create(id, name, controls = [], printScale, type, options) {
   };
 }
 
-export function courseDistance(course, scale) {
+export function courseDistance(course: Course, scale: number): number {
   const controls = course.controls;
   return (
     (controls
@@ -36,7 +57,7 @@ export function courseDistance(course, scale) {
   );
 }
 
-export function courseBounds(course) {
+export function courseBounds(course: Course): Extent {
   return course.controls.reduce(
     (a, c) => [
       Math.min(a[0], c.coordinates[0]),
@@ -48,7 +69,7 @@ export function courseBounds(course) {
   );
 }
 
-export function getStartRotation({ controls }) {
+export function getStartRotation({ controls }: Course): number {
   const startIndex = controls.findIndex((control) => control.kind === "start");
   const start = controls[startIndex];
   const next = controls[startIndex + 1];

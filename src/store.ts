@@ -1,14 +1,48 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import produce, { applyPatches, enablePatches } from "immer";
+import produce, { applyPatches, enablePatches, Patch } from "immer";
 import * as Event from "./models/event";
+import { Event as EventType } from "./models/event";
 import * as Control from "./models/control";
+import { Control as ControlType } from "./models/control";
 import * as Course from "./models/course";
-import { useMemo } from "react";
+import { Course as CourseType } from "./models/course";
+import { ReactNode, useMemo } from "react";
+import { Map } from "ol";
+import Geometry from "ol/geom/Geometry";
+import VectorLayer from "ol/layer/Vector";
+import { Extent } from "ol/extent";
+import { PrintArea } from "./models/print-area";
+import OcadTiler from "ocad-tiler";
+import VectorSource from "ol/source/Vector";
 
 enablePatches();
 
-export const useMap = create((set) => ({
+interface Crs {
+  scale: number;
+}
+
+interface OcadFile {
+  getCrs: () => Crs;
+}
+
+interface MapState {
+  mapFile?: OcadFile;
+  mapInstance?: Map;
+  clipGeometry?: Geometry;
+  clipLayer?: VectorLayer;
+  setMapFile: (
+    mapFilename: string,
+    mapFile: OcadFile,
+    tiler: OcadTiler
+  ) => void;
+  setMapInstance: (map: Map) => void;
+  setClipGeometry: (geometry: Geometry) => void;
+  setClipLayer: (clipLayer: VectorLayer) => void;
+  setControlsSource: (controlSource: VectorSource) => void;
+}
+
+export const useMap = create<MapState>((set) => ({
   mapFile: undefined,
   mapInstance: undefined,
   clipGeometry: undefined,
@@ -23,20 +57,65 @@ export const useMap = create((set) => ({
     set((state) => ({ ...state, controlsSource })),
 }));
 
-export function useCrs() {
+export function useCrs(): Crs | undefined {
   const mapFile = useMap(getMapFile);
   return useMemo(() => mapFile?.getCrs(), [mapFile]);
 }
 
-function getMapFile({ mapFile }) {
+function getMapFile({ mapFile }: MapState) {
   return mapFile;
 }
 
-const history = {};
+type Undoable = {
+  undo: Patch[];
+  redo: Patch[];
+};
+const history: Undoable[] = [];
 let currentVersion = -1;
 const maxHistoryLength = 40;
 
-const useEvent = create(
+interface Actions {
+  actions: {
+    event: {
+      set: (event: EventType) => void;
+      setMap: (mapFile: OcadFile, mapFilename: string) => void;
+      setName: (name: string) => void;
+      addControl: (options: ControlType, courseId?: number) => void;
+      newEvent: () => void;
+    };
+    course: {
+      new: (course: CourseType) => void;
+      setSelected: (selectedCourseId: number) => void;
+      setName: (courseId: number, name: string) => void;
+      setPrintAreaExtent: (courseId: number, extent: Extent) => void;
+      setPrintScale: (courseId: number, scale: number) => void;
+      setPrintArea: (courseId: number, props: PrintArea) => void;
+    };
+    control: {
+      remove: (courseId: number, controlId: number) => void;
+      setCoordinates: (
+        courseId: number,
+        controlId: number,
+        coordinates: number[]
+      ) => void;
+      setDescription: (
+        controlId: number,
+        description: Control.Description
+      ) => void;
+    };
+  };
+  undo: () => void;
+  redo: () => void;
+}
+
+interface UiState {
+  selectedCourseId: number;
+}
+
+type EventState = EventType & UiState;
+type StateWithActions = EventState & Actions;
+
+const useEvent = create<StateWithActions>(
   persist(
     (set) => ({
       ...createNewEvent(),
@@ -55,13 +134,13 @@ const useEvent = create(
             ),
           setName: (name) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 draft.name = name;
               })
             ),
           addControl: (options, courseId) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 const control = Control.create(options);
                 Event.addControl(draft, control);
                 if (courseId && courseId !== Event.ALL_CONTROLS_ID) {
@@ -75,7 +154,7 @@ const useEvent = create(
         course: {
           new: (course) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 Event.addCourse(draft, course);
                 draft.selectedCourseId = course.id;
               })
@@ -83,14 +162,14 @@ const useEvent = create(
           setSelected: (selectedCourseId) => set(() => ({ selectedCourseId })),
           setName: (courseId, name) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 const draftCourse = findCourse(draft, courseId);
                 draftCourse.name = name;
               })
             ),
           setPrintAreaExtent: (courseId, extent) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 const isAllControls = courseId === Event.ALL_CONTROLS_ID;
                 const printArea = isAllControls
                   ? draft.printArea
@@ -105,26 +184,30 @@ const useEvent = create(
             ),
           setPrintScale: (courseId, scale) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 if (courseId !== Event.ALL_CONTROLS_ID) {
                   const draftCourse = findCourse(draft, courseId);
                   draftCourse.printScale = scale;
-                } else {
-                  draft.allControls.printScale = scale;
-                  Event.updateAllControls(draft);
                 }
               })
             ),
           setPrintArea: (courseId, printAreaProps) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 const isAllControls = courseId === Event.ALL_CONTROLS_ID;
-                const printArea = isAllControls
-                  ? draft.printArea
-                  : findCourse(draft, courseId).printArea;
-                Object.keys(printAreaProps).forEach((prop) => {
-                  printArea[prop] = printAreaProps[prop];
-                });
+                const printArea = findCourse(draft, courseId).printArea;
+                const mapTo = <T, S extends T, K extends keyof T>(
+                  target: T,
+                  source: S,
+                  key: K
+                ): void => {
+                  target[key] = source[key];
+                };
+                (Object.keys(printAreaProps) as (keyof PrintArea)[]).forEach(
+                  (prop) => {
+                    mapTo(printArea, printAreaProps, prop);
+                  }
+                );
 
                 if (isAllControls) {
                   Event.updateAllControls(draft);
@@ -135,7 +218,7 @@ const useEvent = create(
         control: {
           remove: (courseId, controlId) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 const draftCourse = findCourse(draft, courseId);
                 const controlIndex = draftCourse.controls.findIndex(
                   ({ id }) => id === controlId
@@ -145,7 +228,7 @@ const useEvent = create(
             ),
           setCoordinates: (courseId, controlId, coordinates) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 Event.updateControl(draft, controlId, (control) => {
                   control.coordinates = coordinates;
                 });
@@ -153,7 +236,7 @@ const useEvent = create(
             ),
           setDescription: (controlId, description) =>
             set(
-              undoable((draft) => {
+              undoable((draft: StateWithActions) => {
                 Event.updateControl(draft, controlId, (control) => {
                   control.description = description;
                 });
@@ -177,7 +260,7 @@ const useEvent = create(
   )
 );
 
-function findCourse(event, courseId) {
+function findCourse(event: EventType, courseId: number): CourseType {
   const course = event.courses.find((c) => c.id === courseId);
   if (course) {
     return course;
@@ -188,17 +271,18 @@ function findCourse(event, courseId) {
 
 export default useEvent;
 
-export const useUndo = () => useEvent(getUndoRedo);
+export const useUndo: () => { undo?: () => void; redo?: () => void } = () =>
+  useEvent(getUndoRedo);
 
-function getUndoRedo({ undo, redo }) {
+function getUndoRedo({ undo, redo }: Actions) {
   return {
     undo: history[currentVersion]?.undo && undo,
     redo: history[currentVersion + 1]?.redo && redo,
   };
 }
 
-function undoable(fn) {
-  return (state) =>
+function undoable(fn: (draft: StateWithActions) => void) {
+  return (state: EventState) =>
     produce(state, fn, (patches, inversePatches) => {
       currentVersion++;
       history[currentVersion] = { redo: patches, undo: inversePatches };
@@ -207,17 +291,29 @@ function undoable(fn) {
     });
 }
 
-function undo(state) {
+function undo(state: StateWithActions) {
   if (!history[currentVersion]?.undo) return;
   return applyPatches(state, history[currentVersion--].undo);
 }
 
-function redo(state) {
+function redo(state: StateWithActions) {
   if (!history[currentVersion + 1]?.redo) return;
   return applyPatches(state, history[++currentVersion].redo);
 }
 
-export const useNotifications = create((set) => ({
+interface Notification {
+  type: string;
+  message: ReactNode;
+  detail?: ReactNode;
+}
+
+interface NotificationsState {
+  notifications: Notification[];
+  push: (type: string, message: ReactNode, detail?: ReactNode) => void;
+  pop: () => void;
+}
+
+export const useNotifications = create<NotificationsState>((set) => ({
   notifications: [],
   push: (type, message, detail) =>
     set((state) => ({
@@ -226,18 +322,16 @@ export const useNotifications = create((set) => ({
   pop: () => set((state) => ({ notifications: state.notifications.slice(1) })),
 }));
 
-function createNewEvent(state) {
+function createNewEvent(state?: EventState): EventState {
   const scale = state?.mapScale || 15000;
   const event = Event.create("New event");
 
-  Event.setMap(event, state?.mapScale, state?.mapFilename);
+  Event.setMap(event, scale, state?.mapFilename || "");
 
   Event.addCourse(
     event,
     Course.create(event.idGenerator.next(), "New course", [], scale, "normal")
   );
 
-  event.selectedCourseId = event.courses[0].id;
-
-  return event;
+  return { ...event, selectedCourseId: event.courses[0].id };
 }

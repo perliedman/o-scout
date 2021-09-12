@@ -193,9 +193,8 @@ export function parsePPen(doc) {
   function parseAllControls(event, allControlsTag) {
     if (!allControlsTag) return;
 
-    event.allControls = {
-      printScale: Number(allControlsTag.getAttribute("print-scale")),
-    };
+    const allControls = Event.getAllControls(event);
+    allControls.printScale = Number(allControlsTag.getAttribute("print-scale"));
   }
 }
 
