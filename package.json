@@ -44,8 +44,19 @@
     ],
     "extends": [
       "react-app",
-      "react-app/jest",
-      "plugin:@typescript-eslint/recommended"
+      "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "*.{ts,tsx}"
+        ],
+        "extends": [
+          "react-app",
+          "react-app/jest",
+          "plugin:@typescript-eslint/recommended"
+        ]
+      }
     ]
   },
   "browserslist": {
