@@ -36,14 +36,14 @@ export default function EditControls() {
   const crs = useCrs();
   const objScale = useMemo(
     () =>
-      selectedCourse
+      selectedCourse && crs?.scale
         ? getObjectScale(
             courseAppearance.scaleSizes,
             crs.scale,
             selectedCourse.printScale
           )
         : 1,
-    [courseAppearance, crs.scale, selectedCourse]
+    [courseAppearance, crs?.scale, selectedCourse]
   );
   const style = useCallback(
     (feature, resolution) => {

@@ -1,6 +1,8 @@
 export function ModeButton({ active, ...props }) {
   return (
     <ToolButton
+      role="switch"
+      aria-checked={active}
       colorClassName={`${active ? "bg-indigo-600 text-white" : null}`}
       {...props}
     />
@@ -12,9 +14,11 @@ export default function ToolButton({
   disabled,
   colorClassName = "text-gray-600 bg-white",
   children,
+  ...props
 }) {
   return (
     <button
+      {...props}
       className={`
         px-2
         py-1

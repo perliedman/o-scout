@@ -1,4 +1,4 @@
-import { useState, useEffect, ComponentType, ReactNode } from "react";
+import { useState, useEffect, ComponentType, ReactElement } from "react";
 import useEvent, { EventState, useUndo } from "./store";
 import EditControls from "./tools/EditControls";
 import PrintArea from "./tools/PrintArea";
@@ -14,18 +14,24 @@ const Modes: ModeMap = idHash({
 });
 const modes = [Modes.createCourse, Modes.editControls, Modes.printArea];
 
-export default function Toolbar(): ReactNode {
+export default function Toolbar(): ReactElement {
   const { undo, redo } = useUndo();
-  const [activeMode, setActiveMode] = useState<keyof ModeMap | undefined>(modes[0].id);
+  const [activeMode, setActiveMode] = useState<keyof ModeMap | undefined>(
+    modes[0].id
+  );
 
   const { courses, selectedCourseId } = useEvent(getEvent, shallow);
   useEffect(() => {
-    const selectedCourse = courses.find(course => course.id === selectedCourseId)
+    const selectedCourse = courses.find(
+      (course) => course.id === selectedCourseId
+    );
     if (selectedCourse) {
-      const hasFinish = selectedCourse.controls.some(control => control.kind==='finish')
-      setActiveMode(hasFinish ? 'editControls' : 'createCourse')
+      const hasFinish = selectedCourse.controls.some(
+        (control) => control.kind === "finish"
+      );
+      setActiveMode(hasFinish ? "editControls" : "createCourse");
     }
-  }, [courses, selectedCourseId])
+  }, [courses, selectedCourseId]);
 
   const ActiveModeComponent = activeMode ? Modes[activeMode]?.component : null;
   useHotkeys("ctrl+z", undo || voidFn, [undo]);
@@ -70,7 +76,7 @@ type ModeMap = Record<string, Mode>;
 interface Mode {
   id?: keyof ModeMap;
   label: string;
-  component: ComponentType<Record<string,never>>;
+  component: ComponentType<Record<string, never>>;
 }
 
 function idHash(object: Record<string, Mode>): Record<string, Mode> {

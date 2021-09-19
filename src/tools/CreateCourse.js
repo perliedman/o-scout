@@ -36,7 +36,7 @@ export default function CreateCourse() {
   const crs = useCrs();
   const objScale = useMemo(
     () =>
-      selectedCourse
+      crs?.scale && selectedCourse
         ? (crs.scale / 1000) *
           getObjectScale(
             courseAppearance.scaleSizes,
@@ -44,7 +44,7 @@ export default function CreateCourse() {
             selectedCourse.printScale
           )
         : 1,
-    [courseAppearance, crs.scale, selectedCourse]
+    [courseAppearance, crs?.scale, selectedCourse]
   );
 
   const activeModeRef = useRef(activeMode);
