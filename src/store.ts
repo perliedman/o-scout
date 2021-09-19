@@ -112,7 +112,7 @@ interface UiState {
   selectedCourseId: number;
 }
 
-type EventState = EventType & UiState;
+export type EventState = EventType & UiState;
 type StateWithActions = EventState & Actions;
 
 const useEvent = create<StateWithActions>(
