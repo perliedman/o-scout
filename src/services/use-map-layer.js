@@ -35,8 +35,8 @@ export default function useMapLayer({
               DOMImplementation: document.implementation,
             });
 
-            svg.setAttribute("width", tileSize[0]);
-            svg.setAttribute("height", tileSize[1]);
+            svg.setAttributeNS(null, "width", tileSize[0]);
+            svg.setAttributeNS(null, "height", tileSize[1]);
             svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
 
             tile.getImage().src = await svgToBitmap(svg, tileSize);

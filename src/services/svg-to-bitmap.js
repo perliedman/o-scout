@@ -17,6 +17,10 @@ export function svgToBitmap(svg, [width = null, height = null] = []) {
   });
 }
 
+const serializer = new XMLSerializer();
+
 export function svgToUrl(svg) {
-  return `data:image/svg+xml,${encodeURIComponent(svg.outerHTML)}`;
+  return `data:image/svg+xml,${encodeURIComponent(
+    serializer.serializeToString(svg)
+  )}`;
 }
