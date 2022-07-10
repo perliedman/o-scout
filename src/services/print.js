@@ -4,7 +4,7 @@ import { courseToSvg } from "./create-svg";
 import PDFDocument from "@react-pdf/pdfkit";
 import blobStream from "blob-stream";
 import SVGtoPDF from "svg-to-pdfkit";
-import { mmToMeter, transformExtent } from "./coordinates";
+import { mmToMeter, toProjectedCoord, transformExtent } from "./coordinates";
 import { getSvgDimensions } from "./svg-utils";
 
 const mmToPt = 2.83465;
@@ -53,7 +53,7 @@ export async function printCourse(
       : olExtent.buffer(courseBounds(course), 10);
   // Convert from PPEN mm to OCAD coordinates, 1/100 mm
   const projectedExtent = transformExtent(printAreaExtent, ([x, y]) =>
-    crs.toProjectedCoord([x * 100, y * 100])
+    toProjectedCoord(crs, [x, y])
   );
   const scaleFactor = crs.scale / course.printScale;
   const printAreaWidthMm = printAreaExtent[2] - printAreaExtent[0];
