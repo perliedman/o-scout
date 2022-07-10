@@ -8,6 +8,16 @@ export function transformExtent(extent, fn) {
 }
 
 export const mmToMeter = 0.001;
+/**
+ * Converts a paper coordinate (millimeters) to the map's geographic
+ * coordinates. Note that unlike ocad2geojson's similar method, this
+ * function deliberately does *not* take the map's grivation into
+ * account.
+ *
+ * @param {*} crs ocad2geojson CRS (Coordinate Reference System)
+ * @param {[number, number]} coordinate paper coordinate to convert
+ * @returns {[number, number]} the converted geographic coordinates
+ */
 export const toProjectedCoord = (crs, coordinate) => {
   return [
     coordinate[0] * mmToMeter * crs.scale + crs.easting,
@@ -15,6 +25,16 @@ export const toProjectedCoord = (crs, coordinate) => {
   ];
 };
 
+/**
+ * Converts a map's geographic coordinates to the paper
+ * coordinate (millimeters). Note that unlike ocad2geojson's
+ * similar method, this deliberately does *not* take the map's
+ * grivation into account.
+ *
+ * @param {*} crs ocad2geojson CRS (Coordinate Reference System)
+ * @param {[number, number]} coordinate geographic coordinate to convert
+ * @returns {[number, number]} the converted paper coordinates
+ */
 export const fromProjectedCoord = (crs, coordinate) => {
   return [
     (coordinate[0] - crs.easting) / crs.scale / mmToMeter,

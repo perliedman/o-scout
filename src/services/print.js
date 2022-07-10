@@ -36,6 +36,13 @@ const inToPt = 72;
     scale) in the print scale, measured as points (pt); this will ensure
     the SVG is printed with the correct size when we convert it to PDF,
     where all units are points (pt).
+
+  *Note*: Unless you are _really sure_, don't use ocad2geojson's
+  coordinate conversion methods (crs.toProjectedCoord/crs.toMapCoord),
+  since they take map's grivation into account; for map output, that is
+  almost certainly not what you want (since it rotates the map, including
+  texts). Instead, use toProjectedCoord/fromProjectedCoord in O-Scout's
+  "coordinates" module.
 */
 
 export async function printCourse(
