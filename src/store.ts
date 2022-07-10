@@ -66,6 +66,12 @@ function getMapFile({ mapFile }: MapState) {
   return mapFile;
 }
 
+export enum Mode {
+  CreateCourse = 1,
+  EditControls = 2,
+  PrintArea = 3,
+}
+
 type Undoable = {
   undo: Patch[];
   redo: Patch[];
@@ -103,6 +109,7 @@ interface Actions {
         description: Control.Description
       ) => void;
     };
+    setMode: (mode: Mode) => void;
   };
   undo: () => void;
   redo: () => void;
@@ -110,10 +117,11 @@ interface Actions {
 
 interface UiState {
   selectedCourseId: number;
+  mode: Mode;
 }
 
 export type EventState = EventType & UiState;
-type StateWithActions = EventState & Actions;
+export type StateWithActions = EventState & Actions;
 
 const useEvent = create<StateWithActions>(
   persist(
@@ -243,6 +251,7 @@ const useEvent = create<StateWithActions>(
               })
             ),
         },
+        setMode: (mode) => set(() => ({ mode })),
       },
       undo: () => set(undo),
       redo: () => set(redo),
@@ -333,5 +342,9 @@ function createNewEvent(state?: EventState): EventState {
     Course.create(event.idGenerator.next(), "New course", [], scale, "normal")
   );
 
-  return { ...event, selectedCourseId: event.courses[0].id };
+  return {
+    ...event,
+    selectedCourseId: event.courses[0].id,
+    mode: Mode.CreateCourse,
+  };
 }

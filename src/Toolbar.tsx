@@ -1,39 +1,35 @@
-import { useState, useEffect, ComponentType, ReactElement } from "react";
-import useEvent, { EventState, useUndo } from "./store";
+import { ComponentType, ReactElement } from "react";
+import useEvent, { StateWithActions, useUndo } from "./store";
 import EditControls from "./tools/EditControls";
 import PrintArea from "./tools/PrintArea";
 import { useHotkeys } from "react-hotkeys-hook";
 import CreateCourse from "./tools/CreateCourse";
 import ToolButton, { ModeButton } from "./ui/ToolButton";
 import shallow from "zustand/shallow";
+import { Mode } from "./store";
 
-const Modes: ModeMap = idHash({
-  printArea: { label: "Area", component: PrintArea },
-  editControls: { label: "Edit", component: EditControls },
-  createCourse: { label: "Create", component: CreateCourse },
+export const ModeMappings: ModeMap = idHash({
+  [Mode.PrintArea]: { label: "Area", component: PrintArea },
+  [Mode.EditControls]: { label: "Edit", component: EditControls },
+  [Mode.CreateCourse]: { label: "Create", component: CreateCourse },
 });
-const modes = [Modes.createCourse, Modes.editControls, Modes.printArea];
+
+const modes: ToolbarMode[] = [
+  ModeMappings[Mode.CreateCourse],
+  ModeMappings[Mode.EditControls],
+  ModeMappings[Mode.PrintArea],
+];
 
 export default function Toolbar(): ReactElement {
   const { undo, redo } = useUndo();
-  const [activeMode, setActiveMode] = useState<keyof ModeMap | undefined>(
-    modes[0].id
+
+  const { mode: activeMode, setMode: setActiveMode } = useEvent(
+    getEvent,
+    shallow
   );
-
-  const { courses, selectedCourseId } = useEvent(getEvent, shallow);
-  useEffect(() => {
-    const selectedCourse = courses.find(
-      (course) => course.id === selectedCourseId
-    );
-    if (selectedCourse) {
-      const hasFinish = selectedCourse.controls.some(
-        (control) => control.kind === "finish"
-      );
-      setActiveMode(hasFinish ? "editControls" : "createCourse");
-    }
-  }, [courses, selectedCourseId]);
-
-  const ActiveModeComponent = activeMode ? Modes[activeMode]?.component : null;
+  const ActiveModeComponent = activeMode
+    ? ModeMappings[activeMode]?.component
+    : null;
   useHotkeys("ctrl+z", undo || voidFn, [undo]);
   useHotkeys("ctrl+y", redo || voidFn, [redo]);
 
@@ -45,7 +41,7 @@ export default function Toolbar(): ReactElement {
             <ModeButton
               key={id}
               active={id === activeMode}
-              onClick={() => setActiveMode(id)}
+              onClick={() => id && setActiveMode(id)}
             >
               {label}
             </ModeButton>
@@ -67,21 +63,28 @@ function voidFn() {
   return undefined;
 }
 
-function getEvent({ courses, selectedCourseId }: EventState) {
-  return { courses, selectedCourseId };
+function getEvent({
+  courses,
+  selectedCourseId,
+  mode,
+  actions: { setMode },
+}: StateWithActions) {
+  return { courses, selectedCourseId, mode, setMode };
 }
 
-type ModeMap = Record<string, Mode>;
+type ModeMap = Record<number, ToolbarMode>;
 
-interface Mode {
-  id?: keyof ModeMap;
+interface ToolbarMode {
+  id?: Mode;
   label: string;
   component: ComponentType<Record<string, never>>;
 }
 
-function idHash(object: Record<string, Mode>): Record<string, Mode> {
+function idHash(
+  object: Record<string, ToolbarMode>
+): Record<string, ToolbarMode> {
   Object.entries(object).forEach(([key, val]) => {
-    val.id = key;
+    val.id = Number(key);
   });
   return object;
 }
