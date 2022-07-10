@@ -11261,7 +11261,7 @@ svg-parser@^2.0.2:
 
 "svg-to-pdfkit@https://github.com/perliedman/SVG-to-PDFKIT#react-pdf-pdfkit":
   version "0.1.8"
-  resolved "git+ssh://git@github.com/perliedman/SVG-to-PDFKIT.git#6a77986788591bdc9e2c87a622aaddb5f6bd2e0d"
+  resolved "https://git@github.com/perliedman/SVG-to-PDFKIT.git#6a77986788591bdc9e2c87a622aaddb5f6bd2e0d"
   dependencies:
     "@react-pdf/pdfkit" ">=2"
 
