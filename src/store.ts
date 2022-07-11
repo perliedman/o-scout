@@ -15,6 +15,11 @@ import { Extent } from "ol/extent";
 import { PrintArea } from "./models/print-area";
 import OcadTiler from "ocad-tiler";
 import VectorSource from "ol/source/Vector";
+import { Coordinate } from "ol/coordinate";
+import Projection from "ol/proj/Projection";
+import { fromProjectedCoord, toProjectedCoord } from "./services/coordinates";
+import { addCoordinateTransforms } from "ol/proj";
+import { ppenProjection } from "./services/ppen";
 
 enablePatches();
 
@@ -31,6 +36,11 @@ interface MapState {
   mapInstance?: Map;
   clipGeometry?: Geometry;
   clipLayer?: VectorLayer;
+  projections?: {
+    mapProjection: Projection;
+    paperToProjected: (c: Coordinate) => Coordinate;
+    projectedToPaper: (c: Coordinate) => Coordinate;
+  };
   setMapFile: (
     mapFilename: string,
     mapFile: OcadFile,
@@ -47,9 +57,44 @@ export const useMap = create<MapState>((set) => ({
   mapInstance: undefined,
   clipGeometry: undefined,
   clipLayer: undefined,
+  projections: undefined,
   setMapFile: (mapFilename, mapFile, tiler) =>
-    set((state) => ({ ...state, mapFile, mapFilename, tiler })),
-  setMapInstance: (map) => set((state) => ({ ...state, map })),
+    set((state) => ({
+      ...state,
+      mapFile,
+      mapFilename,
+      tiler,
+      projections: undefined,
+    })),
+  setMapInstance: (map) =>
+    set((state) => {
+      const crs = state.mapFile?.getCrs();
+      let projections;
+      if (map) {
+        if (!crs) throw new Error("Setting map instance without a map file.");
+
+        const mapProjection = map.getView().getProjection();
+        const paperToProjected = (c: Coordinate) => toProjectedCoord(crs, c);
+        const projectedToPaper = (c: Coordinate) => fromProjectedCoord(crs, c);
+        projections = {
+          mapProjection,
+          paperToProjected,
+          projectedToPaper,
+        };
+        addCoordinateTransforms(
+          ppenProjection,
+          mapProjection,
+          paperToProjected,
+          projectedToPaper
+        );
+      }
+
+      return {
+        ...state,
+        map,
+        projections,
+      };
+    }),
   setClipGeometry: (clipGeometry) =>
     set((state) => ({ ...state, clipGeometry })),
   setClipLayer: (clipLayer) => set((state) => ({ ...state, clipLayer })),

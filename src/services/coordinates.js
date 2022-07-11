@@ -15,8 +15,8 @@ export const mmToMeter = 0.001;
  * account.
  *
  * @param {*} crs ocad2geojson CRS (Coordinate Reference System)
- * @param {[number, number]} coordinate paper coordinate to convert
- * @returns {[number, number]} the converted geographic coordinates
+ * @param {import("ol/coordinate").Coordinate} coordinate paper coordinate to convert
+ * @returns {Coordinate} the converted geographic coordinates
  */
 export const toProjectedCoord = (crs, coordinate) => {
   return [
@@ -32,8 +32,8 @@ export const toProjectedCoord = (crs, coordinate) => {
  * grivation into account.
  *
  * @param {*} crs ocad2geojson CRS (Coordinate Reference System)
- * @param {[number, number]} coordinate geographic coordinate to convert
- * @returns {[number, number]} the converted paper coordinates
+ * @param {Coordinate} coordinate geographic coordinate to convert
+ * @returns {Coordinate} the converted paper coordinates
  */
 export const fromProjectedCoord = (crs, coordinate) => {
   return [

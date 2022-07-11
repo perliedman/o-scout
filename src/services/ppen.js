@@ -4,6 +4,8 @@ import * as Control from "../models/control";
 import * as Course from "../models/course";
 import * as PrintArea from "../models/print-area";
 import * as CourseAppearance from "../models/course-appearance";
+import Projection from "ol/proj/Projection";
+import Units from "ol/proj/Units";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
@@ -324,3 +326,11 @@ function mapAttributes(tag) {
 
   return attributes;
 }
+
+export const ppenProjection = new Projection({
+  code: "ppen",
+  units: Units.METERS,
+  axisOrientation: "enu",
+  global: false,
+  metersPerUnit: 0.001,
+});

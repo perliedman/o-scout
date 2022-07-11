@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useCrs, useMap } from "./store";
 import GeoJSON from "ol/format/GeoJSON";
 import useControls from "./services/use-controls";
@@ -8,51 +8,26 @@ import useNumberPositions, {
   courseObjectsGeoJSON,
 } from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
-import Projection from "ol/proj/Projection";
-import Units from "ol/proj/Units";
-import { addCoordinateTransforms } from "ol/proj";
 import { featureCollection } from "@turf/helpers";
 import useClip from "./use-clip";
 import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
-import {
-  fromProjectedCoord,
-  getObjectScale,
-  toProjectedCoord,
-  transformExtent,
-} from "./services/coordinates";
+import { getObjectScale, transformExtent } from "./services/coordinates";
 import { Feature } from "ol";
 import * as PrintArea from "./models/print-area";
 import useVector from "./ol/use-vector";
 import useStyle from "./course-feature-style";
-
-const ppenProjection = new Projection({
-  code: "ppen",
-  units: Units.METERS,
-  axisOrientation: "enu",
-  global: false,
-  metersPerUnit: 0.001,
-});
+import { ppenProjection } from "./services/ppen";
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
-  const { map, mapFile, clipLayer, setControlsSource } = useMap(getMap);
+  const {
+    map,
+    mapFile,
+    clipLayer,
+    setControlsSource,
+    projections: { paperToProjected },
+  } = useMap(getMap);
   const crs = useCrs();
   const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
-  const paperToProjected = useCallback((c) => toProjectedCoord(crs, c), [crs]);
-  const projectedToPaper = useCallback(
-    (c) => fromProjectedCoord(crs, c),
-    [crs]
-  );
-
-  useEffect(() => {
-    if (mapProjection && crs) {
-      addCoordinateTransforms(
-        ppenProjection,
-        mapProjection,
-        paperToProjected,
-        projectedToPaper
-      );
-    }
-  }, [crs, mapProjection, paperToProjected, projectedToPaper]);
 
   const mapScale = useMemo(() => mapFile.getCrs().scale, [mapFile]);
   const objScale = useMemo(
@@ -65,14 +40,14 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     if (clipLayer) {
       const extent = transformExtent(
         PrintArea.getExtent(course.printArea, course),
-        (c) => toProjectedCoord(crs, c)
+        paperToProjected
       );
       const extentPolygon = polygonFromExtent(extent);
       const clipSource = clipLayer.getSource();
       clipSource.clear();
       clipSource.addFeature(new Feature(extentPolygon));
     }
-  }, [clipLayer, course, crs]);
+  }, [clipLayer, course, crs, paperToProjected]);
 
   const controlsGeoJSON = useControls(course.controls);
   const controlConnectionsGeoJSON = useControlConnections(
@@ -152,8 +127,8 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   return null;
 }
 
-function getMap({ map, mapFile, clipLayer, setControlsSource }) {
-  return { map, mapFile, clipLayer, setControlsSource };
+function getMap({ map, mapFile, clipLayer, setControlsSource, projections }) {
+  return { map, mapFile, clipLayer, setControlsSource, projections };
 }
 
 const vectorLayerOptions = {
