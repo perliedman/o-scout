@@ -21,7 +21,7 @@ export function create(options?: PrintArea): PrintArea {
 export function getExtent(printArea: PrintArea, course: Course): Extent {
   return !printArea.auto && printArea.extent
     ? printArea.extent
-    : buffer(courseBounds(course), 10);
+    : buffer(courseBounds(course), course.printScale / 150);
 }
 
 export interface PrintArea {
