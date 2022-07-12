@@ -1,5 +1,5 @@
 import { renderHook, act } from "@testing-library/react-hooks";
-import useEvent from "./store";
+import useEvent, { Mode } from "./store";
 
 describe("store", () => {
   test("can set name", () => {
@@ -180,5 +180,46 @@ describe("store", () => {
     act(() => result.current.actions.event.newEvent());
 
     expect(result.current.selectedCourseId).toBe(result.current.courses[0].id);
+  });
+
+  test("creating a new event sets mode to create", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() => result.current.actions.course.setSelected(9999));
+    act(() => result.current.actions.event.newEvent());
+
+    expect(result.current.mode).toBe(Mode.CreateCourse);
+  });
+
+  test("adding a finish switches mode to edit", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "finish", coordinates: [0, 0] },
+        result.current.courses[0].id
+      )
+    );
+
+    expect(result.current.mode).toBe(Mode.EditControls);
+  });
+
+  test("selecting a course with a finish switches mode to edit", () => {
+    const { result } = renderHook(() => useEvent());
+    const initialCourseId = result.current.selectedCourseId;
+    act(() =>
+      result.current.actions.course.new({
+        name: "My new course",
+        id: 1234,
+        controls: [],
+      })
+    );
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "finish", coordinates: [0, 0] },
+        initialCourseId
+      )
+    );
+    act(() => result.current.actions.course.setSelected(initialCourseId));
+
+    expect(result.current.mode).toBe(Mode.EditControls);
   });
 });

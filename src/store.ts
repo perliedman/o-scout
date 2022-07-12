@@ -178,6 +178,9 @@ const useEvent = create<StateWithActions>(
             set(() => ({
               ...event,
               selectedCourseId: event.courses?.[0]?.id,
+              mode: event.courses?.[0]
+                ? getModeFromCourse(event.courses[0])
+                : Mode.CreateCourse,
             })),
           setMap: (mapFile, mapFilename) =>
             set((state) =>
@@ -199,6 +202,12 @@ const useEvent = create<StateWithActions>(
                 if (courseId && courseId !== Event.ALL_CONTROLS_ID) {
                   const draftCourse = findCourse(draft, courseId);
                   draftCourse.controls.push(Control.clone(control));
+                  if (
+                    courseId === draft.selectedCourseId &&
+                    control.kind === "finish"
+                  ) {
+                    draft.mode = Mode.EditControls;
+                  }
                 }
               })
             ),
@@ -212,7 +221,23 @@ const useEvent = create<StateWithActions>(
                 draft.selectedCourseId = course.id;
               })
             ),
-          setSelected: (selectedCourseId) => set(() => ({ selectedCourseId })),
+          setSelected: (selectedCourseId) =>
+            set((state) => {
+              let course;
+
+              try {
+                course = findCourse(state, selectedCourseId);
+              } catch (e) {
+                // Course not found, let mode be what it was
+              }
+              const mode =
+                course &&
+                (state.mode === Mode.CreateCourse ||
+                  state.mode === Mode.EditControls)
+                  ? getModeFromCourse(course)
+                  : state.mode;
+              return { selectedCourseId, mode };
+            }),
           setName: (courseId, name) =>
             set(
               undoable((draft: StateWithActions) => {
@@ -392,4 +417,10 @@ function createNewEvent(state?: EventState): EventState {
     selectedCourseId: event.courses[0].id,
     mode: Mode.CreateCourse,
   };
+}
+
+function getModeFromCourse(course: CourseType): Mode {
+  return course.controls.some((c: ControlType) => c.kind === "finish")
+    ? Mode.EditControls
+    : Mode.CreateCourse;
 }
