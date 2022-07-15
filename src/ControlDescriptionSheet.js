@@ -84,14 +84,15 @@ export default function ControlDescriptionSheet({
                   <DescriptionSymbol symbol={c.description.all} />
                   <div className="relative -top-6 font-bold h-0">
                     {i > 0
-                      ? (
-                          (controlDistance(
+                      ? Math.round(
+                          ((controlDistance(
                             course.controls[i - 1],
                             course.controls[i]
                           ) /
                             1000) *
-                          mapScale
-                        ).toFixed(0)
+                            mapScale) /
+                            10
+                        ) * 10
                       : ""}
                     m
                   </div>
