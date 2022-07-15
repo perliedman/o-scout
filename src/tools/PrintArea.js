@@ -40,12 +40,14 @@ export default function PrintArea() {
       };
 
       function commitExtent() {
-        setPrintAreaExtent(
-          course.id,
-          transformExtent(currentExtent.current, (c) =>
-            fromProjectedCoord(crs, c)
-          )
-        );
+        if (currentExtent.current) {
+          setPrintAreaExtent(
+            course.id,
+            transformExtent(currentExtent.current, (c) =>
+              fromProjectedCoord(crs, c)
+            )
+          );
+        }
       }
     }
   }, [crs, mapFile, map, course, setPrintAreaExtent]);
