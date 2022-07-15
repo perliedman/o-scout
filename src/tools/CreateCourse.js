@@ -48,6 +48,7 @@ export default function CreateCourse() {
   );
 
   const activeModeRef = useRef(activeMode);
+  activeModeRef.current = activeMode;
   const savedMode = useRef();
   useEffect(() => {
     document.addEventListener("keydown", isShiftDown);
