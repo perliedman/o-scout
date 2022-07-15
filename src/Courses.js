@@ -106,6 +106,7 @@ export default function Courses() {
       {map && mapFile && crs && selectedCourse && (
         <CourseLayer
           eventName={eventName}
+          mapScale={mapScale}
           course={selectedCourse}
           courseAppearance={courseAppearance}
         />

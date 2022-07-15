@@ -12,6 +12,7 @@ export function useControlDescriptions(
   map,
   toProjectedCoord,
   eventName,
+  mapScale,
   course,
   specialObjectsGeoJSON
 ) {
@@ -25,7 +26,11 @@ export function useControlDescriptions(
         specialObjectsGeoJSON.features
           .filter((object) => object.properties.kind === "descriptions")
           .map(async (descriptionObject) => {
-            const svg = await courseDefinitionToSvg(eventName, course);
+            const svg = await courseDefinitionToSvg(
+              eventName,
+              course,
+              mapScale
+            );
             svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
             svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
             const url = await svgToUrl(svg);

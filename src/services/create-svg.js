@@ -146,7 +146,8 @@ export async function courseToSvg(
               case "descriptions": {
                 const descriptionSvg = await courseDefinitionToSvg(
                   eventName,
-                  course
+                  course,
+                  mapScale
                 );
                 const descriptionDimensions = getSvgDimensions(descriptionSvg);
                 const descriptionGroup = descriptionSvg.firstChild;
@@ -227,7 +228,7 @@ const startTriangle = [
   [0, 3.464],
 ];
 
-export async function courseDefinitionToSvg(eventName, course) {
+export async function courseDefinitionToSvg(eventName, course, mapScale) {
   const { controls } = course;
   const cellSize = 25;
   const fontSize = 14;
@@ -340,15 +341,18 @@ export async function courseDefinitionToSvg(eventName, course) {
                     cellSize - 1 // TODO: LOL
                   ),
                   text(
-                    (
-                      (controlDistance(
+                    Math.round(
+                      ((controlDistance(
                         course.controls[index - 1],
                         course.controls[index]
                       ) /
                         1000) *
-                      // TODO: Use correct map scale
-                      15000
-                    ).toFixed(0) + " m",
+                        // TODO: Use correct map scale
+                        mapScale) /
+                        10
+                    ) *
+                      10 +
+                      " m",
                     cellSize * 4 + cellSize / 2,
                     baseLine,
                     "black",

@@ -72,6 +72,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     map,
     paperToProjected,
     eventName,
+    mapScale,
     course,
     specialObjectsGeoJSON
   );
