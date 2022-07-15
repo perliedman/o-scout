@@ -20,17 +20,19 @@ export default function PrintArea() {
 
   useEffect(() => {
     if (map && course) {
+      const initialExtent = transformExtent(
+        getExtent(course.printArea, course),
+        (c) => toProjectedCoord(crs, c)
+      );
+      currentExtent.current = initialExtent;
       const interaction = new ExtentInteraction({
-        extent: transformExtent(getExtent(course.printArea, course), (c) =>
-          toProjectedCoord(crs, c)
-        ),
+        extent: initialExtent,
         boxStyle,
         pointerStyle: new Style(),
       });
-      interaction.on(
-        "extentchanged",
-        ({ extent }) => (currentExtent.current = extent)
-      );
+      interaction.on("extentchanged", ({ extent }) => {
+        currentExtent.current = [...extent];
+      });
       map.on("pointerup", commitExtent);
       map.addInteraction(interaction);
 
