@@ -24,7 +24,6 @@ export default function PrintArea() {
         getExtent(course.printArea, course),
         (c) => toProjectedCoord(crs, c)
       );
-      currentExtent.current = initialExtent;
       const interaction = new ExtentInteraction({
         extent: initialExtent,
         boxStyle,
