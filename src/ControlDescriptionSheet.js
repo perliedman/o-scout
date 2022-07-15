@@ -3,6 +3,7 @@ import { controlDistance } from "./models/control";
 import { courseDistance } from "./models/course";
 import DefinitionTexts from "svg-control-descriptions/symbols/lang.json";
 import Button from "./ui/Button";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export default function ControlDescriptionSheet({
   eventName,
@@ -16,7 +17,7 @@ export default function ControlDescriptionSheet({
   const [descriptionSelector, setDescriptionSelector] = useState();
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div ref={containerRef}>
       <table className="control-sheet">
         <tbody>
           <tr>
@@ -160,43 +161,53 @@ function DescriptionSelector({
 }) {
   const pos = useMemo(() => {
     if (x < 287 / 2) {
-      return { top: `${y}px`, left: `${x}px` };
+      return { top: `${y + 244}px`, left: `${x}px` };
     } else {
-      return { top: `${y}px`, right: `${287 - 40 - x}px` };
+      return { top: `${y + 244}px`, right: `${287 - 40 - x}px` };
     }
   }, [x, y]);
   const [tempSelection, setTempSelection] = useState(selected);
+  useHotkeys("escape", () => onSelect(selected));
 
   return (
-    <div
-      className="absolute z-10 bg-white rounded shadow-md p-2 border border-grey-200 w-48 h-70"
-      style={pos}
-    >
-      <div className="flex flex-col">
-        <DescriptionList
-          selected={tempSelection}
-          column={column}
-          onSelect={setTempSelection}
-        />
-        <div className="font-bold text-center border-t border-gray-600">
-          {DefinitionTexts[tempSelection]?.names["en"] || " "}
-        </div>
-        <div className="w-full flex flex-col items-center mt-2">
-          <div className="w-8 h-12">
-            <DescriptionSymbol symbol={tempSelection} />
+    <>
+      <div
+        className="absolute z-10 bg-white rounded shadow-md p-2 border border-grey-200 w-48 h-70"
+        style={pos}
+      >
+        <div className="flex flex-col">
+          <DescriptionList
+            selected={tempSelection}
+            column={column}
+            onSelect={(description, clickEvent) => {
+              setTempSelection(description);
+              if (clickEvent.detail === 2) onSelect(description);
+            }}
+          />
+          <div className="font-bold text-center border-t border-gray-600">
+            {DefinitionTexts[tempSelection]?.names["en"] || " "}
+          </div>
+          <div className="w-full flex flex-col items-center mt-2">
+            <div className="w-8 h-12">
+              <DescriptionSymbol symbol={tempSelection} />
+            </div>
+          </div>
+          <div className="border-t border-gray-600 mt-2">
+            <Button
+              type="primary"
+              className="text-xs mt-2 w-full"
+              onClick={() => onSelect(tempSelection)}
+            >
+              Ok
+            </Button>
           </div>
         </div>
-        <div className="border-t border-gray-600 mt-2">
-          <Button
-            type="primary"
-            className="text-xs mt-2 w-full"
-            onClick={() => onSelect(tempSelection)}
-          >
-            Ok
-          </Button>
-        </div>
       </div>
-    </div>
+      <div
+        className="absolute inset-y-0 left-8 right-0 bg-black opacity-5"
+        onClick={() => onSelect(tempSelection)}
+      />
+    </>
   );
 }
 
@@ -221,7 +232,7 @@ function DescriptionList({ selected, onSelect, column }) {
           className={`w-6 p-1 focus:outline-none ${
             selected === symbol ? "border border-gray-400" : ""
           }`}
-          onClick={() => onSelect(symbol)}
+          onClick={(e) => onSelect(symbol, e)}
         >
           <DescriptionSymbol symbol={symbol} />
         </button>
