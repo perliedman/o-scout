@@ -15,6 +15,7 @@ export default function EditControls() {
     selectedCourseId,
     selectedCourse,
     courseAppearance,
+    addControl,
     setControlCoordinates,
     removeControl,
   } = useEvent(getEvent, shallow);
@@ -87,13 +88,28 @@ export default function EditControls() {
         source: controlsSource,
       });
       modify.on("modifyend", (e) => {
-        e.features.forEach((feature) =>
-          setControlCoordinates(
-            selectedCourseId,
-            feature.get("id"),
-            fromProjectedCoord(crs, feature.getGeometry().getCoordinates())
-          )
-        );
+        e.features.forEach((feature) => {
+          if (feature.get("kind") !== "line") {
+            setControlCoordinates(
+              selectedCourseId,
+              feature.get("id"),
+              fromProjectedCoord(crs, feature.getGeometry().getCoordinates())
+            );
+          } else {
+            const beforeId = feature.get("end").id;
+            addControl(
+              {
+                kind: "normal",
+                coordinates: fromProjectedCoord(
+                  crs,
+                  feature.getGeometry().getCoordinates()[1]
+                ),
+              },
+              selectedCourseId,
+              beforeId
+            );
+          }
+        });
       });
 
       map.addInteraction(modify);
@@ -170,6 +186,7 @@ function getEvent({
   courses,
   courseAppearance,
   actions: {
+    event: { addControl },
     control: { remove: removeControl, setCoordinates: setControlCoordinates },
   },
 }) {
@@ -180,6 +197,7 @@ function getEvent({
     selectedCourseId,
     selectedCourse,
     courseAppearance,
+    addControl,
     setControlCoordinates,
     removeControl,
   };

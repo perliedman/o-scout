@@ -31,7 +31,7 @@ interface OcadFile {
   getCrs: () => Crs;
 }
 
-interface MapState {
+export interface MapState {
   mapFile?: OcadFile;
   mapInstance?: Map;
   clipGeometry?: Geometry;
@@ -131,7 +131,11 @@ interface Actions {
       set: (event: EventType) => void;
       setMap: (mapFile: OcadFile, mapFilename: string) => void;
       setName: (name: string) => void;
-      addControl: (options: ControlType, courseId?: number) => void;
+      addControl: (
+        options: ControlType,
+        courseId?: number,
+        beforeId?: number
+      ) => void;
       newEvent: () => void;
     };
     course: {
@@ -194,14 +198,29 @@ const useEvent = create<StateWithActions>(
                 draft.name = name;
               })
             ),
-          addControl: (options, courseId) =>
+          addControl: (options, courseId, beforeId) =>
             set(
               undoable((draft: StateWithActions) => {
                 const control = Control.create(options);
                 Event.addControl(draft, control);
                 if (courseId && courseId !== Event.ALL_CONTROLS_ID) {
                   const draftCourse = findCourse(draft, courseId);
-                  draftCourse.controls.push(Control.clone(control));
+                  if (beforeId == null) {
+                    draftCourse.controls.push(Control.clone(control));
+                  } else {
+                    const beforeIndex = draftCourse.controls.findIndex(
+                      (c) => c.id === beforeId
+                    );
+                    if (beforeIndex < 0)
+                      throw new Error(
+                        `Course has no control with id ${beforeId}.`
+                      );
+                    draftCourse.controls.splice(
+                      beforeIndex,
+                      0,
+                      Control.clone(control)
+                    );
+                  }
                   if (
                     courseId === draft.selectedCourseId &&
                     control.kind === "finish"

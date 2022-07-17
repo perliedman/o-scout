@@ -80,29 +80,29 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const controlFeaturesRef = useRef();
   const controlFeatures = useMemo(() => {
     const geojson = new GeoJSON();
-    return geojson.readFeatures(controlsGeoJSON, {
-      dataProjection: ppenProjection,
-      featureProjection: mapProjection,
-    });
-  }, [controlsGeoJSON, mapProjection]);
+    return geojson.readFeatures(
+      featureCollection([
+        ...controlConnectionsGeoJSON.features,
+        ...controlsGeoJSON.features,
+      ]),
+      {
+        dataProjection: ppenProjection,
+        featureProjection: mapProjection,
+      }
+    );
+  }, [controlsGeoJSON, controlConnectionsGeoJSON, mapProjection]);
   controlFeaturesRef.current = controlFeatures;
   const objectFeaturesRef = useRef([]);
   const objectFeatures = useMemo(() => {
     const geojson = new GeoJSON();
     return geojson.readFeatures(
       featureCollection([
-        ...controlConnectionsGeoJSON.features,
         ...controlLabelsGeoJSON.features,
         ...specialObjectsGeoJSON.features,
       ]),
       { dataProjection: ppenProjection, featureProjection: mapProjection }
     );
-  }, [
-    controlConnectionsGeoJSON,
-    controlLabelsGeoJSON,
-    specialObjectsGeoJSON,
-    mapProjection,
-  ]);
+  }, [controlLabelsGeoJSON, specialObjectsGeoJSON, mapProjection]);
   objectFeaturesRef.current = objectFeatures;
 
   const { layer: controlsLayer, source: controlsSource } = useVector(
