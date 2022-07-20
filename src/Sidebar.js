@@ -1,5 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/outline";
-import React, { useState } from "react";
+import { useState } from "react";
 import Courses from "./Courses";
 import MapSection from "./MapSection";
 import PrintAndExport from "./PrintAndExport";
@@ -60,6 +60,13 @@ export default function Sidebar() {
           >
             <Courses />
           </Section>
+          {/* <Section
+            title="Objects"
+            defaultOpen={false}
+            className="border-b border-gray-200"
+          >
+            <Objects />
+          </Section> */}
           <Section
             title="Print &amp; Export"
             defaultOpen={false}

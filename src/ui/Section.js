@@ -6,14 +6,15 @@ export default function Section({
   defaultOpen,
   children,
   className,
-  headingComponent: HeadingComponent = "h2",
-  headingTextStyle = "text-lg",
+  level = 1,
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const { marginClass, borderClass, HeadingComponent, headingTextStyle } =
+    getAttributes(level);
 
   return (
-    <div className={`w-full p-4 ${className}`}>
-      <div className="flex justify-between items-center">
+    <div className={`w-full ${className}`}>
+      <div className={`flex justify-between items-center ${marginClass}`}>
         <button
           className="py-5 w-full cursor-pointer select-none focus:outline-none text-left"
           onClick={() => setOpen(!open)}
@@ -28,7 +29,9 @@ export default function Section({
         </button>
         <Toggle open={open} onClick={() => setOpen(!open)} />
       </div>
-      {open ? <div className="font-thin">{children}</div> : null}
+      {open ? (
+        <div className={`font-thin bg-gray-50 ${borderClass}`}>{children}</div>
+      ) : null}
     </div>
   );
 }
@@ -46,4 +49,25 @@ function Toggle({ open, type, onClick }) {
       <ChevronUpIcon className={open ? "text-white" : "text-grey"} />
     </button>
   );
+}
+
+function getAttributes(level) {
+  switch (level) {
+    case 1:
+      return {
+        marginClass: "mx-4",
+        HeadingComponent: "h2",
+        borderClass: "border-t border-grey",
+        headingTextStyle: "text-lg",
+      };
+    case 2:
+      return {
+        marginClass: "",
+        HeadingComponent: "h3",
+        borderClass: "",
+        headingTextStyle: "",
+      };
+    default:
+      throw new Error(`Unhandled Section level ${level}.`);
+  }
 }

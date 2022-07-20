@@ -41,47 +41,45 @@ export default function PrintAndExport() {
   }, [courses, selection]);
 
   return (
-    <>
-      <Section title="Options" headingComponent="h3" headingTextStyle="">
-        <div className="flex flex-col ml-4 text-sm">
-          <div>Print selection</div>
-          {Object.keys(selectionOptions).map((option) => (
-            <label key={option}>
-              <input
-                className="mr-2"
-                type="radio"
-                name="selection"
-                value={option}
-                checked={option === selection}
-                disabled={!selectionOptions[option].enabled(courses)}
-                onChange={() => setSelection(option)}
-              />
-              {selectionOptions[option].name}
-            </label>
-          ))}
-          <div className="mt-2">Print format</div>
-          {Object.keys(formatOptions).map((option) => (
-            <label key={option}>
-              <input
-                className="mr-2"
-                type="radio"
-                name="format"
-                value={option}
-                checked={option === format}
-                onChange={() => setFormat(option)}
-              />
-              {formatOptions[option].name}
-            </label>
-          ))}
-        </div>
-      </Section>
+    <div className="mx-4 mb-4">
+      <div className="flex flex-col my-4 text-sm">
+        <div>Print selection</div>
+        {Object.keys(selectionOptions).map((option) => (
+          <label key={option}>
+            <input
+              className="mr-2"
+              type="radio"
+              name="selection"
+              value={option}
+              checked={option === selection}
+              disabled={!selectionOptions[option].enabled(courses)}
+              onChange={() => setSelection(option)}
+            />
+            {selectionOptions[option].name}
+          </label>
+        ))}
+        <div className="mt-2">Print format</div>
+        {Object.keys(formatOptions).map((option) => (
+          <label key={option}>
+            <input
+              className="mr-2"
+              type="radio"
+              name="format"
+              value={option}
+              checked={option === format}
+              onChange={() => setFormat(option)}
+            />
+            {formatOptions[option].name}
+          </label>
+        ))}
+      </div>
       <div className="flex justify-end mt-4">
         <Button onClick={onPrint}>
           {state === "printing" && <Spinner className="text-indigo-600" />}
           {`Print ${selectionOptions[selection].name} to ${formatOptions[format].name}`}
         </Button>
       </div>
-    </>
+    </div>
   );
 
   function onPrint() {

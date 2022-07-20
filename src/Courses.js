@@ -37,12 +37,12 @@ export default function Courses() {
 
   return (
     <>
-      <ul>
+      <ul className="">
         {courses.map((course) => (
           <li key={course.id}>
             <button
               onClick={() => setSelected(course.id)}
-              className={`focus:outline-none focus:ring-2 rounded py-2 ring-indigo-600 border-t border-gray-200 w-full text-left ${
+              className={`px-4 focus:outline-none focus:ring-2 rounded py-2 ring-indigo-600 font-thin tracking-wide border-t border-gray-200 w-full text-left ${
                 selectedCourseId === course.id
                   ? "text-indigo-600"
                   : "text-gray-600"
@@ -51,7 +51,7 @@ export default function Courses() {
               {course.name}
             </button>
             {selectedCourseId === course.id && (
-              <div className="my-4">
+              <div className="m-4">
                 <ControlDescriptionSheet
                   eventName={eventName}
                   course={course}
@@ -64,11 +64,7 @@ export default function Courses() {
                     setControlDescription(controlId, description)
                   }
                 />
-                <Section
-                  title="Options"
-                  headingComponent="h3"
-                  headingTextStyle=""
-                >
+                <Section title="Options" level={2}>
                   <CourseOptions
                     course={course}
                     mapScale={mapScale}

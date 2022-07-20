@@ -1,4 +1,3 @@
-import React from "react";
 import SelectMap from "./SelectMap";
 import useEvent, { useMap } from "./store";
 import { ExclamationIcon } from "@heroicons/react/outline";
@@ -10,7 +9,7 @@ export default function MapSection() {
   const setMap = useEvent(getSetMap);
 
   return (
-    <>
+    <div className="p-4">
       <div
         className="w-full overflow-ellipsis overflow-hidden"
         title={mapFilename}
@@ -27,7 +26,7 @@ export default function MapSection() {
           />
         </Dropdown>
       </div>
-    </>
+    </div>
   );
 }
 function getState({ mapFilename, mapFile }) {
@@ -44,9 +43,9 @@ function getSetMap({
 
 function Details({ mapFile }) {
   return (
-    <Section title="Details" headingComponent="h3" headingTextStyle="">
-      <div className="pl-4 bg-indigo-100 rounded">
-        <ul className="ml-4 my-4 py-2 list-disc">
+    <Section title="Details" level={2}>
+      <div className="bg-indigo-100 rounded">
+        <ul className="ml-6 my-4 py-2 list-disc">
           <li>OCAD version: {mapFile.header.version}</li>
         </ul>
       </div>
