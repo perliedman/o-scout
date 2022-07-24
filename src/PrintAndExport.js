@@ -41,7 +41,7 @@ export default function PrintAndExport() {
   }, [courses, selection]);
 
   return (
-    <div className="mx-4 mb-4">
+    <div className="mx-4 pb-4">
       <div className="flex flex-col my-4 text-sm">
         <div>Print selection</div>
         {Object.keys(selectionOptions).map((option) => (

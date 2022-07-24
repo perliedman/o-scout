@@ -36,7 +36,7 @@ export default function Courses() {
   const [isSelectingCourse, selectCourse] = useState(false);
 
   return (
-    <>
+    <div className="pb-4">
       <ul className="">
         {courses.map((course) => (
           <li key={course.id}>
@@ -107,7 +107,7 @@ export default function Courses() {
           courseAppearance={courseAppearance}
         />
       )}
-    </>
+    </div>
   );
 
   async function loadCourse([file]) {
