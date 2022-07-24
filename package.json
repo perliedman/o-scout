@@ -5,7 +5,7 @@
   "dependencies": {
     "@craco/craco": "^6.1.2",
     "@heroicons/react": "^1.0.1",
-    "@react-pdf/pdfkit": "^2.0.10",
+    "@react-pdf/pdfkit": "^2.4.0",
     "@tailwindcss/forms": "^0.3.3",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -27,7 +27,7 @@
     "react-hotkeys-hook": "^3.3.2",
     "react-scripts": "4.0.3",
     "svg-control-descriptions": "^1.1.0",
-    "svg-to-pdfkit": "https://github.com/perliedman/SVG-to-PDFKIT#react-pdf-pdfkit",
+    "svg-to-pdfkit": "^0.1.8",
     "web-vitals": "^1.0.1",
     "zustand": "^3.5.1"
   },
