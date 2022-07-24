@@ -3,6 +3,7 @@ import useEvent, { useMap } from "./store";
 import { ExclamationIcon } from "@heroicons/react/outline";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 import Section from "./ui/Section";
+import { Fragment } from "react";
 
 export default function MapSection() {
   const { mapFilename, mapFile } = useMap(getState);
@@ -42,12 +43,27 @@ function getSetMap({
 }
 
 function Details({ mapFile }) {
+  const { version, subVersion, subSubVersion, currentFileVersion } =
+    mapFile.header;
+  const crs = mapFile.getCrs();
+
+  const items = [
+    ["OCAD version", [version, subVersion, subSubVersion].join(".")],
+    ["File version", currentFileVersion],
+    ["Georeference", `${crs.name} (${crs.catalog}:${crs.code})`],
+  ];
+
   return (
     <Section title="Details" level={2}>
-      <div className="bg-indigo-100 rounded">
-        <ul className="ml-6 my-4 py-2 list-disc">
-          <li>OCAD version: {mapFile.header.version}</li>
-        </ul>
+      <div className="-mx-1 px-1 bg-indigo-50 rounded">
+        <dl>
+          {items.map(([label, value]) => (
+            <div key={label} className="grid grid-cols-3 gap-2">
+              <dt className="text-sm text-gray-600">{label}</dt>
+              <dd className="col-span-2">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </Section>
   );
