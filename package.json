@@ -27,7 +27,7 @@
     "react-hotkeys-hook": "^3.3.2",
     "react-scripts": "4.0.3",
     "svg-control-descriptions": "^1.1.0",
-    "svg-to-pdfkit": "^0.1.8",
+    "svg-to-pdfkit": "perliedman/SVG-to-PDFKit#make-insensitive-to-name-mangling",
     "web-vitals": "^1.0.1",
     "zustand": "^3.5.1"
   },
