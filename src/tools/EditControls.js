@@ -8,6 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import useSelect from "../ol/use-select";
 import ToolButton from "../ui/ToolButton";
 import shallow from "zustand/shallow";
+import { Feature } from "ol";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -83,9 +84,14 @@ export default function EditControls() {
 
   useEffect(() => {
     if (map && controlsSource) {
+      const styleFunction = (_, resolution) =>
+        style(new Feature({ kind: "normal" }), resolution);
+
       const modify = new ModifyInteraction({
         deleteCondition: never,
         source: controlsSource,
+        style: styleFunction,
+        pixelTolerance: 20,
       });
       modify.on("modifyend", (e) => {
         e.features.forEach((feature) => {
