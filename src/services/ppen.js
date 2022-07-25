@@ -6,6 +6,7 @@ import * as PrintArea from "../models/print-area";
 import * as CourseAppearance from "../models/course-appearance";
 import Projection from "ol/proj/Projection";
 import Units from "ol/proj/Units";
+import { createXml } from "./xml-utils";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
@@ -199,20 +200,6 @@ export function parsePPen(doc) {
     allControls.printScale = Number(allControlsTag.getAttribute("print-scale"));
   }
 }
-
-const createXml = (document, n) => {
-  const node = document.createElement(n.type);
-  n.id && (node.id = n.id);
-  n.attrs &&
-    Object.keys(n.attrs).forEach((attrName) =>
-      node.setAttribute(attrName, n.attrs[attrName])
-    );
-  n.text && node.appendChild(document.createTextNode(n.text));
-  n.children &&
-    n.children.forEach((child) => node.appendChild(createXml(document, child)));
-
-  return node;
-};
 
 const courses = (courses) => {
   let id = 1;
