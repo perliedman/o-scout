@@ -82,8 +82,8 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     const geojson = new GeoJSON();
     return geojson.readFeatures(
       featureCollection([
-        ...controlConnectionsGeoJSON.features,
         ...controlsGeoJSON.features,
+        ...controlConnectionsGeoJSON.features,
       ]),
       {
         dataProjection: ppenProjection,

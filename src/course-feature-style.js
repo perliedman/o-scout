@@ -171,7 +171,11 @@ export const finishStyle = [
 ];
 
 export const lineStyle = new Style({
-  stroke: new Stroke({ color: courseOverPrintRgb, width: 3 }),
+  stroke: new Stroke({
+    color: courseOverPrintRgb,
+    width: 3,
+    lineCap: "butt",
+  }),
 });
 
 export const numberStyle = new Style({
