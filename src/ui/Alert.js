@@ -28,8 +28,7 @@ export default function Alert({ message, detail, type = "info", onClose }) {
           <p className="mb-4">{message}</p>
           <p className="font-thin">{detail}</p>
         </div>
-
-        <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
+        <span className="absolute top-0 bottom-0 right-0 px-4 py-3 h-fit">
           <button onClick={onClose}>
             <XIcon className="h-7 w-7" />
           </button>

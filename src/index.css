@@ -23,3 +23,8 @@
 .control-sheet .heavy-right {
   @apply border-r-2;
 }
+
+/* TODO: Remove when tailwind has been bumped to version => 3.0 */
+.h-fit {
+  height: fit-content;
+}
