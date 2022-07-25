@@ -46,10 +46,10 @@ export default function Toolbar(): ReactElement {
               {label}
             </ModeButton>
           ))}
-          <ToolButton disabled={!undo} onClick={undo || null}>
+          <ToolButton disabled={!undo} onClick={undo || null} title="Ctrl+Z">
             Undo
           </ToolButton>
-          <ToolButton disabled={!redo} onClick={redo || null}>
+          <ToolButton disabled={!redo} onClick={redo || null} title="Ctrl+Y">
             Redo
           </ToolButton>
         </div>

@@ -125,6 +125,7 @@ export default function EditControls() {
     setControlCoordinates,
     selectedCourseId,
     style,
+    addControl,
   ]);
 
   useHotkeys("delete,backspace", deleteSelected, [selectedFeature]);
@@ -151,7 +152,11 @@ export default function EditControls() {
 
   return (
     <div>
-      <ToolButton disabled={!selectedControlId} onClick={deleteSelected}>
+      <ToolButton
+        disabled={!selectedControlId}
+        onClick={deleteSelected}
+        title="Del"
+      >
         Delete
       </ToolButton>
     </div>
