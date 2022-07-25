@@ -58,7 +58,7 @@ export default function MapComponent() {
   useEffect(() => {
     if (map && mapLayer) {
       map.addLayer(mapLayer);
-      map.getView().fit(tiler.bounds);
+      map.getView().fit(tiler.bounds, { padding: [50, 370, 50, 50] });
       return () => {
         map.removeLayer(mapLayer);
       };
