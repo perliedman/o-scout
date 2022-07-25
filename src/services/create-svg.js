@@ -270,15 +270,7 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
 
   function header() {
     return [
-      text(
-        eventName,
-        width / 2,
-        cellSize - 7,
-        "black",
-        fontSize,
-        "bold",
-        "middle"
-      ),
+      text(eventName, width / 2, cellSize - 7, "black", fontSize, "bold"),
       lines(
         [
           [0, cellSize],
@@ -295,15 +287,7 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
   function courseInfo() {
     const y = cellSize * 2 - 7;
     return [
-      text(
-        course.name,
-        (cellSize * 3) / 2,
-        y,
-        "black",
-        fontSize,
-        "bold",
-        "middle"
-      ),
+      text(course.name, (cellSize * 3) / 2, y, "black", fontSize, "bold"),
       text(
         // TODO: Use correct map scale
         `${courseDistance(course, 15000).toFixed(1)} km`,
@@ -311,8 +295,7 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
         y,
         "black",
         fontSize,
-        "bold",
-        "middle"
+        "bold"
       ),
       colLine(3, 1, 2),
       colLine(6, 1, 2),
@@ -452,14 +435,24 @@ export function getControlDescriptionExtent(descriptionObject, descriptionSvg) {
   return [bbox[0], bbox[1] - extentHeight, bbox[0] + extentWidth, bbox[1]];
 }
 
-function text(text, x, y, fill, fontSize, fontStyle = "normal") {
+function text(
+  text,
+  x,
+  y,
+  fill,
+  fontSize,
+  fontWeight = "normal",
+  fontFamily = "sans-serif"
+) {
   return {
     type: "text",
     attrs: {
       x,
       y,
       fill,
-      style: `font: ${fontStyle} ${fontSize}px sans-serif;`,
+      "font-family": fontFamily,
+      "font-weight": fontWeight,
+      "font-size": fontSize,
       "text-anchor": "middle",
     },
     text,
