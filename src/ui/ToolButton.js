@@ -12,7 +12,7 @@ export function ModeButton({ active, ...props }) {
 export default function ToolButton({
   onClick,
   disabled,
-  colorClassName = "text-gray-600 bg-white",
+  colorClassName = "",
   children,
   ...props
 }) {
