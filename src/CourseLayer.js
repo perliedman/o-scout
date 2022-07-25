@@ -122,8 +122,6 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const f = mapScale / 1000;
   useStyle(controlsLayer, controlFeaturesRef, f * objScale);
   useStyle(objectsLayer, objectFeaturesRef, f * objScale);
-  useClip(controlsLayer);
-  useClip(objectsLayer);
 
   return null;
 }

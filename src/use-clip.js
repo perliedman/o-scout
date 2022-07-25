@@ -17,7 +17,7 @@ export default function useClip(layer) {
       const vectorContext = getVectorContext(event);
       const context = event.context;
       const canvas = context.canvas;
-      context.fillStyle = "rgba(0,0,0,0.1)";
+      context.fillStyle = "rgba(0,0,0,0.15)";
       clipLayer.getSource().forEachFeature(function (feature) {
         event.context.beginPath();
         drawGeometry(vectorContext, feature.getGeometry());

@@ -57,7 +57,7 @@ export default function PrintArea() {
 }
 
 const boxStyle = new Style({
-  stroke: new Stroke({ color: "#444", lineDash: [8, 4], width: 1 }),
+  stroke: new Stroke({ color: "#444", lineDash: [6, 10], width: 3 }),
   fill: null,
 });
 
