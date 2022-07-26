@@ -9,7 +9,6 @@ import useNumberPositions, {
 } from "./services/use-number-positions";
 import { useControlDescriptions } from "./ControlDescriptionLayer";
 import { featureCollection } from "@turf/helpers";
-import useClip from "./use-clip";
 import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
 import { getObjectScale, transformExtent } from "./services/coordinates";
 import { Feature } from "ol";
