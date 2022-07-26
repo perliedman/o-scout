@@ -1,4 +1,5 @@
 import cloneDeep from "lodash/cloneDeep";
+import { MakeOptional } from "../ts-utils";
 import * as Control from "./control";
 import { Control as ControlType } from "./control";
 import * as Course from "./course";
@@ -125,9 +126,19 @@ export function addCourse(event: Event, course: CourseType): void {
   updateAllControls(event);
 }
 
-export function addControl(event: Event, control: ControlType): ControlType {
-  const id = (control.id = event.idGenerator.next());
-  const { kind } = control;
+export type ControlCreationOptions = MakeOptional<ControlType, "id" | "code">;
+
+export function addControl(
+  event: Event,
+  controlOptions: ControlCreationOptions
+): ControlType {
+  const control = {
+    ...controlOptions,
+    id: controlOptions.id || event.idGenerator.next(),
+    code: controlOptions.code || event.controlCodeGenerator.next(),
+  };
+
+  const { id, kind } = control;
   if (kind !== "start" && kind !== "finish") {
     control.code = event.controlCodeGenerator.next();
   }
@@ -155,8 +166,21 @@ export function updateControl(
 export function updateAllControls(event: Event): void {
   const allControls = getAllControls(event);
   allControls.controls = Object.values(event.controls)
-    .filter((control) => control.kind === "normal")
-    .map((control) => cloneDeep(control));
+    // .filter((control) => control.kind === "normal")
+    .map((control) => cloneDeep(control))
+    .sort((a, b) => {
+      const aVal = value(a);
+      const bVal = value(b);
+      return aVal - bVal;
+
+      function value(x: ControlType): number {
+        return x.kind === "start"
+          ? -1
+          : x.kind === "finish"
+          ? Number.MAX_SAFE_INTEGER
+          : x.code;
+      }
+    });
   allControls.printArea = event.printArea && cloneDeep(event.printArea);
 }
 
