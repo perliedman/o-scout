@@ -1,6 +1,7 @@
 import { Coordinate } from "ol/coordinate";
 import { courseDistance } from "../models/course";
 import { ALL_CONTROLS_ID, Event } from "../models/event";
+import { OcadCrs } from "../store";
 import { createXml } from "./xml-utils";
 
 export function writeIofXml(
@@ -111,11 +112,3 @@ function controlKindToIofType(kind: string): "Start" | "Finish" | "Control" {
       throw new Error(`Unhandled control kind ${kind}.`);
   }
 }
-
-// TODO: incomplete and should ideally be taken of OCAD2GeoJSON
-type OcadCrs = {
-  catalog: string;
-  code: number;
-  scale: number;
-  toProjectedCoord: (c: Coordinate) => Coordinate;
-};

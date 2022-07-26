@@ -23,19 +23,24 @@ import { ppenProjection } from "./services/ppen";
 
 enablePatches();
 
-interface Crs {
+export interface OcadCrs {
   scale: number;
+  catalog: string;
+  code: number;
+  toProjectedCoord: (c: Coordinate) => Coordinate;
+  fromProjectedCoord: (c: Coordinate) => Coordinate;
 }
 
 interface OcadFile {
-  getCrs: () => Crs;
+  getCrs: () => OcadCrs;
 }
 
 export interface MapState {
   mapFile?: OcadFile;
-  mapInstance?: Map;
+  map?: Map;
   clipGeometry?: Geometry;
   clipLayer?: VectorLayer;
+  controlsSource?: VectorSource;
   projections?: {
     mapProjection: Projection;
     paperToProjected: (c: Coordinate) => Coordinate;
@@ -102,7 +107,7 @@ export const useMap = create<MapState>((set) => ({
     set((state) => ({ ...state, controlsSource })),
 }));
 
-export function useCrs(): Crs | undefined {
+export function useCrs(): OcadCrs | undefined {
   const mapFile = useMap(getMapFile);
   return useMemo(() => mapFile?.getCrs(), [mapFile]);
 }
@@ -132,7 +137,7 @@ interface Actions {
       setMap: (mapFile: OcadFile, mapFilename: string) => void;
       setName: (name: string) => void;
       addControl: (
-        options: ControlType,
+        options: Event.ControlCreationOptions,
         courseId?: number,
         beforeId?: number
       ) => void;
@@ -201,8 +206,7 @@ const useEvent = create<StateWithActions>(
           addControl: (options, courseId, beforeId) =>
             set(
               undoable((draft: StateWithActions) => {
-                const control = Control.create(options);
-                Event.addControl(draft, control);
+                const control = Event.addControl(draft, options);
                 if (courseId && courseId !== Event.ALL_CONTROLS_ID) {
                   const draftCourse = findCourse(draft, courseId);
                   if (beforeId == null) {
