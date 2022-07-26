@@ -50,7 +50,7 @@ export function useControlDescriptions(
 
       setDescriptionLayers(layers);
     }
-  }, [eventName, course, specialObjectsGeoJSON, toProjectedCoord]);
+  }, [mapScale, eventName, course, specialObjectsGeoJSON, toProjectedCoord]);
 
   useEffect(() => {
     if (map) {
