@@ -20,31 +20,40 @@ export default function useStyle(
   layer,
   featuresRef,
   objScale,
-  selected = false
+  courseOverPrintColor = courseOverPrintRgb,
+  styleWrapper
 ) {
   const styleFn = useCallback(
     (feature, resolution) =>
-      courseFeatureStyle(featuresRef, objScale, selected, feature, resolution),
-    [featuresRef, objScale, selected]
+      courseFeatureStyle(
+        featuresRef,
+        objScale,
+        courseOverPrintColor,
+        feature,
+        resolution
+      ),
+    [featuresRef, objScale, courseOverPrintColor]
   );
   useEffect(() => {
-    layer.setStyle(styleFn);
-  }, [layer, styleFn]);
+    layer.setStyle(
+      styleWrapper
+        ? (feature, resolution) => styleWrapper(feature, resolution, styleFn)
+        : styleFn
+    );
+  }, [layer, styleFn, styleWrapper]);
 }
 
 export function courseFeatureStyle(
   featuresRef,
   objScale,
-  selected,
+  courseOverPrintColor,
   feature,
   resolution
 ) {
   const kind = feature.get("kind");
-  const color = selected
-    ? selectedOverPrintRgb
-    : feature.get("color")
+  const color = feature.get("color")
     ? palette[feature.get("color")]
-    : courseOverPrintRgb;
+    : courseOverPrintColor;
   let style;
 
   // Note: where applicable, always use setRadius *last*, since that is what
@@ -59,9 +68,8 @@ export function courseFeatureStyle(
     image.setRadius(dimension(controlCircleOutsideDiameter / 2));
     style = controlStyle;
   } else if (kind === "start") {
-    style = selected ? selectedStartStyle : startStyle;
+    style = getStartStyle(color);
     const image = style.getImage();
-    image.getStroke().setColor(color);
     image.setScale(dimension(0.05));
 
     const next = featuresRef.current[feature.get("index") + 1];
@@ -121,18 +129,30 @@ export const controlStyle = new Style({
   }),
 });
 
-export const startStyle = new Style({
-  image: new RegularShape({
-    points: 3,
-    radius: startTriangleRadius * 10 * 2,
-    stroke: new Stroke({
-      color: courseOverPrintRgb,
-      width: overprintLineWidth * 10 * 2,
+const startStyleCache = {};
+export function getStartStyle(color) {
+  let style = startStyleCache[color];
+  if (!style) {
+    style = startStyleCache[color] = createStartStyle(color);
+  }
+
+  return style;
+}
+
+function createStartStyle(color) {
+  return new Style({
+    image: new RegularShape({
+      points: 3,
+      radius: startTriangleRadius * 10 * 2,
+      stroke: new Stroke({
+        color,
+        width: overprintLineWidth * 10 * 2,
+      }),
+      fill: invisible,
+      rotateWithView: true,
     }),
-    fill: invisible,
-    rotateWithView: true,
-  }),
-});
+  });
+}
 
 export const selectedStartStyle = new Style({
   image: new RegularShape({
