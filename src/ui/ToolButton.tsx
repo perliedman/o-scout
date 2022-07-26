@@ -1,4 +1,11 @@
-export function ModeButton({ active, ...props }) {
+import { ButtonHTMLAttributes } from "react";
+
+type ToolButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  colorClassName?: string;
+};
+type ModeButtonProps = ToolButtonProps & { active: boolean };
+
+export function ModeButton({ active, ...props }: ModeButtonProps): JSX.Element {
   return (
     <ToolButton
       role="switch"
@@ -15,7 +22,7 @@ export default function ToolButton({
   colorClassName = "",
   children,
   ...props
-}) {
+}: ToolButtonProps): JSX.Element {
   return (
     <button
       {...props}
