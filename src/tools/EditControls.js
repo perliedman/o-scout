@@ -9,6 +9,7 @@ import useSelect from "../ol/use-select";
 import ToolButton from "../ui/ToolButton";
 import shallow from "zustand/shallow";
 import { Feature } from "ol";
+import { selectedOverPrintRgb } from "../models/course";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -53,7 +54,7 @@ export default function EditControls() {
       return courseFeatureStyle(
         featuresRef,
         f * objScale,
-        true,
+        selectedOverPrintRgb,
         feature,
         resolution
       );
