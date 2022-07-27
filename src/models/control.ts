@@ -4,9 +4,11 @@ export const controlDistance = (c1: Control, c2: Control): number => {
   return length(sub(c1.coordinates, c2.coordinates));
 };
 
+type ControlKind = "start" | "finish" | "normal";
+
 type CreateProps = {
   id: number;
-  kind: string;
+  kind: ControlKind;
   code: number;
   coordinates: number[];
   description?: Description;
@@ -59,8 +61,8 @@ export interface Description {
 
 export interface Control {
   id: number;
-  kind: string;
-  code: number;
+  kind: ControlKind;
+  code?: number;
   coordinates: number[];
   description: Description;
 }

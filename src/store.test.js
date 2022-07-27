@@ -222,4 +222,29 @@ describe("store", () => {
 
     expect(result.current.mode).toBe(Mode.EditControls);
   });
+
+  test("adding a control gives it a code in sequence", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "normal", coordinates: [0, 0] },
+        result.current.courses[0].id
+      )
+    );
+
+    const firstCode =
+      result.current.controls[Object.keys(result.current.controls)[0]].code;
+
+    act(() =>
+      result.current.actions.event.addControl(
+        { kind: "normal", coordinates: [0, 0] },
+        result.current.courses[0].id
+      )
+    );
+    expect(
+      Object.keys(result.current.controls)
+        .map((id) => result.current.controls[id].code)
+        .sort()
+    ).toEqual([firstCode, firstCode + 1]);
+  });
 });
