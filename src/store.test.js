@@ -1,4 +1,5 @@
 import { renderHook, act } from "@testing-library/react-hooks";
+import { ALL_CONTROLS_ID, getAllControls } from "./models/event";
 import useEvent, { Mode } from "./store";
 
 describe("store", () => {
@@ -246,5 +247,22 @@ describe("store", () => {
         .map((id) => result.current.controls[id].code)
         .sort()
     ).toEqual([firstCode, firstCode + 1]);
+  });
+
+  test("can set all controls print scale", () => {
+    const { result } = renderHook(() => useEvent());
+    act(() =>
+      result.current.actions.course.setPrintScale(ALL_CONTROLS_ID, 4500)
+    );
+
+    expect(getAllControls(result.current).printScale).toBe(4500);
+  });
+
+  test("setting print scale of a course with same print scale as all controls, also updates all controls print scale", () => {
+    const { result } = renderHook(() => useEvent());
+    const courseId = result.current.selectedCourseId;
+    act(() => result.current.actions.course.setPrintScale(courseId, 4500));
+
+    expect(getAllControls(result.current).printScale).toBe(4500);
   });
 });

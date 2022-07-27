@@ -42,13 +42,6 @@ export function create(name: string): Event {
     specialObjects: [],
     courseAppearance: CourseAppearance.create(),
     printArea: PrintArea.create(),
-    // allControls: Course.create(
-    //   ALL_CONTROLS_ID,
-    //   "All Controls",
-    //   [],
-    //   15000,
-    //   "all-controls"
-    // ),
   };
 
   event.courses.push(

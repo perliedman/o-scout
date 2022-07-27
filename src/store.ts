@@ -291,9 +291,15 @@ const useEvent = create<StateWithActions>(
           setPrintScale: (courseId, scale) =>
             set(
               undoable((draft: StateWithActions) => {
+                const draftCourse = findCourse(draft, courseId);
+                const originalPrintScale = draftCourse.printScale;
+                draftCourse.printScale = scale;
+
                 if (courseId !== Event.ALL_CONTROLS_ID) {
-                  const draftCourse = findCourse(draft, courseId);
-                  draftCourse.printScale = scale;
+                  const allControls = Event.getAllControls(draft);
+                  if (allControls.printScale === originalPrintScale) {
+                    allControls.printScale = scale;
+                  }
                 }
               })
             ),
