@@ -84,7 +84,13 @@ export default function Courses() {
           <DropdownItem
             onClick={() =>
               newCourse(
-                Course.create(null, "New course", [], mapScale, "normal")
+                Course.create(
+                  null,
+                  "New course",
+                  [],
+                  selectedCourse.printScale,
+                  "normal"
+                )
               )
             }
           >
