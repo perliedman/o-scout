@@ -39,7 +39,7 @@ export interface MapState {
   mapFile?: OcadFile;
   map?: Map;
   clipGeometry?: Geometry;
-  clipLayer?: VectorLayer;
+  clipLayer?: VectorLayer<VectorSource>;
   controlsSource?: VectorSource;
   projections?: {
     mapProjection: Projection;
@@ -53,7 +53,7 @@ export interface MapState {
   ) => void;
   setMapInstance: (map: Map) => void;
   setClipGeometry: (geometry: Geometry) => void;
-  setClipLayer: (clipLayer: VectorLayer) => void;
+  setClipLayer: (clipLayer: VectorLayer<VectorSource>) => void;
   setControlsSource: (controlSource: VectorSource) => void;
 }
 
@@ -150,6 +150,11 @@ interface Actions {
       setPrintAreaExtent: (courseId: number, extent: Extent) => void;
       setPrintScale: (courseId: number, scale: number) => void;
       setPrintArea: (courseId: number, props: PrintArea) => void;
+      replaceControl: (
+        courseId: number,
+        controlIndex: number,
+        newControlId: number
+      ) => void;
     };
     control: {
       remove: (courseId: number, controlId: number) => void;
@@ -313,6 +318,14 @@ const useEvent = create<StateWithActions>(
                 if (isAllControls) {
                   Event.updateAllControls(draft);
                 }
+              })
+            ),
+          replaceControl: (courseId, controlIndex, newControlId) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                const draftCourse = findCourse(draft, courseId);
+                const newControl = draft.controls[newControlId];
+                draftCourse.controls.splice(controlIndex, 1, newControl);
               })
             ),
         },

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useEvent, { useCrs, useMap } from "../store";
 import ModifyInteraction from "ol/interaction/Modify";
+import SnapInteraction from "ol/interaction/Snap";
 import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
 import { never } from "ol/events/condition";
 import { courseFeatureStyle } from "../course-feature-style";
@@ -10,17 +11,23 @@ import ToolButton from "../ui/ToolButton";
 import shallow from "zustand/shallow";
 import { Feature } from "ol";
 import { selectedOverPrintRgb } from "../models/course";
+import useOtherControls from "./use-other-controls";
+import { ALL_CONTROLS_ID } from "../models/event";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
   const {
     selectedCourseId,
     selectedCourse,
+    allControls,
     courseAppearance,
     addControl,
+    replaceControl,
     setControlCoordinates,
     removeControl,
   } = useEvent(getEvent, shallow);
+
+  const [showAllControls, setShowAllControls] = useState(true);
 
   const featuresRef = useRef();
   useEffect(() => {
@@ -62,6 +69,17 @@ export default function EditControls() {
     [crs, featuresRef, objScale]
   );
 
+  const highlightFeatureRef = useRef();
+  const { source: otherControlsSource } = useOtherControls({
+    enabled: showAllControls,
+    selectedCourse,
+    allControls,
+    courseAppearance,
+    crs,
+    map,
+    highlightFeatureRef,
+  });
+
   const [selectedControlId, setSelectedControlId] = useState();
   const selectOptions = useMemo(
     () => ({
@@ -93,34 +111,56 @@ export default function EditControls() {
         source: controlsSource,
         style: styleFunction,
         pixelTolerance: 20,
+        snapToPointer: true,
       });
       modify.on("modifyend", (e) => {
         e.features.forEach((feature) => {
           if (feature.get("kind") !== "line") {
-            setControlCoordinates(
-              selectedCourseId,
-              feature.get("id"),
-              fromProjectedCoord(crs, feature.getGeometry().getCoordinates())
-            );
+            const coordinates = feature.getGeometry().getCoordinates();
+            const snappedControlId = findSnap(otherControlsSource, coordinates);
+
+            if (!snappedControlId) {
+              setControlCoordinates(
+                selectedCourseId,
+                feature.get("id"),
+                fromProjectedCoord(crs, coordinates)
+              );
+            } else {
+              replaceControl(
+                selectedCourseId,
+                feature.get("index"),
+                snappedControlId
+              );
+            }
           } else {
+            const coordinates = feature.getGeometry().getCoordinates()[1];
+            const snappedControlId = findSnap(otherControlsSource, coordinates);
             const beforeId = feature.get("end").id;
-            addControl(
-              {
-                kind: "normal",
-                coordinates: fromProjectedCoord(
-                  crs,
-                  feature.getGeometry().getCoordinates()[1]
-                ),
-              },
-              selectedCourseId,
-              beforeId
-            );
+            if (!snappedControlId) {
+              addControl(
+                {
+                  kind: "normal",
+                  coordinates: fromProjectedCoord(crs, coordinates),
+                },
+                selectedCourseId,
+                beforeId
+              );
+            } else {
+              const snappedControl = allControls.controls.find(
+                (control) => control.id === snappedControlId
+              );
+              addControl({ ...snappedControl }, selectedCourseId, beforeId);
+            }
           }
         });
       });
 
       map.addInteraction(modify);
+      const snap = new SnapInteraction({ source: otherControlsSource });
+      map.addInteraction(snap);
+
       return () => {
+        map.removeInteraction(snap);
         map.removeInteraction(modify);
       };
     }
@@ -133,6 +173,8 @@ export default function EditControls() {
     selectedCourseId,
     style,
     addControl,
+    otherControlsSource,
+    allControls,
   ]);
 
   useHotkeys("delete,backspace", deleteSelected, [selectedFeature]);
@@ -158,13 +200,24 @@ export default function EditControls() {
   ]);
 
   return (
-    <div>
+    <div className="flex items-start">
       <ToolButton
         disabled={!selectedControlId}
         onClick={deleteSelected}
         title="Del"
       >
         Delete
+      </ToolButton>
+      <ToolButton>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={showAllControls}
+            onChange={(e) => setShowAllControls(e.target.checked)}
+            className="mr-2 rounded-sm"
+          />{" "}
+          Reuse controls
+        </label>
       </ToolButton>
     </div>
   );
@@ -189,6 +242,22 @@ export default function EditControls() {
   }
 }
 
+function findSnap(otherControlsSource, coordinates) {
+  let result;
+  otherControlsSource.forEachFeature((feature) => {
+    const featureCoordinate = feature.getGeometry().getCoordinates();
+    if (
+      !result &&
+      featureCoordinate[0] === coordinates[0] &&
+      featureCoordinate[1] === coordinates[1]
+    ) {
+      result = feature.get("id");
+    }
+  });
+
+  return result;
+}
+
 function getMap({ map, controlsSource }) {
   return { map, controlsSource };
 }
@@ -200,16 +269,20 @@ function getEvent({
   actions: {
     event: { addControl },
     control: { remove: removeControl, setCoordinates: setControlCoordinates },
+    course: { replaceControl },
   },
 }) {
   const selectedCourse = courses.find(
     (course) => course.id === selectedCourseId
   );
+  const allControls = courses.find((course) => course.id === ALL_CONTROLS_ID);
   return {
     selectedCourseId,
     selectedCourse,
+    allControls,
     courseAppearance,
     addControl,
+    replaceControl,
     setControlCoordinates,
     removeControl,
   };
