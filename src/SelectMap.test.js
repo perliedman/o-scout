@@ -1,8 +1,7 @@
 import SelectMap from "./SelectMap";
 import { readFileSync } from "fs";
 import { Simulate } from "react-dom/test-utils";
-import { render, waitFor } from "@testing-library/react";
-import { act } from "@testing-library/react-hooks";
+import { render, waitFor, act } from "@testing-library/react";
 
 describe("SelectMap", () => {
   test("state returns to idle after loading map", async () => {
@@ -14,7 +13,9 @@ describe("SelectMap", () => {
     );
     const input = document.querySelector("input");
 
-    Simulate.change(input, { target: { files: [file] } });
+    await act(async () => {
+      Simulate.change(input, { target: { files: [file] } });
+    });
 
     expect(input).toBeDisabled();
     await waitFor(() => expect(input).toBeEnabled());
