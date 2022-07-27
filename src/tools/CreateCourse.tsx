@@ -1,48 +1,25 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import useStyle, {
   controlStyle,
-  courseFeatureStyle,
   finishStyle,
   getStartStyle,
 } from "../course-feature-style";
-import {
-  Course,
-  courseOverPrintRgb,
-  selectedOverPrintRgb,
-} from "../models/course";
+import { courseOverPrintRgb } from "../models/course";
 import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
 import {
   controlCircleOutsideDiameter,
   overprintLineWidth,
 } from "../services/use-number-positions";
-import useEvent, {
-  MapState,
-  OcadCrs,
-  StateWithActions,
-  useCrs,
-  useMap,
-} from "../store";
+import useEvent, { MapState, StateWithActions, useCrs, useMap } from "../store";
 import DrawInteraction from "ol/interaction/Draw";
-import GeometryType from "ol/geom/GeometryType";
-import GeoJSON from "ol/format/GeoJSON";
 import { primaryAction } from "ol/events/condition";
 import ToolButton, { ModeButton } from "../ui/ToolButton";
 import shallow from "zustand/shallow";
 import { ALL_CONTROLS_ID } from "../models/event";
 import CircleStyle from "ol/style/Circle";
 import Point from "ol/geom/Point";
-import { Feature, Map, MapBrowserEvent } from "ol";
-import { CourseAppearance } from "../models/course-appearance";
-import useControls from "../services/use-controls";
-import useVector from "../ol/use-vector";
-import { ppenProjection } from "../services/ppen";
+import { Feature, MapBrowserEvent } from "ol";
+import useOtherControls from "./use-other-controls";
 
 type CreationMode = "Control" | "Finish";
 const creationModes: CreationMode[] = ["Control", "Finish"];
@@ -65,9 +42,9 @@ export default function CreateCourse(): JSX.Element {
   useEffect(() => {
     if (controlsSource) {
       featuresRef.current = controlsSource.getFeatures();
-      controlsSource.on("changed", update);
+      controlsSource.on("change", update);
       return () => {
-        controlsSource.un("changed", update);
+        controlsSource.un("change", update);
       };
     }
     function update() {
@@ -155,7 +132,7 @@ export default function CreateCourse(): JSX.Element {
   useEffect(() => {
     if (map && controlsSource) {
       const draw = new DrawInteraction({
-        type: GeometryType.POINT,
+        type: "Point",
         style,
         condition: (event) => {
           return primaryAction(event);
@@ -197,7 +174,7 @@ export default function CreateCourse(): JSX.Element {
     }
   }, [map, crs, controls, controlsSource, addControl, selectedCourseId, style]);
 
-  const otherControlsLayer = useOtherControls({
+  const { layer: otherControlsLayer } = useOtherControls({
     enabled: showAllControls,
     selectedCourse,
     allControls,
@@ -216,7 +193,7 @@ export default function CreateCourse(): JSX.Element {
       };
     }
 
-    async function onPointerMove(e: MapBrowserEvent) {
+    async function onPointerMove(e: MapBrowserEvent<PointerEvent>) {
       const features = await otherControlsLayer.getFeatures(e.pixel);
       if (features.length > 0) {
         const [feature] = features;
@@ -283,86 +260,4 @@ function getEvent({
     courseAppearance,
     addControl,
   };
-}
-
-type OtherControlsProps = {
-  map?: Map;
-  crs?: OcadCrs;
-  enabled: boolean;
-  allControls?: Course;
-  selectedCourse?: Course;
-  courseAppearance: CourseAppearance;
-  highlightFeatureRef: MutableRefObject<Feature | undefined>;
-};
-function useOtherControls({
-  enabled,
-  map,
-  crs,
-  allControls,
-  selectedCourse,
-  courseAppearance,
-  highlightFeatureRef,
-}: OtherControlsProps) {
-  const objScale = useMemo(
-    () =>
-      getObjectScale(
-        courseAppearance.scaleSizes,
-        crs?.scale,
-        selectedCourse?.printScale
-      ),
-    [courseAppearance, crs?.scale, selectedCourse?.printScale]
-  );
-
-  const controls = useMemo(() => {
-    if (!enabled) return [];
-    const selectedCourseIds = new Set(
-      selectedCourse?.controls.map((c) => c.id)
-    );
-    return (allControls?.controls || []).filter(
-      (control) =>
-        (selectedCourseIds.size === 0 || control.kind !== "start") &&
-        !selectedCourseIds.has(control.id)
-    );
-  }, [enabled, selectedCourse, allControls]);
-  const controlsGeoJSON = useControls(controls);
-  const featureProjection = map?.getView().getProjection();
-  const controlFeatures = useMemo(() => {
-    const geojson = new GeoJSON();
-    return geojson.readFeatures(controlsGeoJSON, {
-      dataProjection: ppenProjection,
-      featureProjection,
-    });
-  }, [controlsGeoJSON, featureProjection]);
-
-  const { layer: controlsLayer } = useVector(map, controlFeatures, {});
-
-  const f = crs ? crs.scale / 1000 : 1;
-  const highlighStyleFn = useCallback(
-    (feature, resolution, fallbackStyleFn) => {
-      if (feature === highlightFeatureRef.current) {
-        return courseFeatureStyle(
-          { current: [] },
-          f * objScale,
-          selectedOverPrintRgb,
-          feature,
-          resolution
-        );
-      } else {
-        return fallbackStyleFn(feature, resolution);
-      }
-    },
-    [highlightFeatureRef, f, objScale]
-  );
-
-  const controlFeaturesRef = useRef(controlFeatures);
-  controlFeaturesRef.current = controlFeatures;
-  useStyle(
-    controlsLayer,
-    controlFeaturesRef,
-    f * objScale,
-    "rgba(182, 44, 152, 0.5)",
-    highlighStyleFn
-  );
-
-  return controlsLayer;
 }
