@@ -108,7 +108,7 @@ describe("store", () => {
 
     act(() => result.current.undo());
 
-    expect(result.current.controls[controlId].description.all).toBeFalsy();
+    expect(result.current.controls[controlId].description?.all).toBeFalsy();
     expect(
       result.current.courses[0].controls[
         result.current.courses[0].controls.length - 1
