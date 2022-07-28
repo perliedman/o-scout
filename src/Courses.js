@@ -3,12 +3,13 @@ import useEvent, { useMap } from "./store";
 import shallow from "zustand/shallow";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 import FilePicker from "./FilePicker";
-import { parsePPen } from "./services/ppen";
+import { parsePPen, writePpen } from "./services/ppen";
 import CourseLayer from "./CourseLayer";
 import ControlDescriptionSheet from "./ControlDescriptionSheet";
 import * as Course from "./models/course";
 import Section from "./ui/Section";
 import CourseOptions from "./CourseOptions";
+import downloadBlob from "./services/download-blob";
 
 export default function Courses() {
   const {
@@ -96,6 +97,9 @@ export default function Courses() {
           >
             Add new course
           </DropdownItem>
+          <DropdownItem onClick={downloadCourses}>
+            Download as Purple Pen...
+          </DropdownItem>
           <DropdownItem onClick={selectCourse}>Load courses...</DropdownItem>
           <DropdownItem onClick={newEvent}>New event</DropdownItem>
         </Dropdown>
@@ -115,6 +119,17 @@ export default function Courses() {
       )}
     </div>
   );
+
+  function downloadCourses() {
+    const event = useEvent.getState();
+    const ppen = writePpen(event);
+    downloadBlob(
+      new Blob([new XMLSerializer().serializeToString(ppen)], {
+        type: "application/xml",
+      }),
+      `${event.name}.ppen`
+    );
+  }
 
   async function loadCourse([file]) {
     selectCourse(false);

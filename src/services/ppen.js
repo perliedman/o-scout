@@ -7,6 +7,7 @@ import * as CourseAppearance from "../models/course-appearance";
 import Projection from "ol/proj/Projection";
 import Units from "ol/proj/Units";
 import { createXml } from "./xml-utils";
+import { ALL_CONTROLS_ID } from "../models/event";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
@@ -263,15 +264,15 @@ export function writePpen(event) {
               type: "OCAD",
               scale: event.mapScale,
               "ignore-missing-fonts": false,
-              "absolute-path": event.map.name,
-              text: event.map.name,
+              "absolute-path": event.mapFilename,
+              text: event.mapFilename,
             },
           },
         ],
       },
     ]
       .concat(
-        event.controlList.map((c) => ({
+        Object.values(event.controls).map((c) => ({
           type: "control",
           id: c.id,
           attrs: {
@@ -294,7 +295,9 @@ export function writePpen(event) {
             ),
         }))
       )
-      .concat(courses(event.courses)),
+      .concat(
+        courses(event.courses.filter((course) => course.id !== ALL_CONTROLS_ID))
+      ),
   });
 
   doc.appendChild(root);
