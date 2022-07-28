@@ -20,6 +20,7 @@ onmessage = async function ({ data }) {
       svg.setAttributeNS(null, "width", tileSize[0]);
       svg.setAttributeNS(null, "height", tileSize[1]);
       svg.setAttribute("viewBox", `0 0 ${tileSize[0]} ${tileSize[1]}`);
+      fixIds(svg);
 
       postMessage({
         type: "TILE",
@@ -31,3 +32,17 @@ onmessage = async function ({ data }) {
       throw new Error(`Unhandled message type "${data.type}.`);
   }
 };
+
+// In xmldom, node ids are normal attributes, while in the browser's
+// DOM, they are a property on the node object itself. This method
+// recursively "fixes" nodes by adding id attributes.
+function fixIds(n) {
+  if (n.id) {
+    n.setAttributeNS("http://www.w3.org/2000/svg", "id", n.id);
+  }
+  if (n.childNodes) {
+    for (let i = 0; i < n.childNodes.length; i++) {
+      fixIds(n.childNodes[i]);
+    }
+  }
+}
