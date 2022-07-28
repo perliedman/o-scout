@@ -111,7 +111,7 @@ export default function PrintAndExport() {
               new Blob([svg.outerHTML], { type: "application/svg+xml" })
             )
         : format === "png"
-        ? (svg) => svgToBitmap(svg)
+        ? (svg) => svgToBitmap(svg, [], new XMLSerializer())
         : null;
 
     if (format !== "iofXml") {

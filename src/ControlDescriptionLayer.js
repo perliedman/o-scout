@@ -33,7 +33,7 @@ export function useControlDescriptions(
             );
             svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
             svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-            const url = await svgToUrl(svg);
+            const url = await svgToUrl(svg, new XMLSerializer());
             const imageExtent = transformExtent(
               getControlDescriptionExtent(descriptionObject, svg),
               toProjectedCoord
