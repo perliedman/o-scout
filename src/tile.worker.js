@@ -25,7 +25,7 @@ onmessage = async function ({ data }) {
       postMessage({
         type: "TILE",
         tileId: tileId,
-        url: await svgToUrl(svg, new XMLSerializer()),
+        url: svgToUrl(svg, new XMLSerializer()),
       });
       break;
     default:
