@@ -49,7 +49,7 @@ export default function SelectMap({
     try {
       const [blob] = e.target.files;
       const map = await readMap(blob);
-      setMap(blob.name, map, new OcadTiler(map));
+      setMap(blob.name, map, new OcadTiler(map), blob);
       onMapLoaded && onMapLoaded(map, blob.name);
       setState("idle");
     } catch (e) {

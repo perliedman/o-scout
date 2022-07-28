@@ -20,6 +20,8 @@ import Projection from "ol/proj/Projection";
 import { fromProjectedCoord, toProjectedCoord } from "./services/coordinates";
 import { addCoordinateTransforms } from "ol/proj";
 import { ppenProjection } from "./services/ppen";
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import TileWorker from "worker-loader!./tile.worker.js";
 
 enablePatches();
 
@@ -46,10 +48,12 @@ export interface MapState {
     paperToProjected: (c: Coordinate) => Coordinate;
     projectedToPaper: (c: Coordinate) => Coordinate;
   };
+  tileWorker?: TileWorker;
   setMapFile: (
     mapFilename: string,
     mapFile: OcadFile,
-    tiler: OcadTiler
+    tiler: OcadTiler,
+    mapFileBlob: Blob
   ) => void;
   setMapInstance: (map: Map) => void;
   setClipGeometry: (geometry: Geometry) => void;
@@ -63,14 +67,20 @@ export const useMap = create<MapState>((set) => ({
   clipGeometry: undefined,
   clipLayer: undefined,
   projections: undefined,
-  setMapFile: (mapFilename, mapFile, tiler) =>
-    set((state) => ({
-      ...state,
-      mapFile,
-      mapFilename,
-      tiler,
-      projections: undefined,
-    })),
+  setMapFile: (mapFilename, mapFile, tiler, mapFileBlob) =>
+    set((state) => {
+      const tileWorker = state.tileWorker || new TileWorker();
+      tileWorker.postMessage({ type: "SET_MAP_FILE", blob: mapFileBlob });
+
+      return {
+        ...state,
+        mapFile,
+        mapFilename,
+        tiler,
+        tileWorker,
+        projections: undefined,
+      };
+    }),
   setMapInstance: (map) =>
     set((state) => {
       const crs = state.mapFile?.getCrs();
