@@ -16,10 +16,8 @@ import shallow from "zustand/shallow";
 import EventMapMismatchDialog from "./EventMapMismatchDialog";
 
 export default function MapComponent() {
-  const { mapFile, map, tiler, setMapInstance, setClipLayer } = useMap(
-    getMap,
-    shallow
-  );
+  const { mapFile, map, tiler, tileWorker, setMapInstance, setClipLayer } =
+    useMap(getMap, shallow);
   const pushNotification = useNotifications(getPush);
 
   useRestoredData();
@@ -54,7 +52,13 @@ export default function MapComponent() {
     },
     [hasTileErrors, pushNotification]
   );
-  const mapLayer = useMapLayer({ map, projection, tiler, onSuccess, onError });
+  const mapLayer = useMapLayer({
+    map,
+    projection,
+    tileWorker,
+    onSuccess,
+    onError,
+  });
   useEffect(() => {
     if (map && mapLayer) {
       map.addLayer(mapLayer);
@@ -131,6 +135,7 @@ function getMap({
   mapFile,
   map,
   tiler,
+  tileWorker,
   setMapInstance,
   clipGeometry,
   setClipLayer,
@@ -139,6 +144,7 @@ function getMap({
     mapFile,
     map,
     tiler,
+    tileWorker,
     setMapInstance,
     clipGeometry,
     setClipLayer,

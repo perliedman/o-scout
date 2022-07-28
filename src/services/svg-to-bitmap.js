@@ -1,12 +1,26 @@
-export function svgToBitmap(svg, [width = null, height = null] = []) {
+export function svgToBitmap(
+  svg,
+  [width = null, height = null] = [],
+  xmlSerializer
+) {
+  const svgUrl = svgToUrl(svg, xmlSerializer);
+  width = width || svg.getAttribute("width");
+  height = height || svg.getAttribute("height");
+  return svgUrlToBitmapDataUrl(svgUrl, [width, height]);
+}
+
+export function svgUrlToBitmapDataUrl(
+  svgUrl,
+  [width = null, height = null] = []
+) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.src = svgToUrl(svg);
+    image.src = svgUrl;
 
     image.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = width || svg.getAttribute("width");
-      canvas.height = height || svg.getAttribute("height");
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(image, 0, 0);
 
@@ -17,10 +31,8 @@ export function svgToBitmap(svg, [width = null, height = null] = []) {
   });
 }
 
-const serializer = new XMLSerializer();
-
-export function svgToUrl(svg) {
+export function svgToUrl(svg, xmlSerializer) {
   return `data:image/svg+xml,${encodeURIComponent(
-    serializer.serializeToString(svg)
+    xmlSerializer.serializeToString(svg)
   )}`;
 }
