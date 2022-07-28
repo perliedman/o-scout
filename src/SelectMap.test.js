@@ -2,7 +2,7 @@ import SelectMap from "./SelectMap";
 import { readFileSync } from "fs";
 import { Simulate } from "react-dom/test-utils";
 import { render, waitFor, act } from "@testing-library/react";
-
+jest.mock("worker-loader!./tile.worker.js");
 describe("SelectMap", () => {
   test("state returns to idle after loading map", async () => {
     render(<SelectMap>Select Map</SelectMap>);

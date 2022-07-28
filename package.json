@@ -92,6 +92,9 @@
   "jest": {
     "transformIgnorePatterns": [
       "/node_modules/(?!ol)"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.worker.js": "<rootDir>/src/__mocks__/worker-mock.js"
+    }
   }
 }
