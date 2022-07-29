@@ -173,6 +173,7 @@ export default function EditControls() {
     selectedCourseId,
     style,
     addControl,
+    replaceControl,
     otherControlsSource,
     allControls,
   ]);
