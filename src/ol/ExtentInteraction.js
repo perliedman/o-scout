@@ -13,6 +13,11 @@ export default class ExtentInteraction extends OlExtentInteraction {
    * @type (eventType: 'extentchangeend', handler: ({type: 'eventchangeend', extent: Extent}) => void)   */
   on;
 
+  constructor(options) {
+    super(options);
+    this.create_ = options?.create;
+  }
+
   handleEvent(mapBrowserEvent) {
     super.handleEvent(mapBrowserEvent);
     return !this.pointerHandler_ && !this.dragDelta_;
@@ -24,8 +29,8 @@ export default class ExtentInteraction extends OlExtentInteraction {
     let cursor = "auto";
 
     const vertex = this.snapToVertex_(pixel, map);
+    const extent = this.getExtentInternal();
     if (vertex) {
-      const extent = this.getExtentInternal();
       if (vertex[0] === extent[0] && vertex[1] === extent[1]) {
         cursor = "ne-resize";
       } else if (vertex[0] === extent[2] && vertex[1] === extent[1]) {
@@ -44,7 +49,8 @@ export default class ExtentInteraction extends OlExtentInteraction {
         cursor = "s-resize";
       }
     } else if (
-      containsCoordinate(this.getExtentInternal(), mapBrowserEvent.coordinate)
+      extent &&
+      containsCoordinate(extent, mapBrowserEvent.coordinate)
     ) {
       cursor = "all-scroll";
     }
@@ -60,7 +66,7 @@ export default class ExtentInteraction extends OlExtentInteraction {
 
     const vertex = this.snapToVertex_(pixel, map);
 
-    if (!vertex) {
+    if (!this.create_ && !vertex) {
       if (containsCoordinate(extent, coordinate)) {
         const center = getCenter(extent);
         this.dragDelta_ = [
@@ -82,8 +88,9 @@ export default class ExtentInteraction extends OlExtentInteraction {
     this.dragDelta_ = undefined;
     const handled = super.handleUpEvent(mapBrowserEvent);
     if (
-      this._dragStartExtent &&
-      this.extent_.some((x, i) => this._dragStartExtent[i] !== x)
+      this.create_ ||
+      (this._dragStartExtent &&
+        this.extent_.some((x, i) => this._dragStartExtent[i] !== x))
     ) {
       this.dispatchEvent({ type: "extentchangeend", extent: this.extent_ });
     }
