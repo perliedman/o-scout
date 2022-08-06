@@ -186,6 +186,27 @@ export function getAllControls(event: Event): CourseType {
   return allControls;
 }
 
+export function addSpecialObject(
+  event: Event,
+  object: Omit<SpecialObject, "id">,
+  courseId: number | undefined
+): SpecialObject {
+  const specialObject = { id: event.idGenerator.next(), ...object };
+
+  event.specialObjects.push(specialObject);
+
+  for (const course of event.courses) {
+    if (object.isAllCourses || courseId === course.id) {
+      course.specialObjects.push({
+        ...specialObject,
+        locations: [...specialObject.locations],
+      });
+    }
+  }
+
+  return specialObject;
+}
+
 const sequence = (start: number) =>
   (() => {
     let s = start - 1;

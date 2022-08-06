@@ -5,10 +5,10 @@ import useEvent, { MapState, StateWithActions, useMap } from "../store";
 import GeoJSON from "ol/format/GeoJSON";
 import { ppenProjection } from "../services/ppen";
 import Select from "ol/interaction/Select";
-import { Collection, Feature } from "ol";
+import { Collection, Feature, Map } from "ol";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
-import { selectedOverPrintRgb } from "../models/course";
+import { Course, selectedOverPrintRgb } from "../models/course";
 import Fill from "ol/style/Fill";
 import { asArray } from "ol/color";
 import Modify from "ol/interaction/Modify";
@@ -17,31 +17,113 @@ import VectorSource from "ol/source/Vector";
 import { SpecialObject } from "../models/special-object";
 import { altKeyOnly, singleClick } from "ol/events/condition";
 import ExtentInteraction from "../ol/ExtentInteraction";
-import { transformExtent } from "ol/proj";
+import { Projection, transformExtent } from "ol/proj";
 import { Extent } from "ol/extent";
 import ToolButton, { ModeButton } from "../ui/ToolButton";
+import { Coordinate } from "ol/coordinate";
+
+type ObjectMode = "edit" | "white-out" | "line" | "descriptions";
+
+const modes: Array<[ObjectMode, string]> = [
+  ["edit", "Edit"],
+  ["white-out", "White-Out"],
+  ["line", "Line"],
+  ["descriptions", "Descriptions"],
+];
 
 export default function Objects(): JSX.Element {
+  const { map } = useMap(getMap);
+  const {
+    selectedCourse,
+    addSpecialObject,
+    updateSpecialObject,
+    deleteSpecialObject,
+  } = useEvent(getEvent, shallow);
+  const [selectedObjectId, setSelectedObjectId] = useState<number>();
+  const [mode, setMode] = useState<ObjectMode>("edit");
+
+  useEffect(() => {
+    if (!map || !selectedCourse) return;
+    if (mode === "descriptions") {
+      const interaction = new ExtentInteraction({
+        create: true,
+        boxStyle: selectedStyle,
+        cursor: "crosshair",
+      });
+      interaction.on("extentchangeend", ({ extent }: { extent: Extent }) => {
+        const locations = mapExtentToDescriptionLocations(
+          extent,
+          map.getView().getProjection(),
+          (selectedCourse?.controls.length || 0) + 2
+        );
+        addSpecialObject(
+          {
+            id: Math.floor(Math.random() * 1000000),
+            kind: "descriptions",
+            locations,
+            isAllCourses: false,
+          },
+          selectedCourse.id
+        );
+        const objects = useEvent.getState().specialObjects;
+        setSelectedObjectId(objects[objects.length - 1].id);
+        setMode("edit");
+      });
+      map.addInteraction(interaction);
+
+      return () => {
+        map.removeInteraction(interaction);
+      };
+    }
+  }, [addSpecialObject, map, mode, selectedCourse]);
+
   return (
     <>
       <div className="flex items-start">
-        <ModeButton active>Edit</ModeButton>
-        <ModeButton>White-out</ModeButton>
-        <ModeButton>Line</ModeButton>
-        <ModeButton>Descriptions</ModeButton>
-        <EditObjects />
+        {modes.map(([buttonMode, label]) => (
+          <ModeButton
+            key={buttonMode}
+            active={buttonMode === mode}
+            onClick={() => setMode(buttonMode)}
+          >
+            {label}
+          </ModeButton>
+        ))}
+        {mode === "edit" && (
+          <EditObjects
+            map={map}
+            selectedCourse={selectedCourse}
+            selectedObjectId={selectedObjectId}
+            setSelectedObjectId={setSelectedObjectId}
+            updateSpecialObject={updateSpecialObject}
+            deleteSpecialObject={deleteSpecialObject}
+          />
+        )}
       </div>
     </>
   );
 }
 
-function EditObjects(): JSX.Element {
-  const { map } = useMap(getMap);
-  const { selectedCourse, updateSpecialObject, deleteSpecialObject } = useEvent(
-    getEvent,
-    shallow
-  );
+type EditObjectsProps = {
+  map?: Map;
+  selectedCourse?: Course;
+  selectedObjectId?: number;
+  setSelectedObjectId: (objectId: number | undefined) => void;
+  updateSpecialObject: (
+    objectId: number,
+    update: Partial<SpecialObject>
+  ) => void;
+  deleteSpecialObject: (objectId: number) => void;
+};
 
+function EditObjects({
+  map,
+  selectedCourse,
+  selectedObjectId,
+  setSelectedObjectId,
+  updateSpecialObject,
+  deleteSpecialObject,
+}: EditObjectsProps): JSX.Element {
   const specialObjectsGeoJSON = useSpecialObjects(
     selectedCourse?.specialObjects || [],
     selectedCourse?.controls.length || 0
@@ -54,7 +136,6 @@ function EditObjects(): JSX.Element {
     });
   }, [specialObjectsGeoJSON, map]);
 
-  const [selectedObjectId, setSelectedObjectId] = useState<number>();
   const selectedObjectRef = useRef<SpecialObject | undefined>();
   selectedObjectRef.current = selectedCourse?.specialObjects.find(
     (object) => object.id === selectedObjectId
@@ -109,23 +190,12 @@ function EditObjects(): JSX.Element {
         boxStyle: selectedStyle,
       });
       extentInteraction.on("extentchangeend", (e: { extent: Extent }) => {
-        const { extent: projectedExtent } = e;
-        const extent = transformExtent(
-          projectedExtent,
-          map.getView().getProjection(),
-          ppenProjection
-        );
-        const width = extent[2] - extent[0];
-        const height = extent[3] - extent[1];
-        const cellSize = Math.max(
-          width / 8,
-          height / ((selectedCourse?.controls.length || 0) + 2)
-        );
         updateSpecialObject(selectedObjectId as number, {
-          locations: [
-            [extent[0], extent[3]],
-            [extent[0] + cellSize, extent[3]],
-          ],
+          locations: mapExtentToDescriptionLocations(
+            e.extent,
+            map.getView().getProjection(),
+            (selectedCourse?.controls.length || 0) + 2
+          ),
         });
       });
       map.addInteraction(extentInteraction);
@@ -205,7 +275,7 @@ function getEvent({
   selectedCourseId,
   courses,
   actions: {
-    event: { updateSpecialObject, deleteSpecialObject },
+    event: { addSpecialObject, updateSpecialObject, deleteSpecialObject },
   },
 }: StateWithActions) {
   const selectedCourse = courses.find(
@@ -214,9 +284,30 @@ function getEvent({
   return {
     selectedCourseId,
     selectedCourse,
+    addSpecialObject,
     updateSpecialObject,
     deleteSpecialObject,
   };
+}
+
+function mapExtentToDescriptionLocations(
+  projectedExtent: Extent,
+  mapProjection: Projection,
+  numberRows: number
+): Coordinate[] {
+  const extent = transformExtent(
+    projectedExtent,
+    mapProjection,
+    ppenProjection
+  );
+  const width = extent[2] - extent[0];
+  const height = extent[3] - extent[1];
+  const cellSize = Math.max(width / 8, height / numberRows);
+
+  return [
+    [extent[0], extent[3]],
+    [extent[0] + cellSize, extent[3]],
+  ];
 }
 
 const fillColor = asArray(selectedOverPrintRgb);

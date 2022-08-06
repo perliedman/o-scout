@@ -154,6 +154,10 @@ interface Actions {
         beforeId?: number
       ) => void;
       newEvent: () => void;
+      addSpecialObject: (
+        specialObject: SpecialObject,
+        courseId: number
+      ) => void;
       updateSpecialObject: (
         objectId: number,
         update: Partial<SpecialObject>
@@ -257,6 +261,12 @@ const useEvent = create<StateWithActions>(
               })
             ),
           newEvent: () => set((state) => createNewEvent(state)),
+          addSpecialObject: (specialObject, courseId) =>
+            set(
+              undoable((draft) => {
+                Event.addSpecialObject(draft, specialObject, courseId);
+              })
+            ),
           updateSpecialObject: (objectId, update) =>
             set(
               undoable((draft) => {
