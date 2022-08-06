@@ -2,12 +2,16 @@ import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection, lineString, polygon } from "@turf/helpers";
 import lineOffset from "@turf/line-offset";
 import { useMemo } from "react";
+import { getControlDescriptionExtent } from "./create-svg";
 
-export default function useSpecialObjects(specialObjects) {
-  return useMemo(() => createSpecialObjects(specialObjects), [specialObjects]);
+export default function useSpecialObjects(specialObjects, numberControls) {
+  return useMemo(
+    () => createSpecialObjects(specialObjects, numberControls),
+    [specialObjects, numberControls]
+  );
 }
 
-export function createSpecialObjects(specialObjects) {
+export function createSpecialObjects(specialObjects, numberControls) {
   return featureCollection(
     specialObjects
       .map((object) => {
@@ -31,10 +35,13 @@ export function createSpecialObjects(specialObjects) {
                 ];
           }
           case "descriptions":
-            return bboxPolygon(locations.flat(), {
-              properties: { kind },
-              id,
-            });
+            return bboxPolygon(
+              getControlDescriptionExtent(object, numberControls + 2),
+              {
+                properties: { kind },
+                id,
+              }
+            );
           default:
             console.warn(`Unknown special object kind "${kind}".`);
             return null;

@@ -148,7 +148,10 @@ export function parsePPen(doc) {
       courseIds.forEach((courseId) => {
         const course = event.courses.find((c) => c.id === courseId);
         if (course) {
-          course.specialObjects.push(specialObject);
+          course.specialObjects.push({
+            ...specialObject,
+            locations: [...specialObject.locations],
+          });
         } else {
           warnings.push(
             `No course with id ${courseId} found for special object ${attributes.id}.`

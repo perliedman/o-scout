@@ -2,6 +2,7 @@ import { ComponentType, ReactElement } from "react";
 import useEvent, { StateWithActions, useUndo } from "./store";
 import EditControls from "./tools/EditControls";
 import PrintArea from "./tools/PrintArea";
+import Objects from "./tools/Objects";
 import { useHotkeys } from "react-hotkeys-hook";
 import CreateCourse from "./tools/CreateCourse";
 import ToolButton, { ModeButton } from "./ui/ToolButton";
@@ -12,11 +13,13 @@ export const ModeMappings: ModeMap = idHash({
   [Mode.PrintArea]: { label: "Area", component: PrintArea },
   [Mode.EditControls]: { label: "Edit", component: EditControls },
   [Mode.CreateCourse]: { label: "Create", component: CreateCourse },
+  [Mode.Objects]: { label: "Objects", component: Objects },
 });
 
 const modes: ToolbarMode[] = [
   ModeMappings[Mode.CreateCourse],
   ModeMappings[Mode.EditControls],
+  ModeMappings[Mode.Objects],
   ModeMappings[Mode.PrintArea],
 ];
 

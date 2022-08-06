@@ -22,6 +22,7 @@ import { addCoordinateTransforms } from "ol/proj";
 import { ppenProjection } from "./services/ppen";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import TileWorker from "worker-loader!./tile.worker.js";
+import { SpecialObject } from "./models/special-object";
 
 enablePatches();
 
@@ -130,6 +131,7 @@ export enum Mode {
   CreateCourse = 1,
   EditControls = 2,
   PrintArea = 3,
+  Objects = 4,
 }
 
 type Undoable = {
@@ -152,6 +154,10 @@ interface Actions {
         beforeId?: number
       ) => void;
       newEvent: () => void;
+      updateSpecialObject: (
+        objectId: number,
+        update: Partial<SpecialObject>
+      ) => void;
     };
     course: {
       new: (course: CourseType) => void;
@@ -250,6 +256,32 @@ const useEvent = create<StateWithActions>(
               })
             ),
           newEvent: () => set((state) => createNewEvent(state)),
+          updateSpecialObject: (objectId, update) =>
+            set(
+              undoable((draft) => {
+                const objectIndex = draft.specialObjects.findIndex(
+                  (object) => object.id === objectId
+                );
+                if (objectIndex < 0) {
+                  throw new Error(`No special object with id ${objectId}.`);
+                }
+                const updatedObject = {
+                  ...draft.specialObjects[objectIndex],
+                  ...update,
+                };
+                draft.specialObjects[objectIndex] = updatedObject;
+                for (const course of draft.courses) {
+                  for (let i = 0; i < course.specialObjects.length; i++) {
+                    if (course.specialObjects[i].id === objectId) {
+                      course.specialObjects[i] = {
+                        ...updatedObject,
+                        locations: [...updatedObject.locations],
+                      };
+                    }
+                  }
+                }
+              })
+            ),
         },
         course: {
           new: (course) =>
