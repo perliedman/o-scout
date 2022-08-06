@@ -55,7 +55,10 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
     course.labelKind,
     objScale
   );
-  const specialObjectsGeoJSON = useSpecialObjects(course.specialObjects);
+  const specialObjectsGeoJSON = useSpecialObjects(
+    course.specialObjects,
+    course.controls.length
+  );
   const courseObjects = useMemo(
     () =>
       courseObjectsGeoJSON(controlConnectionsGeoJSON, specialObjectsGeoJSON),

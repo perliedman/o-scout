@@ -35,7 +35,10 @@ export function useControlDescriptions(
             svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
             const url = await svgToUrl(svg, new XMLSerializer());
             const imageExtent = transformExtent(
-              getControlDescriptionExtent(descriptionObject, svg),
+              [
+                ...descriptionObject.geometry.coordinates[0][0],
+                ...descriptionObject.geometry.coordinates[0][2],
+              ],
               toProjectedCoord
             );
             return new ImageLayer({

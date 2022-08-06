@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useEvent, { useMap } from "./store";
 import shallow from "zustand/shallow";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";

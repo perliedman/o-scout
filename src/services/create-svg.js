@@ -61,7 +61,10 @@ export async function courseToSvg(
     course.labelKind,
     objScale
   );
-  const specialObjects = createSpecialObjects(course.specialObjects);
+  const specialObjects = createSpecialObjects(
+    course.specialObjects,
+    course.controls.length
+  );
 
   return createSvgNode(document, {
     type: "g",
@@ -117,7 +120,7 @@ export async function courseToSvg(
   async function specialObjectsToSvg() {
     return (
       await Promise.all(
-        createSpecialObjects(course.specialObjects)
+        createSpecialObjects(course.specialObjects, course.controls.length)
           // Put descriptions last, to render them on top of everything else
           .features.sort(descriptionsOnTop)
           .map(async (specialObject) => {
@@ -151,8 +154,10 @@ export async function courseToSvg(
                 );
                 const descriptionDimensions = getSvgDimensions(descriptionSvg);
                 const descriptionGroup = descriptionSvg.firstChild;
-                const [extentXmin, extentYmin, extentXmax, extentYmax] =
-                  getControlDescriptionExtent(specialObject, descriptionSvg);
+                const [extentXmin, extentYmin, extentXmax, extentYmax] = [
+                  ...specialObject.geometry.coordinates[0][0],
+                  ...specialObject.geometry.coordinates[0][2],
+                ];
                 const extentMin = toSvgCoord([extentXmin, extentYmin]);
                 const extentMax = toSvgCoord([extentXmax, extentYmax]);
                 const scale =
@@ -228,9 +233,9 @@ const startTriangle = [
   [0, 3.464],
 ];
 
+const cellSize = 25;
 export async function courseDefinitionToSvg(eventName, course, mapScale) {
   const { controls } = course;
-  const cellSize = 25;
   const fontSize = 14;
   const width = 8 * cellSize;
   const height = cellSize * (controls.length + 2);
@@ -425,14 +430,18 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
   }
 }
 
-export function getControlDescriptionExtent(descriptionObject, descriptionSvg) {
-  const imageSize = getSvgDimensions(descriptionSvg);
-  const aspectRatio = imageSize[1] / imageSize[0];
-  const { bbox } = descriptionObject;
+export function getControlDescriptionExtent(descriptionObject, numberRows) {
+  const { locations } = descriptionObject;
   // PPen gives size of one "cell" (column width)
-  const extentWidth = (bbox[2] - bbox[0]) * 8;
-  const extentHeight = extentWidth * aspectRatio;
-  return [bbox[0], bbox[1] - extentHeight, bbox[0] + extentWidth, bbox[1]];
+  const cellSize = locations[1][0] - locations[0][0];
+  const extentWidth = cellSize * 8;
+  const extentHeight = cellSize * numberRows;
+  return [
+    locations[0][0],
+    locations[0][1] - extentHeight,
+    locations[0][0] + extentWidth,
+    locations[0][1],
+  ];
 }
 
 function text(
