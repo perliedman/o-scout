@@ -158,6 +158,7 @@ interface Actions {
         objectId: number,
         update: Partial<SpecialObject>
       ) => void;
+      deleteSpecialObject: (objectId: number) => void;
     };
     course: {
       new: (course: CourseType) => void;
@@ -277,6 +278,27 @@ const useEvent = create<StateWithActions>(
                         ...updatedObject,
                         locations: [...updatedObject.locations],
                       };
+                    }
+                  }
+                }
+              })
+            ),
+          deleteSpecialObject: (objectId) =>
+            set(
+              undoable((draft) => {
+                const objectIndex = draft.specialObjects.findIndex(
+                  (object) => object.id === objectId
+                );
+                if (objectIndex < 0) {
+                  throw new Error(`No special object with id ${objectId}.`);
+                }
+                draft.specialObjects.splice(objectIndex, 1);
+
+                for (const course of draft.courses) {
+                  for (let i = 0; i < course.specialObjects.length; i++) {
+                    if (course.specialObjects[i].id === objectId) {
+                      course.specialObjects.splice(i, 1);
+                      break;
                     }
                   }
                 }

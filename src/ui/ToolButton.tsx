@@ -3,7 +3,7 @@ import { ButtonHTMLAttributes } from "react";
 type ToolButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   colorClassName?: string;
 };
-type ModeButtonProps = ToolButtonProps & { active: boolean };
+type ModeButtonProps = ToolButtonProps & { active?: boolean };
 
 export function ModeButton({ active, ...props }: ModeButtonProps): JSX.Element {
   return (

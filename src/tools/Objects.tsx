@@ -19,10 +19,28 @@ import { altKeyOnly, singleClick } from "ol/events/condition";
 import ExtentInteraction from "../ol/ExtentInteraction";
 import { transformExtent } from "ol/proj";
 import { Extent } from "ol/extent";
+import ToolButton, { ModeButton } from "../ui/ToolButton";
 
-export default function CreateCourse(): JSX.Element {
+export default function Objects(): JSX.Element {
+  return (
+    <>
+      <div className="flex items-start">
+        <ModeButton active>Edit</ModeButton>
+        <ModeButton>White-out</ModeButton>
+        <ModeButton>Line</ModeButton>
+        <ModeButton>Descriptions</ModeButton>
+        <EditObjects />
+      </div>
+    </>
+  );
+}
+
+function EditObjects(): JSX.Element {
   const { map } = useMap(getMap);
-  const { selectedCourse, updateSpecialObject } = useEvent(getEvent, shallow);
+  const { selectedCourse, updateSpecialObject, deleteSpecialObject } = useEvent(
+    getEvent,
+    shallow
+  );
 
   const specialObjectsGeoJSON = useSpecialObjects(
     selectedCourse?.specialObjects || [],
@@ -165,7 +183,18 @@ export default function CreateCourse(): JSX.Element {
     selectedObjectId,
   ]);
 
-  return <div className="flex items-start"></div>;
+  return (
+    <ToolButton disabled={selectedObjectId === undefined} onClick={onDelete}>
+      Delete
+    </ToolButton>
+  );
+
+  function onDelete() {
+    if (selectedObjectId) {
+      deleteSpecialObject(selectedObjectId);
+      setSelectedObjectId(undefined);
+    }
+  }
 }
 
 function getMap({ map }: MapState) {
@@ -176,7 +205,7 @@ function getEvent({
   selectedCourseId,
   courses,
   actions: {
-    event: { updateSpecialObject },
+    event: { updateSpecialObject, deleteSpecialObject },
   },
 }: StateWithActions) {
   const selectedCourse = courses.find(
@@ -186,6 +215,7 @@ function getEvent({
     selectedCourseId,
     selectedCourse,
     updateSpecialObject,
+    deleteSpecialObject,
   };
 }
 
