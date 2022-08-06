@@ -16,6 +16,7 @@ export default class ExtentInteraction extends OlExtentInteraction {
   constructor(options) {
     super(options);
     this.create_ = options?.create;
+    this.cursor_ = options?.cursor || "auto";
   }
 
   handleEvent(mapBrowserEvent) {
@@ -23,10 +24,20 @@ export default class ExtentInteraction extends OlExtentInteraction {
     return !this.pointerHandler_ && !this.dragDelta_;
   }
 
+  setMap(map) {
+    if (this.map_) {
+      this.map_.getTarget().style.cursor = this.saveCursor_;
+    }
+    if (map) {
+      this.saveCursor_ = map.getTarget().style.cursor;
+    }
+    super.setMap(map);
+  }
+
   handlePointerMove_(mapBrowserEvent) {
     const pixel = mapBrowserEvent.pixel;
     const map = mapBrowserEvent.map;
-    let cursor = "auto";
+    let cursor = this.cursor_;
 
     const vertex = this.snapToVertex_(pixel, map);
     const extent = this.getExtentInternal();
