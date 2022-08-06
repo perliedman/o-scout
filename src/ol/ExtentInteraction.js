@@ -52,7 +52,7 @@ export default class ExtentInteraction extends OlExtentInteraction {
       extent &&
       containsCoordinate(extent, mapBrowserEvent.coordinate)
     ) {
-      cursor = "all-scroll";
+      cursor = "move";
     }
     map.getTarget().style.cursor = cursor;
   }
