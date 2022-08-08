@@ -21,7 +21,7 @@ export default function useMapLayer({
       });
 
       const awaitedTiles = {};
-      tileWorker.onmessage = async ({ data: { type, tileId, url } }) => {
+      tileWorker.onmessage = async ({ data: { type, tileId, url, error } }) => {
         if (type === "TILE") {
           const tileData = awaitedTiles[tileId];
           if (tileData) {
@@ -43,6 +43,8 @@ export default function useMapLayer({
           } else {
             console.warn(`Received unknown tile ${tileId}.`);
           }
+        } else if (type === "ERROR") {
+          onError(error);
         }
       };
 
