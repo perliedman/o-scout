@@ -8,14 +8,14 @@ import Select from "ol/interaction/Select";
 import { Collection, Feature, Map } from "ol";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
-import { Course, selectedOverPrintRgb } from "../models/course";
+import type { Course as CourseType } from "../models/course";
+import * as Course from "../models/course";
 import Fill from "ol/style/Fill";
 import { asArray } from "ol/color";
 import Modify from "ol/interaction/Modify";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { SpecialObject } from "../models/special-object";
-import { altKeyOnly, singleClick } from "ol/events/condition";
 import ExtentInteraction from "../ol/ExtentInteraction";
 import { Projection, transform, transformExtent } from "ol/proj";
 import { Extent } from "ol/extent";
@@ -138,7 +138,7 @@ export default function Objects(): JSX.Element {
 
 type EditObjectsProps = {
   map?: Map;
-  selectedCourse?: Course;
+  selectedCourse?: CourseType;
   selectedObjectId?: number;
   setSelectedObjectId: (objectId: number | undefined) => void;
   updateSpecialObject: (
@@ -335,11 +335,11 @@ function mapExtentToDescriptionLocations(
   ];
 }
 
-const fillColor = asArray(selectedOverPrintRgb);
+const fillColor = asArray(Course.selectedOverPrintRgb);
 fillColor[3] = 0.25;
 
 const selectedStyle = new Style({
-  stroke: new Stroke({ width: 2, color: selectedOverPrintRgb }),
+  stroke: new Stroke({ width: 2, color: Course.selectedOverPrintRgb }),
   fill: new Fill({ color: fillColor }),
   zIndex: 1000,
 });
