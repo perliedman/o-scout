@@ -21,12 +21,16 @@ export function createSpecialObjects(specialObjects, numberControls) {
             return polygon([[...locations, locations[0]]], { kind }, { id });
           case "line": {
             const {
-              color,
-              "line-width": lineWidth,
-              "gap-size": gapSize,
+              color = "purple",
+              "line-width": lineWidth = 1,
+              "gap-size": gapSize = 0,
             } = object;
 
-            const line = lineString([...locations], { kind, color, lineWidth });
+            const line = lineString(
+              [...locations],
+              { kind, color, lineWidth },
+              { id }
+            );
             return !gapSize
               ? line
               : [
