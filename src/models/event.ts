@@ -59,6 +59,7 @@ export function load(data: Event): Event {
       ...[
         ...Object.keys(data.controls),
         ...data.courses.map((course) => course.id),
+        ...data.specialObjects.map((object) => object.id),
       ]
         .map(Number)
         .filter((x) => !isNaN(x))
