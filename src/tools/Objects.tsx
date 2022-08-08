@@ -17,10 +17,12 @@ import VectorSource from "ol/source/Vector";
 import { SpecialObject } from "../models/special-object";
 import { altKeyOnly, singleClick } from "ol/events/condition";
 import ExtentInteraction from "../ol/ExtentInteraction";
-import { Projection, transformExtent } from "ol/proj";
+import { Projection, transform, transformExtent } from "ol/proj";
 import { Extent } from "ol/extent";
 import ToolButton, { ModeButton } from "../ui/ToolButton";
 import { Coordinate } from "ol/coordinate";
+import Draw from "ol/interaction/Draw";
+import { Polygon } from "ol/geom";
 
 type ObjectMode = "edit" | "white-out" | "line" | "descriptions";
 
@@ -43,7 +45,7 @@ export default function Objects(): JSX.Element {
   const [mode, setMode] = useState<ObjectMode>("edit");
 
   useEffect(() => {
-    if (!map || !selectedCourse) return;
+    if (!map || !selectedCourse || mode === "edit") return;
     if (mode === "descriptions") {
       const interaction = new ExtentInteraction({
         create: true,
@@ -58,7 +60,6 @@ export default function Objects(): JSX.Element {
         );
         addSpecialObject(
           {
-            id: Math.floor(Math.random() * 1000000),
             kind: "descriptions",
             locations,
             isAllCourses: false,
@@ -71,6 +72,37 @@ export default function Objects(): JSX.Element {
       });
       map.addInteraction(interaction);
 
+      return () => {
+        map.removeInteraction(interaction);
+      };
+    } else {
+      const geometryType = mode === "line" ? "LineString" : "Polygon";
+      const interaction = new Draw({
+        type: geometryType,
+        style: selectedStyle,
+      });
+      interaction.on("drawend", (e) => {
+        const coordinates = (
+          e.feature.getGeometry() as Polygon
+        ).getCoordinates();
+        const corners = (
+          geometryType === "Polygon" ? coordinates[0] : coordinates
+        ) as Coordinate[];
+        addSpecialObject(
+          {
+            kind: mode,
+            locations: corners.map((c) =>
+              transform(c, map.getView().getProjection(), ppenProjection)
+            ),
+            isAllCourses: false,
+          },
+          selectedCourse.id
+        );
+        const objects = useEvent.getState().specialObjects;
+        setSelectedObjectId(objects[objects.length - 1].id);
+        setMode("edit");
+      });
+      map.addInteraction(interaction);
       return () => {
         map.removeInteraction(interaction);
       };
@@ -205,19 +237,6 @@ function EditObjects({
     } else {
       const modify = new Modify({
         features: select.getFeatures(),
-        condition: () => {
-          return selectedObjectRef.current?.kind !== "descriptions";
-        },
-        insertVertexCondition: () => {
-          return selectedObjectRef.current?.kind !== "descriptions";
-        },
-        deleteCondition: (e) => {
-          return (
-            selectedObjectRef.current?.kind !== "descriptions" &&
-            singleClick(e) &&
-            altKeyOnly(e)
-          );
-        },
       });
       modify.on("modifyend", (e) => {
         const feature = e.features.getArray()[0] as Feature;
@@ -230,13 +249,19 @@ function EditObjects({
             featureProjection: map.getView().getProjection(),
             dataProjection: ppenProjection,
           }) as any;
-          if (specialObject.kind !== "descriptions") {
+          let locations: Coordinate[];
+
+          if (objectGeoJSON.type === "Polygon") {
             const outerRing = objectGeoJSON.coordinates[0];
-            updateSpecialObject(feature.getId() as number, {
-              locations: outerRing.slice(0, outerRing.length - 1),
-            });
+            locations = outerRing.slice(0, outerRing.length - 1);
+          } else if (objectGeoJSON.type === "LineString") {
+            locations = objectGeoJSON.coordinates;
           } else {
+            throw new Error(`Unhandled geometry type ${objectGeoJSON.type}.`);
           }
+          updateSpecialObject(feature.getId() as number, {
+            locations,
+          });
         }
       });
       map.addInteraction(modify);

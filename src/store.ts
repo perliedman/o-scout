@@ -155,7 +155,7 @@ interface Actions {
       ) => void;
       newEvent: () => void;
       addSpecialObject: (
-        specialObject: SpecialObject,
+        specialObject: Omit<SpecialObject, "id">,
         courseId: number
       ) => void;
       updateSpecialObject: (
