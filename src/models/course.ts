@@ -21,8 +21,7 @@ export const palette = {
 };
 
 export const courseOverPrintRgb = palette.purple;
-//export const selectedOverPrintRgb = "rgba(182, 44, 152, 1)";
-export const selectedOverPrintRgb = "red";
+export const selectedOverPrintRgb = "rgba(182, 44, 152, 1)";
 
 export function create(
   id: number,
