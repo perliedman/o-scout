@@ -27,7 +27,7 @@ export default function Courses() {
     makeNewEvent,
     newCourse,
   } = useEvent(getCourses, shallow);
-  const { mapFile, map, crs } = useMap(getMap);
+  const { mapFile, map, crs, projections } = useMap(getMap, shallow);
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]
@@ -109,7 +109,7 @@ export default function Courses() {
         accept=".ppen"
         onSelect={loadCourse}
       />
-      {map && mapFile && crs && selectedCourse && (
+      {map && mapFile && crs && projections && selectedCourse && (
         <CourseLayer
           eventName={eventName}
           mapScale={mapScale}
@@ -186,8 +186,8 @@ function getCourses({
   };
 }
 
-function getMap({ mapFile, map }) {
-  return { mapFile, map, crs: mapFile.getCrs() };
+function getMap({ mapFile, map, projections }) {
+  return { mapFile, map, crs: mapFile.getCrs(), projections };
 }
 
 function readAsText(file) {
