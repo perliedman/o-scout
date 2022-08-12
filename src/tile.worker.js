@@ -11,6 +11,9 @@ onmessage = async function ({ data }) {
       case "SET_MAP_FILE":
         const mapFile = await readMap(data.blob);
         this.tiler = new OcadTiler(mapFile);
+        postMessage({
+          type: "READY",
+        });
         break;
       case "GET_TILE":
         const { tileId, extent, resolution, tileSize } = data;

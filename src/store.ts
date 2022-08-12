@@ -68,19 +68,30 @@ export const useMap = create<MapState>((set) => ({
   clipGeometry: undefined,
   clipLayer: undefined,
   projections: undefined,
-  setMapFile: (mapFilename, mapFile, tiler, mapFileBlob) =>
-    set((state) => {
-      const tileWorker = state.tileWorker || new TileWorker();
-      tileWorker.postMessage({ type: "SET_MAP_FILE", blob: mapFileBlob });
-
-      return {
-        ...state,
-        mapFile,
-        mapFilename,
-        tiler,
-        tileWorker,
-        projections: undefined,
+  setMapFile: async (mapFilename, mapFile, tiler, mapFileBlob) =>
+    await new Promise((resolve, reject) => {
+      const tileWorker = new TileWorker();
+      tileWorker.onmessage = (message) => {
+        if (message.data.type === "READY") {
+          set((state) => {
+            if (state.tileWorker) {
+              state.tileWorker.terminate();
+            }
+            return {
+              ...state,
+              mapFile,
+              mapFilename,
+              tiler,
+              tileWorker,
+              projections: undefined,
+            };
+          });
+          resolve();
+        } else {
+          reject(new Error(`Unexpected message: ${message.data.type}.`));
+        }
       };
+      tileWorker.postMessage({ type: "SET_MAP_FILE", blob: mapFileBlob });
     }),
   setMapInstance: (map) =>
     set((state) => {
