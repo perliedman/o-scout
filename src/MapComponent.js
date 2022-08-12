@@ -45,7 +45,7 @@ export default function MapComponent() {
         pushNotification(
           "warning",
           "Some parts of the map failed to display",
-          e.toString()
+          e.message || e.toString()
         );
         hasTileErrors.current = true;
       }
