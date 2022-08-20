@@ -16,7 +16,10 @@ export default function CourseOptions({
       width === printArea.pageWidth && height === printArea.pageHeight
   );
 
-  const extent = useMemo(() => getPrintAreaExtent(course), [printArea, course]);
+  const extent = useMemo(
+    () => getPrintAreaExtent(course, mapScale),
+    [course, mapScale]
+  );
 
   return (
     <>

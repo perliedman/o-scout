@@ -69,11 +69,11 @@ export function courseBounds(course: Course): Extent {
   );
 }
 
-export function getPrintAreaExtent(course: Course): Extent {
+export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
   const { printArea } = course;
   return !printArea.auto && printArea.extent
     ? printArea.extent
-    : buffer(courseBounds(course), 200 / mmToMeter / 15000);
+    : buffer(courseBounds(course), 200 / mmToMeter / mapScale);
 }
 
 export function getStartRotation({ controls }: Course): number {
