@@ -12,10 +12,10 @@ import { featureCollection } from "@turf/helpers";
 import { fromExtent as polygonFromExtent } from "ol/geom/Polygon";
 import { getObjectScale, transformExtent } from "./services/coordinates";
 import { Feature } from "ol";
-import * as PrintArea from "./models/print-area";
 import useVector from "./ol/use-vector";
 import useStyle from "./course-feature-style";
 import { ppenProjection } from "./services/ppen";
+import { getPrintAreaExtent } from "./models/course";
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
   const {
@@ -38,7 +38,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   useEffect(() => {
     if (clipLayer) {
       const extent = transformExtent(
-        PrintArea.getExtent(course.printArea, course),
+        getPrintAreaExtent(course, mapScale),
         paperToProjected
       );
       const extentPolygon = polygonFromExtent(extent);

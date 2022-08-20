@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { getExtent } from "./models/print-area";
+import { getPrintAreaExtent } from "./models/course";
 import { PAPER_SIZES } from "./services/print";
 import Checkbox from "./ui/Checkbox";
 import Input from "./ui/Input";
@@ -16,10 +16,7 @@ export default function CourseOptions({
       width === printArea.pageWidth && height === printArea.pageHeight
   );
 
-  const extent = useMemo(
-    () => printArea?.extent || getExtent(printArea, course),
-    [printArea, course]
-  );
+  const extent = useMemo(() => getPrintAreaExtent(course), [printArea, course]);
 
   return (
     <>

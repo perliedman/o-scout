@@ -1,5 +1,4 @@
-import * as olExtent from "ol/extent";
-import { courseBounds } from "../models/course";
+import { getPrintAreaExtent } from "../models/course";
 import { courseToSvg } from "./create-svg";
 import PDFDocument from "@react-pdf/pdfkit";
 import blobStream from "blob-stream";
@@ -54,10 +53,7 @@ export async function printCourse(
   svgOptions
 ) {
   const crs = mapFile.getCrs();
-  const printAreaExtent =
-    !course.printArea?.auto && course.printArea?.extent
-      ? course.printArea?.extent
-      : olExtent.buffer(courseBounds(course), 10);
+  const printAreaExtent = getPrintAreaExtent(course, crs.scale);
   // Convert from PPEN mm to OCAD coordinates, 1/100 mm
   const projectedExtent = transformExtent(printAreaExtent, ([x, y]) =>
     toProjectedCoord(crs, [x, y])

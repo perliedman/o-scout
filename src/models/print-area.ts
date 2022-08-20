@@ -1,5 +1,4 @@
-import { Course, courseBounds } from "./course";
-import { buffer, Extent } from "ol/extent";
+import { Extent } from "ol/extent";
 import { PAPER_SIZES } from "../services/print";
 
 const a4 = PAPER_SIZES.find((paper) => paper.name === "A4");
@@ -16,12 +15,6 @@ export function create(options?: PrintArea): PrintArea {
     pageHeight: defaultHeight,
     ...options,
   };
-}
-
-export function getExtent(printArea: PrintArea, course: Course): Extent {
-  return !printArea.auto && printArea.extent
-    ? printArea.extent
-    : buffer(courseBounds(course), course.printScale / 150);
 }
 
 export interface PrintArea {

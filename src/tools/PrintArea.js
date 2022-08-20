@@ -1,7 +1,6 @@
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
 import { useEffect, useMemo, useRef } from "react";
-import { getExtent } from "../models/print-area";
 import {
   fromProjectedCoord,
   toProjectedCoord,
@@ -10,6 +9,7 @@ import {
 import useEvent, { useMap } from "../store";
 import shallow from "zustand/shallow";
 import ExtentInteraction from "../ol/ExtentInteraction";
+import { getPrintAreaExtent } from "../models/course";
 
 export default function PrintArea() {
   const { map, mapFile } = useMap(getMap);
@@ -21,7 +21,7 @@ export default function PrintArea() {
   useEffect(() => {
     if (map && course) {
       const initialExtent = transformExtent(
-        getExtent(course.printArea, course),
+        getPrintAreaExtent(course, crs.scale),
         (c) => toProjectedCoord(crs, c)
       );
       const interaction = new ExtentInteraction({

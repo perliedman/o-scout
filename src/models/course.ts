@@ -1,4 +1,5 @@
-import { Extent } from "ol/extent";
+import { buffer, Extent } from "ol/extent";
+import { mmToMeter } from "../services/coordinates";
 import { Control, controlDistance } from "./control";
 import * as PrintArea from "./print-area";
 import { PrintArea as PrintAreaType } from "./print-area";
@@ -66,6 +67,13 @@ export function courseBounds(course: Course): Extent {
     ],
     [Number.MAX_VALUE, Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
   );
+}
+
+export function getPrintAreaExtent(course: Course): Extent {
+  const { printArea } = course;
+  return !printArea.auto && printArea.extent
+    ? printArea.extent
+    : buffer(courseBounds(course), 200 / mmToMeter / 15000);
 }
 
 export function getStartRotation({ controls }: Course): number {

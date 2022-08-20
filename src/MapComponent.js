@@ -86,13 +86,13 @@ export default function MapComponent() {
 
   async function _registerProjection() {
     const crs = mapFile.getCrs();
-    const projectionName =
+    const [projectionName, code] =
       crs.catalog === "EPSG"
-        ? `${crs.catalog}:${crs.code}`
+        ? [`${crs.catalog}:${crs.code}`, crs.code]
         : // TODO: This is a really stupid fallback; figure out how
           // to set a really "generic" projection
-          "EPSG:3006";
-    proj4.defs(projectionName, await getProjection(crs.code));
+          ["EPSG:3006", 3006];
+    proj4.defs(projectionName, await getProjection(code));
     register(proj4);
     setProjection(getOlProjection(projectionName));
   }
