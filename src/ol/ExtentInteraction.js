@@ -78,7 +78,7 @@ export default class ExtentInteraction extends OlExtentInteraction {
     const vertex = this.snapToVertex_(pixel, map);
 
     if (!this.create_ && !vertex) {
-      if (containsCoordinate(extent, coordinate)) {
+      if (extent && containsCoordinate(extent, coordinate)) {
         const center = getCenter(extent);
         this.dragDelta_ = [
           coordinate[0] - center[0],
@@ -101,7 +101,7 @@ export default class ExtentInteraction extends OlExtentInteraction {
     if (
       this.create_ ||
       (this._dragStartExtent &&
-        this.extent_.some((x, i) => this._dragStartExtent[i] !== x))
+        this.extent_?.some((x, i) => this._dragStartExtent[i] !== x))
     ) {
       this.dispatchEvent({ type: "extentchangeend", extent: this.extent_ });
     }

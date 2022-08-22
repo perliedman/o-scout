@@ -16,7 +16,6 @@ export default function PrintArea() {
   const { course, setPrintAreaExtent } = useEvent(getSelectedCourse, shallow);
 
   const crs = useMemo(() => mapFile?.getCrs(), [mapFile]);
-  const currentExtent = useRef();
 
   useEffect(() => {
     if (map && course) {
@@ -29,27 +28,19 @@ export default function PrintArea() {
         boxStyle,
         pointerStyle: new Style(),
       });
-      interaction.on("extentchanged", ({ extent }) => {
-        currentExtent.current = [...extent];
+      interaction.on("extentchangeend", ({ extent }) => {
+        if (extent) {
+          setPrintAreaExtent(
+            course.id,
+            transformExtent(extent, (c) => fromProjectedCoord(crs, c))
+          );
+        }
       });
-      map.on("pointerup", commitExtent);
       map.addInteraction(interaction);
 
       return () => {
         map.removeInteraction(interaction);
-        map.un("pointerup", commitExtent);
       };
-
-      function commitExtent() {
-        if (currentExtent.current) {
-          setPrintAreaExtent(
-            course.id,
-            transformExtent(currentExtent.current, (c) =>
-              fromProjectedCoord(crs, c)
-            )
-          );
-        }
-      }
     }
   }, [crs, mapFile, map, course, setPrintAreaExtent]);
 
