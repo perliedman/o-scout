@@ -201,6 +201,12 @@ function DescriptionSelector({
             >
               Ok
             </Button>
+            <Button
+              className="text-xs mt-2 w-full"
+              onClick={() => onSelect(null)}
+            >
+              Clear
+            </Button>
           </div>
         </div>
       </div>
