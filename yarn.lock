@@ -5504,15 +5504,15 @@ flat-cache@^3.0.4:
     rimraf "^3.0.2"
 
 flatbush@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.npmjs.org/flatbush/-/flatbush-3.3.0.tgz"
-  integrity sha512-F3EzQvKpdmXUbFwWxLKBpytOFEGYQMCTBLuqZ4GEajFOEAvnOIBiyxW3OFSZXIOtpCS8teN6bFEpNZtnVXuDQA==
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/flatbush/-/flatbush-3.3.1.tgz#2ba10dfe4069ef142b8692a0c19982cf0ebabce0"
+  integrity sha512-oKuPbtT+DS2CxH+9Vhbsq8HifmSCuOw+3Cy5zt/vCIrZl5KyengoTHDBLmtpZoBhcwa7/biNjgL1DwdLMJYm1A==
   dependencies:
-    flatqueue "^1.2.0"
+    flatqueue "^1.2.1"
 
-flatqueue@^1.2.0:
+flatqueue@^1.2.1:
   version "1.2.1"
-  resolved "https://registry.npmjs.org/flatqueue/-/flatqueue-1.2.1.tgz"
+  resolved "https://registry.yarnpkg.com/flatqueue/-/flatqueue-1.2.1.tgz#82f501758fc5925742fbeb478637230456157ef2"
   integrity sha512-X86TpWS1rGuY7m382HuA9vngLeDuWA9lJvhEG+GfgKMV5onSvx5a71cl7GMbXzhWtlN9dGfqOBrpfqeOtUfGYQ==
 
 flatted@^3.1.0:
@@ -8343,16 +8343,16 @@ obuf@^1.0.0, obuf@^1.1.2:
 
 ocad-tiler@^1.2.2:
   version "1.2.2"
-  resolved "https://registry.npmjs.org/ocad-tiler/-/ocad-tiler-1.2.2.tgz"
+  resolved "https://registry.yarnpkg.com/ocad-tiler/-/ocad-tiler-1.2.2.tgz#0a9dfd850b497446b6335a85b3e0ce135fa5dba6"
   integrity sha512-c+Ae4uQtjn+JzlIFo7uNQMgrkmjqUSPK76ySDnFc1aRp8HbQr2zO6GoKdsYk2Uizr0MtQ/ZIkeJxZj0uCkAHBA==
   dependencies:
     flatbush "^3.3.0"
     ocad2geojson "^2.1.8"
 
 ocad2geojson@^2.1.10, ocad2geojson@^2.1.8:
-  version "2.1.10"
-  resolved "https://registry.yarnpkg.com/ocad2geojson/-/ocad2geojson-2.1.10.tgz#be72ba9728c78cb7b23a01b22c50450f9778a806"
-  integrity sha512-pYs/tJSY5PS0SRuu2/BmAsPWFxcXyikEx2QBTDX5bIL5fx1Zs9V4fOESVNK6uqyzvpO7K2kMOFO0kbQS1nyJPw==
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/ocad2geojson/-/ocad2geojson-2.1.11.tgz#adad05a504877a8ce0aea3ea72609bf1f1fbdfb4"
+  integrity sha512-H/8ioRZtRRM6B1k8jZ164bPN+GRXjFidap6EHbDA5SKdc7Tha+LKTvA4ni117C9S2lEtNi3jFB5oaNVUtC9N7g==
   dependencies:
     "@turf/line-offset" "^6.5.0"
     "@turf/meta" "^6.5.0"
