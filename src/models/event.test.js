@@ -37,7 +37,7 @@ describe("event", () => {
     const loadedEvent = Event.load(event);
 
     expect(loadedEvent.idGenerator.next()).toBe(3);
-    expect(loadedEvent.controlCodeGenerator.next()).toBe(31);
+    expect(loadedEvent.controlCodeGenerator.next()).toBe(32);
   });
 
   test("Modifying a control's code updates the code generator", () => {

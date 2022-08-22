@@ -37,7 +37,7 @@ export function create(name: string): Event {
     mapScale: 15000,
     mapFilename: "",
     courses: [],
-    controlCodeGenerator: sequence(30),
+    controlCodeGenerator: sequence(31),
     idGenerator: sequence(1),
     controls: {},
     specialObjects: [],
