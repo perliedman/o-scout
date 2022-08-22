@@ -12,6 +12,7 @@ export default function ControlDescriptionSheet({
   onChangeEventName,
   onChangeCourseName,
   onChangeDescription,
+  onChangeControlCode,
 }) {
   const containerRef = useRef();
   const [descriptionSelector, setDescriptionSelector] = useState();
@@ -59,7 +60,17 @@ export default function ControlDescriptionSheet({
                       <DescriptionSymbol symbol="start" />
                     )}
                   </td>
-                  <td>{c.code}</td>
+                  <td>
+                    {" "}
+                    <input
+                      type="text"
+                      value={c.code}
+                      className="border-0 p-0 w-full text-center focus:outline-none"
+                      onChange={(e) =>
+                        onChangeControlCode(c.id, Number(e.target.value))
+                      }
+                    />
+                  </td>
                   {["C", "D", "E", "F", "G", "H"].map((column, colIndex) => (
                     <td
                       key={column}

@@ -199,6 +199,7 @@ interface Actions {
         controlId: number,
         description: Control.Description
       ) => void;
+      setCode: (controlId: number, code: number) => void;
     };
     setMode: (mode: Mode) => void;
   };
@@ -444,6 +445,14 @@ const useEvent = create<StateWithActions>(
               undoable((draft: StateWithActions) => {
                 Event.updateControl(draft, controlId, (control) => {
                   control.description = description;
+                });
+              })
+            ),
+          setCode: (controlId, code) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                Event.updateControl(draft, controlId, (control) => {
+                  control.code = code;
                 });
               })
             ),

@@ -39,4 +39,19 @@ describe("event", () => {
     expect(loadedEvent.idGenerator.next()).toBe(3);
     expect(loadedEvent.controlCodeGenerator.next()).toBe(31);
   });
+
+  test("Modifying a control's code updates the code generator", () => {
+    const event = Event.create("Test");
+    const control = Control.create({
+      code: event.controlCodeGenerator.next(),
+      kind: "normal",
+      coordinates: [0, 0],
+    });
+    Event.addCourse(event, Course.create(null, "Test course", [control]));
+
+    Event.updateControl(event, control.id, (control) => {
+      control.code = 37;
+    });
+    expect(event.controlCodeGenerator.next()).toBe(38);
+  });
 });

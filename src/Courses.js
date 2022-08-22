@@ -24,6 +24,7 @@ export default function Courses() {
     setPrintScale,
     setPrintArea,
     setControlDescription,
+    setControlCode,
     makeNewEvent,
     newCourse,
   } = useEvent(getCourses, shallow);
@@ -63,6 +64,9 @@ export default function Courses() {
                   }
                   onChangeDescription={(controlId, description) =>
                     setControlDescription(controlId, description)
+                  }
+                  onChangeControlCode={(controlId, code) =>
+                    setControlCode(controlId, code)
                   }
                 />
                 <Section title="Options" level={2}>
@@ -166,7 +170,7 @@ function getCourses({
       setPrintScale,
       setPrintArea,
     },
-    control: { setDescription: setControlDescription },
+    control: { setDescription: setControlDescription, setCode: setControlCode },
   },
 }) {
   return {
@@ -179,6 +183,7 @@ function getCourses({
     setEventName,
     setCourseName,
     setControlDescription,
+    setControlCode,
     makeNewEvent,
     newCourse,
     setPrintScale,
