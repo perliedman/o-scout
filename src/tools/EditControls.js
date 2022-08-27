@@ -80,27 +80,6 @@ export default function EditControls() {
     highlightFeatureRef,
   });
 
-  const [selectedControlId, setSelectedControlId] = useState();
-  const selectOptions = useMemo(
-    () => ({
-      style,
-      layers: (layer) => layer.getSource() === controlsSource,
-    }),
-    [style, controlsSource]
-  );
-  const selectedFeature =
-    controlsSource && selectedControlId
-      ? controlsSource
-          .getFeatures()
-          .find((feature) => feature.get("id") === selectedControlId)
-      : null;
-  useSelect(
-    map,
-    selectedFeature,
-    (feature) => setSelectedControlId(feature?.get("id")),
-    selectOptions
-  );
-
   useEffect(() => {
     if (map && controlsSource) {
       const styleFunction = (_, resolution) =>
@@ -177,6 +156,27 @@ export default function EditControls() {
     otherControlsSource,
     allControls,
   ]);
+
+  const [selectedControlId, setSelectedControlId] = useState();
+  const selectOptions = useMemo(
+    () => ({
+      style,
+      layers: (layer) => layer.getSource() === controlsSource,
+    }),
+    [style, controlsSource]
+  );
+  const selectedFeature =
+    controlsSource && selectedControlId
+      ? controlsSource
+          .getFeatures()
+          .find((feature) => feature.get("id") === selectedControlId)
+      : null;
+  useSelect(
+    map,
+    selectedFeature,
+    (feature) => setSelectedControlId(feature?.get("id")),
+    selectOptions
+  );
 
   useHotkeys("delete,backspace", deleteSelected, [selectedFeature]);
   useHotkeys("up", () => moveSelected(0, 1), [
