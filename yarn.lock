@@ -8349,10 +8349,10 @@ ocad-tiler@^1.2.2:
     flatbush "^3.3.0"
     ocad2geojson "^2.1.8"
 
-ocad2geojson@^2.1.10, ocad2geojson@^2.1.8:
-  version "2.1.11"
-  resolved "https://registry.yarnpkg.com/ocad2geojson/-/ocad2geojson-2.1.11.tgz#adad05a504877a8ce0aea3ea72609bf1f1fbdfb4"
-  integrity sha512-H/8ioRZtRRM6B1k8jZ164bPN+GRXjFidap6EHbDA5SKdc7Tha+LKTvA4ni117C9S2lEtNi3jFB5oaNVUtC9N7g==
+ocad2geojson@^2.1.12, ocad2geojson@^2.1.8:
+  version "2.1.12"
+  resolved "https://registry.yarnpkg.com/ocad2geojson/-/ocad2geojson-2.1.12.tgz#399c20b685d5fb4c3f42b8245db83c54cde2e90b"
+  integrity sha512-hbB3QrciX/mSlab9y9PpvCaYcXK8idZ0678XtJjMtrs7udnTMZ9cWkvfJqfkX3VrLmIujhAQtTE9kMkaJ5K1Bg==
   dependencies:
     "@turf/line-offset" "^6.5.0"
     "@turf/meta" "^6.5.0"
