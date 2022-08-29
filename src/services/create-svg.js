@@ -109,6 +109,7 @@ export async function courseToSvg(
           x,
           y,
           "text-anchor": "middle",
+          "dominant-baseline": "middle",
           fill: courseOverPrintRgb,
           style: `font: normal ${6 * objScale}px sans-serif;`,
         },
