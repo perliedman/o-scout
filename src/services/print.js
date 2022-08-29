@@ -58,9 +58,12 @@ export async function printCourse(
   const projectedExtent = transformExtent(printAreaExtent, ([x, y]) =>
     toProjectedCoord(crs, [x, y])
   );
-  const scaleFactor = crs.scale / course.printScale;
+  // Print area in millimeters in map's original scale
   const printAreaWidthMm = printAreaExtent[2] - printAreaExtent[0];
   const printAreaHeightMm = printAreaExtent[3] - printAreaExtent[1];
+  // The scale factor between map's original scale and the requested print scale
+  const scaleFactor = crs.scale / course.printScale;
+  // Output dimensions in pt on the actually printed paper (in print scale)
   const outputWidthPt = printAreaWidthMm * scaleFactor * mmToPt;
   const outputHeightPt = printAreaHeightMm * scaleFactor * mmToPt;
   const mapSvg = tiler.renderSvg(projectedExtent, 1, svgOptions);
