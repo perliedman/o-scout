@@ -17,6 +17,7 @@ import { createSpecialObjects } from "./use-special-objects";
 import { add, mul, rotate } from "../models/coordinate";
 import fetchSymbolSvg from "./fetch-symbol-svg";
 import { createSvgNode, getSvgDimensions } from "./svg-utils";
+import { getObjectScale } from "./coordinates";
 
 export const circle = ([cx, cy], r, stroke, scale) => ({
   type: "circle",
@@ -50,10 +51,11 @@ export async function courseToSvg(
   document
 ) {
   const controls = course.controls;
-  const objScale =
-    getObjectScale(courseAppearance.scaleSizes, mapScale, course.printScale) *
-    // TODO: can't explain why this is correct, but gives ok result (?)
-    (7500 / course.printScale);
+  const objScale = getObjectScale(
+    courseAppearance.scaleSizes,
+    mapScale,
+    course.printScale
+  );
 
   const controlConnections = createControlConnections(
     controls,
@@ -69,13 +71,13 @@ export async function courseToSvg(
   return createSvgNode(document, {
     type: "g",
     children: [
+      ...(await specialObjectsToSvg()),
       ...controlsToSvg(),
       ...controlConnectionsToSvg(controlConnections),
       ...controlNumbersToSvg(
         courseObjectsGeoJSON(controlConnections, specialObjects),
         course.labelKind
       ),
-      ...(await specialObjectsToSvg()),
     ],
   });
 
@@ -467,17 +469,4 @@ function text(
     },
     text,
   };
-}
-
-function getObjectScale(scaleSizes, mapScale, printScale) {
-  switch (scaleSizes) {
-    case "None":
-      return printScale / mapScale;
-    case "RelativeToMap":
-      return 1;
-    case "RelativeTo15000":
-      return 15000 / mapScale;
-    default:
-      throw new Error(`Unknown scaleSizes mode "${scaleSizes}".`);
-  }
 }

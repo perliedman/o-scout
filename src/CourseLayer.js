@@ -110,7 +110,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const { layer: controlsLayer, source: controlsSource } = useVector(
     map,
     controlFeatures,
-    vectorLayerOptions
+    controlLayerOptions
   );
   useEffect(() => {
     setControlsSource(controlsSource);
@@ -118,7 +118,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   const { layer: objectsLayer } = useVector(
     map,
     objectFeatures,
-    vectorLayerOptions
+    objectLayerOptions
   );
   // Paper millimeters to world meters factor
   const f = mapScale / 1000;
@@ -132,9 +132,16 @@ function getMap({ map, mapFile, clipLayer, setControlsSource, projections }) {
   return { map, mapFile, clipLayer, setControlsSource, projections };
 }
 
-const vectorLayerOptions = {
+const objectLayerOptions = {
   layerOptions: {
     zIndex: 1,
+    updateWhileAnimating: true,
+    updateWhileInteracting: true,
+  },
+};
+const controlLayerOptions = {
+  layerOptions: {
+    zIndex: 2,
     updateWhileAnimating: true,
     updateWhileInteracting: true,
   },

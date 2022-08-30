@@ -49,10 +49,9 @@ export const fromProjectedCoord = (crs, coordinate) => {
 export function getObjectScale(scaleSizes, mapScale, printScale) {
   switch (scaleSizes) {
     case "None":
-      return 1;
+      return printScale / mapScale;
     case "RelativeToMap":
-      // TODO: Don't know what 2 does here, but otherwise sizes do not match.
-      return (printScale / mapScale) * 2;
+      return 1;
     case "RelativeTo15000":
       return 15000 / mapScale;
     default:
