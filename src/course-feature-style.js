@@ -20,6 +20,7 @@ export default function useStyle(
   layer,
   featuresRef,
   objScale,
+  courseAppearance,
   courseOverPrintColor = courseOverPrintRgb,
   styleWrapper
 ) {
@@ -28,11 +29,12 @@ export default function useStyle(
       courseFeatureStyle(
         featuresRef,
         objScale,
+        courseAppearance,
         courseOverPrintColor,
         feature,
         resolution
       ),
-    [featuresRef, objScale, courseOverPrintColor]
+    [featuresRef, objScale, courseAppearance, courseOverPrintColor]
   );
   useEffect(() => {
     layer.setStyle(
@@ -46,6 +48,7 @@ export default function useStyle(
 export function courseFeatureStyle(
   featuresRef,
   objScale,
+  courseAppearance,
   courseOverPrintColor,
   feature,
   resolution
@@ -55,6 +58,11 @@ export function courseFeatureStyle(
     ? palette[feature.get("color")]
     : courseOverPrintColor;
   let style;
+  const {
+    controlCircleSizeRatio = 1,
+    lineWidthRatio = 1,
+    numberSizeRatio = 1,
+  } = courseAppearance;
 
   // Note: where applicable, always use setRadius *last*, since that is what
   // forces OL to actually update the style of circles.
@@ -63,14 +71,16 @@ export function courseFeatureStyle(
   if (kind === "normal") {
     const image = controlStyle.getImage();
     const stroke = image.getStroke();
-    stroke.setWidth(dimension(overprintLineWidth));
+    stroke.setWidth(dimension(overprintLineWidth * controlCircleSizeRatio));
     stroke.setColor(color);
-    image.setRadius(dimension(controlCircleOutsideDiameter / 2));
+    image.setRadius(
+      dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio
+    );
     style = controlStyle;
   } else if (kind === "start") {
     style = getStartStyle(color);
     const image = style.getImage();
-    image.setScale(dimension(0.05));
+    image.setScale(dimension(0.05 * controlCircleSizeRatio));
 
     const next = featuresRef.current[feature.get("index") + 1];
     if (next) {
@@ -85,20 +95,22 @@ export function courseFeatureStyle(
     finishStyle.forEach((style, i) => {
       const image = style.getImage();
       const stroke = image.getStroke();
-      stroke.setWidth(dimension(overprintLineWidth));
+      stroke.setWidth(dimension(overprintLineWidth) * controlCircleSizeRatio);
       stroke.setColor(color);
-      image.setRadius(dimension(2 + i));
+      image.setRadius(dimension(2 + i) * controlCircleSizeRatio);
     });
     style = finishStyle;
   } else if (kind === "line") {
     const stroke = lineStyle.getStroke();
-    stroke.setWidth(dimension(feature.get("lineWidth") || overprintLineWidth));
+    stroke.setWidth(
+      dimension(feature.get("lineWidth") || overprintLineWidth) * lineWidthRatio
+    );
     stroke.setColor(color);
     style = lineStyle;
   } else if (kind === "number") {
     const text = numberStyle.getText();
     text.setText(feature.get("label"));
-    text.setScale(dimension(0.6));
+    text.setScale(dimension(0.6) * numberSizeRatio);
     style = numberStyle;
   } else if (kind === "white-out") {
     style = whiteOutStyle;

@@ -194,6 +194,14 @@ export function parsePPen(doc) {
       autoLegGapSize:
         Number(courseAppearanceTag.getAttribute("auto-leg-gap-size")) || 0,
       blendPurple: courseAppearanceTag.getAttribute("blend-purple") === "true",
+      controlCircleSizeRatio:
+        Number(courseAppearanceTag.getAttribute("control-circle-size-ratio")) ||
+        1,
+      lineWidthRatio:
+        Number(courseAppearanceTag.getAttribute("line-width-ratio")) || 1,
+
+      numberSizeRatio:
+        Number(courseAppearanceTag.getAttribute("number-size-ratio")) || 1,
     };
   }
 

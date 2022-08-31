@@ -75,6 +75,7 @@ export default function useOtherControls({
         return courseFeatureStyle(
           { current: [] },
           f * objScale,
+          courseAppearance,
           selectedOverPrintRgb,
           feature,
           resolution
@@ -83,7 +84,7 @@ export default function useOtherControls({
         return fallbackStyleFn(feature, resolution);
       }
     },
-    [highlightFeatureRef, f, objScale]
+    [highlightFeatureRef, f, objScale, courseAppearance]
   );
 
   const controlFeaturesRef = useRef(controlFeatures);
@@ -92,6 +93,7 @@ export default function useOtherControls({
     controlsLayer,
     controlFeaturesRef,
     f * objScale,
+    courseAppearance,
     "rgba(182, 44, 152, 0.5)",
     highlighStyleFn
   );

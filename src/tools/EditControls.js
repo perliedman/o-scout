@@ -61,12 +61,13 @@ export default function EditControls() {
       return courseFeatureStyle(
         featuresRef,
         f * objScale,
+        courseAppearance,
         selectedOverPrintRgb,
         feature,
         resolution
       );
     },
-    [crs, featuresRef, objScale]
+    [crs, featuresRef, objScale, courseAppearance]
   );
 
   const highlightFeatureRef = useRef();
