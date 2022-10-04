@@ -21,7 +21,6 @@ import { fromProjectedCoord, toProjectedCoord } from "./services/coordinates";
 import { addCoordinateTransforms } from "ol/proj";
 import { ppenProjection } from "./services/ppen";
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import TileWorker from "worker-loader!./tile.worker.js";
 import { SpecialObject } from "./models/special-object";
 
 enablePatches();
@@ -49,7 +48,7 @@ export interface MapState {
     paperToProjected: (c: Coordinate) => Coordinate;
     projectedToPaper: (c: Coordinate) => Coordinate;
   };
-  tileWorker?: TileWorker;
+  tileWorker?: Worker;
   setMapFile: (
     mapFilename: string,
     mapFile: OcadFile,
@@ -70,7 +69,9 @@ export const useMap = create<MapState>((set) => ({
   projections: undefined,
   setMapFile: async (mapFilename, mapFile, tiler, mapFileBlob) =>
     await new Promise((resolve, reject) => {
-      const tileWorker = new TileWorker();
+      const tileWorker = new Worker(new URL('./tile.worker.js', import.meta.url), {
+        type: 'module'
+      });
       tileWorker.onmessage = (message) => {
         if (message.data.type === "READY") {
           set((state) => {
