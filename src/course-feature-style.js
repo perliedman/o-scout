@@ -20,7 +20,7 @@ export default function useStyle(
   layer,
   featuresRef,
   objScale,
-  courseAppearance,
+  courseAppearance = {},
   courseOverPrintColor = courseOverPrintRgb,
   styleWrapper
 ) {
