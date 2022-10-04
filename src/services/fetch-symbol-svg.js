@@ -3,7 +3,7 @@ import { getSvgDimensions } from "./svg-utils";
 
 export default async function fetchSymbolSvg(symbol) {
   const svgUrl = (
-    await import(`svg-control-descriptions/symbols/${symbol}.svg`)
+    await import(`../../node_modules/svg-control-descriptions/symbols/${symbol}.svg`)
   ).default;
   const symbolXml = await fetch(svgUrl, null, { format: "text" });
   const svg = new window.DOMParser().parseFromString(
