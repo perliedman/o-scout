@@ -64,7 +64,7 @@ export function load(data: Event): Event {
     ]),
     controlCodeGenerator: sequence([
       ...Object.keys(data.controls).map((id) => data.controls[id].code),
-      29,
+      30,
     ]),
   };
   updateAllControls(event);
