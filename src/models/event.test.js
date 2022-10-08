@@ -13,7 +13,7 @@ describe("event", () => {
     const loadedEvent = Event.load(event);
 
     expect(loadedEvent.idGenerator.next()).toBe(1);
-    expect(loadedEvent.controlCodeGenerator.next()).toBe(30);
+    expect(loadedEvent.controlCodeGenerator.next()).toBe(31);
   });
 
   test("load event with controls", () => {
