@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 import { ALL_CONTROLS_ID, getAllControls } from "./models/event";
 import useEvent, { Mode } from "./store";
 
