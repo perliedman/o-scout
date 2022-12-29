@@ -3,7 +3,7 @@ import fetchSymbolSvg from "./fetch-symbol-svg";
 import { parsePpenFile, createDocument } from "../test-utils";
 import { printCourse, renderPdf } from "./print";
 import readOcad from "ocad2geojson/src/ocad-reader";
-import OcadMap from "./ocad-map";
+import OcadMap from "../map-providers/ocad-map";
 
 jest.mock("./fetch-symbol-svg");
 

@@ -1,11 +1,10 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Spinner from "./ui/Spinner";
 import Button from "./ui/Button";
-import OcadTiler from "ocad-tiler";
 
 import { useMap, useNotifications } from "./store";
 import { readMap } from "./services/map";
-import OcadMap from "./services/ocad-map";
+import OcadMap from "./map-providers/ocad-map";
 
 export default function SelectMap({
   className,

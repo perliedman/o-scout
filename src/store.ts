@@ -33,8 +33,10 @@ export interface OcadCrs {
   scale: number;
   catalog: string;
   code: number;
+  easting: number;
+  northing: number;
   toProjectedCoord: (c: Coordinate) => Coordinate;
-  fromProjectedCoord: (c: Coordinate) => Coordinate;
+  toMapCoord: (c: Coordinate) => Coordinate;
 }
 
 export interface OcadFile {
@@ -55,6 +57,7 @@ export type Color = {
 };
 
 export interface MapProvider {
+  mapName: string;
   getCrs: () => OcadCrs;
   getExtent: () => Extent;
   getColors: () => Color[];

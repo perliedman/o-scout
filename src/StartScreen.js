@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SelectMap from "./SelectMap";
 import { readMap } from "./services/map";
 import { useMap, useNotifications } from "./store";
 import Button from "./ui/Button";
 import Spinner from "./ui/Spinner";
-import OcadTiler from "ocad-tiler";
-import OcadMap from "./services/ocad-map";
+import OcadMap from "./map-providers/ocad-map";
+import GoKartor from "./map-providers/go-kartor";
 
 export default function StartScreen() {
   const [state, setState] = useState("idle");
@@ -55,17 +55,18 @@ export default function StartScreen() {
 
   async function loadDemoMap() {
     setState("loading");
-    try {
-      const response = await window.fetch("demo-map.ocd");
-      const blob = await response.blob();
-      const mapFile = await readMap(blob);
-      const mapFilename = "Demo Map";
-      setMap(new OcadMap(mapFilename, mapFile, blob));
-    } catch (e) {
-      console.error(e);
-      setState("error");
-      pushNotification("danger", "Failed to load map.", e.toString());
-    }
+    setMap(new GoKartor());
+    // try {
+    //   const response = await window.fetch("demo-map.ocd");
+    //   const blob = await response.blob();
+    //   const mapFile = await readMap(blob);
+    //   const mapFilename = "Demo Map";
+    //   setMap(new OcadMap(mapFilename, mapFile, blob));
+    // } catch (e) {
+    //   console.error(e);
+    //   setState("error");
+    //   pushNotification("danger", "Failed to load map.", e.toString());
+    // }
   }
 }
 

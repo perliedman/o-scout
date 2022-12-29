@@ -4,15 +4,15 @@ import { ProjectionLike, get as getOlProjection } from "ol/proj";
 import { register } from "ol/proj/proj4";
 import proj4 from "proj4";
 import { Color, MapProvider, OcadCrs, OcadFile } from "../store";
-import { getProjection } from "./epsg";
+import { getProjection } from "../services/epsg";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import TileWorker from "worker-loader!../tile.worker.js";
 import { Coordinate } from "ol/coordinate";
-import { fromProjectedCoord, toProjectedCoord } from "./coordinates";
+import { fromProjectedCoord, toProjectedCoord } from "../services/coordinates";
 import OcadTiler, { SvgOptions } from "ocad-tiler";
 import XYZ from "ol/source/XYZ";
 import { ImageTile, Tile } from "ol";
-import { svgUrlToBitmapDataUrl } from "./svg-to-bitmap";
+import { svgUrlToBitmapDataUrl } from "../services/svg-to-bitmap";
 import TileState from "ol/TileState";
 import { Extent } from "ol/extent";
 
