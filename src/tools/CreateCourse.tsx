@@ -196,7 +196,7 @@ export default function CreateCourse(): JSX.Element {
     async function onPointerMove(e: MapBrowserEvent<PointerEvent>) {
       const features = await otherControlsLayer.getFeatures(e.pixel);
       if (features.length > 0) {
-        const [feature] = features;
+        const [feature] = features as Feature[];
         if (feature !== highlightFeatureRef.current) {
           highlightFeatureRef.current = feature;
           feature.changed();

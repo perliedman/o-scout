@@ -5,7 +5,6 @@ import * as Course from "../models/course";
 import * as PrintArea from "../models/print-area";
 import * as CourseAppearance from "../models/course-appearance";
 import Projection from "ol/proj/Projection";
-import Units from "ol/proj/Units";
 import { createXml } from "./xml-utils";
 import { ALL_CONTROLS_ID } from "../models/event";
 
@@ -330,7 +329,7 @@ function mapAttributes(tag) {
 
 export const ppenProjection = new Projection({
   code: "ppen",
-  units: Units.METERS,
+  units: "m",
   axisOrientation: "enu",
   global: false,
   metersPerUnit: 0.001,
