@@ -3,7 +3,7 @@ import fetchSymbolSvg from "./fetch-symbol-svg";
 import { parsePpenFile, createDocument } from "../test-utils";
 import { printCourse, renderPdf } from "./print";
 import readOcad from "ocad2geojson/src/ocad-reader";
-import OcadTiler from "ocad-tiler";
+import OcadMap from "./ocad-map";
 
 jest.mock("./fetch-symbol-svg");
 
@@ -21,14 +21,14 @@ describe("print", () => {
       });
 
       const mapFile = await readOcad(readFileSync("./test-data/basic-1.ocd"));
-      const tiler = new OcadTiler(mapFile);
+      const ocadMap = new OcadMap("Basic", mapFile, undefined);
 
       const {
         courses: [course],
         courseAppearance,
         name: eventName,
       } = parsePpenFile("./test-data/ppen/test1.ppen");
-      await printCourse(course, courseAppearance, eventName, mapFile, tiler);
+      await printCourse(course, courseAppearance, eventName, ocadMap);
     });
   });
   describe("renderPdf", () => {
@@ -44,7 +44,7 @@ describe("print", () => {
       });
 
       const mapFile = await readOcad(readFileSync("./test-data/basic-1.ocd"));
-      const tiler = new OcadTiler(mapFile);
+      const ocadMap = new OcadMap("Basic", mapFile, undefined);
 
       const {
         courses: [course],
@@ -55,10 +55,9 @@ describe("print", () => {
         course,
         courseAppearance,
         eventName,
-        mapFile,
-        tiler
+        ocadMap
       );
-      await renderPdf(mapFile, course.printArea, svg);
+      await renderPdf(ocadMap, course.printArea, svg);
     });
   });
 });

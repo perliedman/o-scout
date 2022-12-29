@@ -6,19 +6,19 @@ import Section from "./ui/Section";
 import { Fragment } from "react";
 
 export default function MapSection() {
-  const { mapFilename, mapFile } = useMap(getState);
+  const { mapProvider } = useMap(getState);
   const setMap = useEvent(getSetMap);
 
   return (
     <div className="p-4">
       <div
         className="w-full overflow-ellipsis overflow-hidden"
-        title={mapFilename}
+        title={mapProvider.mapName}
       >
-        {mapFilename}
+        {mapProvider.mapName}
       </div>
-      <Details mapFile={mapFile} />
-      <Warnings mapFile={mapFile} />
+      <Details items={mapProvider.getDetails()} />
+      <Warnings warnings={mapProvider.getWarnings()} />
       <div className="flex justify-end">
         <Dropdown>
           <SelectMap
@@ -30,8 +30,8 @@ export default function MapSection() {
     </div>
   );
 }
-function getState({ mapFilename, mapFile }) {
-  return { mapFilename, mapFile };
+function getState({ mapProvider }) {
+  return { mapProvider };
 }
 
 function getSetMap({
@@ -42,17 +42,7 @@ function getSetMap({
   return setMap;
 }
 
-function Details({ mapFile }) {
-  const { version, subVersion, subSubVersion, currentFileVersion } =
-    mapFile.header;
-  const crs = mapFile.getCrs();
-
-  const items = [
-    ["OCAD version", [version, subVersion, subSubVersion].join(".")],
-    ["File version", currentFileVersion],
-    ["Georeference", `${crs.name} (${crs.catalog}:${crs.code})`],
-  ];
-
+function Details({ items }) {
   return (
     <Section title="Details" level={2}>
       <div className="-mx-1 px-1 bg-indigo-50 rounded">
@@ -69,11 +59,11 @@ function Details({ mapFile }) {
   );
 }
 
-function Warnings({ mapFile }) {
-  const nWarnings = mapFile.warnings.length;
+function Warnings({ warnings }) {
+  const nWarnings = warnings.length;
 
   return (
-    mapFile.warnings.length > 0 && (
+    warnings.length > 0 && (
       <Section
         headingComponent="h3"
         headingTextStyle=""
@@ -86,7 +76,7 @@ function Warnings({ mapFile }) {
       >
         <div className="pl-4 bg-indigo-100 rounded">
           <ul className="ml-4 my-4 py-2 list-disc">
-            {mapFile.warnings.map((w) => (
+            {warnings.map((w) => (
               <li>{w.toString()}</li>
             ))}
           </ul>

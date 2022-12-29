@@ -48,11 +48,10 @@ export async function printCourse(
   course,
   courseAppearance,
   eventName,
-  mapFile,
-  tiler,
+  mapProvider,
   svgOptions
 ) {
-  const crs = mapFile.getCrs();
+  const crs = mapProvider.getCrs();
   const printAreaExtent = getPrintAreaExtent(course, crs.scale);
   // Convert from PPEN mm to OCAD coordinates, 1/100 mm
   const projectedExtent = transformExtent(printAreaExtent, ([x, y]) =>
@@ -66,7 +65,7 @@ export async function printCourse(
   // Output dimensions in pt on the actually printed paper (in print scale)
   const outputWidthPt = printAreaWidthMm * scaleFactor * mmToPt;
   const outputHeightPt = printAreaHeightMm * scaleFactor * mmToPt;
-  const mapSvg = tiler.renderSvg(projectedExtent, 1, svgOptions);
+  const mapSvg = mapProvider.renderSvg(projectedExtent, 1, svgOptions);
   mapSvg.setAttribute("width", outputWidthPt);
   mapSvg.setAttribute("height", outputHeightPt);
   mapSvg.setAttribute(
@@ -92,7 +91,7 @@ export async function printCourse(
 }
 
 export function renderPdf(
-  mapFile,
+  mapProvider,
   { pageLandscape, pageWidth, pageHeight, pageMargins },
   svg
 ) {
@@ -118,13 +117,15 @@ export function renderPdf(
         colorCallback: (x) => {
           const color =
             x &&
-            mapFile.colors.find(
-              (c) =>
-                c &&
-                c.rgbArray[0] === x[0][0] &&
-                c.rgbArray[1] === x[0][1] &&
-                c.rgbArray[2] === x[0][2]
-            );
+            mapProvider
+              .getColors()
+              .find(
+                (c) =>
+                  c &&
+                  c.rgbArray[0] === x[0][0] &&
+                  c.rgbArray[1] === x[0][1] &&
+                  c.rgbArray[2] === x[0][2]
+              );
           return color?.cmyk ? [color.cmyk, x[1]] : x;
         },
       }

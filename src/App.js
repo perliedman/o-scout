@@ -8,7 +8,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import Button from "./ui/Button";
 
 function App() {
-  const mapFile = useMap(getMap);
+  const mapProvider = useMap(getMap);
   const newEvent = useEvent(getNewEvent);
   const { notifications, popNotification } = useNotifications(getNotifications);
   const { type, message, detail } =
@@ -16,9 +16,9 @@ function App() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorScreen} onReset={newEvent}>
-      {mapFile ? (
+      {mapProvider ? (
         <>
-          <Map mapFile={mapFile} />
+          <Map />
           <Sidebar />
           <Toolbar />
         </>
@@ -52,7 +52,7 @@ function getNewEvent({
 export default App;
 
 function getMap(state) {
-  return state.mapFile;
+  return state.mapProvider;
 }
 
 function getNotifications({ notifications, pop }) {

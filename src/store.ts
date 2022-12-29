@@ -13,20 +13,23 @@ import Geometry from "ol/geom/Geometry";
 import VectorLayer from "ol/layer/Vector";
 import { Extent } from "ol/extent";
 import { PrintArea } from "./models/print-area";
-import OcadTiler from "ocad-tiler";
+import OcadTiler, { SvgOptions } from "ocad-tiler";
 import VectorSource from "ol/source/Vector";
 import { Coordinate } from "ol/coordinate";
 import Projection from "ol/proj/Projection";
 import { fromProjectedCoord, toProjectedCoord } from "./services/coordinates";
-import { addCoordinateTransforms } from "ol/proj";
+import { addCoordinateTransforms, ProjectionLike } from "ol/proj";
 import { ppenProjection } from "./services/ppen";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import TileWorker from "worker-loader!./tile.worker.js";
 import { SpecialObject } from "./models/special-object";
+import TileLayer from "ol/layer/Tile";
+import XYZ from "ol/source/XYZ";
 
 enablePatches();
 
 export interface OcadCrs {
+  name: string;
   scale: number;
   catalog: string;
   code: number;
@@ -34,28 +37,46 @@ export interface OcadCrs {
   fromProjectedCoord: (c: Coordinate) => Coordinate;
 }
 
-interface OcadFile {
+export interface OcadFile {
+  header: {
+    version: number;
+    subVersion: number;
+    subSubVersion: number;
+    currentFileVersion: number;
+  };
+  warnings: string[];
+  colors: Color[];
   getCrs: () => OcadCrs;
 }
 
+export type Color = {
+  rgbArray: [number, number, number];
+  cmyk?: [number, number, number, number];
+};
+
+export interface MapProvider {
+  getCrs: () => OcadCrs;
+  getExtent: () => Extent;
+  getColors: () => Color[];
+  getOlProjection: () => Promise<ProjectionLike>;
+  paperToProjected: (c: Coordinate) => Coordinate;
+  projectedToPaper: (c: Coordinate) => Coordinate;
+  createTileLayer: (props: {
+    onError: (err: unknown) => void;
+    onSuccess: () => void;
+  }) => Promise<TileLayer<XYZ>>;
+  renderSvg: (extent: Extent, svgOptions: SvgOptions) => XMLDocument;
+  close: () => void;
+}
+
 export interface MapState {
-  mapFile?: OcadFile;
+  mapProvider?: MapProvider;
   map?: Map;
   clipGeometry?: Geometry;
   clipLayer?: VectorLayer<VectorSource>;
   controlsSource?: VectorSource;
-  projections?: {
-    mapProjection: Projection;
-    paperToProjected: (c: Coordinate) => Coordinate;
-    projectedToPaper: (c: Coordinate) => Coordinate;
-  };
   tileWorker?: TileWorker;
-  setMapFile: (
-    mapFilename: string,
-    mapFile: OcadFile,
-    tiler: OcadTiler,
-    mapFileBlob: Blob
-  ) => void;
+  setMapProvider: (mapProvider: MapProvider) => void;
   setMapInstance: (map: Map) => void;
   setClipGeometry: (geometry: Geometry) => void;
   setClipLayer: (clipLayer: VectorLayer<VectorSource>) => void;
@@ -63,64 +84,25 @@ export interface MapState {
 }
 
 export const useMap = create<MapState>((set) => ({
-  mapFile: undefined,
+  mapProvider: undefined,
   mapInstance: undefined,
   clipGeometry: undefined,
   clipLayer: undefined,
-  projections: undefined,
-  setMapFile: async (mapFilename, mapFile, tiler, mapFileBlob) =>
-    await new Promise((resolve, reject) => {
-      const tileWorker = new TileWorker();
-      tileWorker.onmessage = (message) => {
-        if (message.data.type === "READY") {
-          set((state) => {
-            if (state.tileWorker) {
-              state.tileWorker.terminate();
-            }
-            return {
-              ...state,
-              mapFile,
-              mapFilename,
-              tiler,
-              tileWorker,
-              projections: undefined,
-            };
-          });
-          resolve();
-        } else {
-          reject(new Error(`Unexpected message: ${message.data.type}.`));
-        }
-      };
-      tileWorker.postMessage({ type: "SET_MAP_FILE", blob: mapFileBlob });
-    }),
+  setMapProvider: (mapProvider) => set({ mapProvider }),
   setMapInstance: (map) =>
     set((state) => {
-      const crs = state.mapFile?.getCrs();
-      let projections;
-      if (map) {
-        if (!crs) throw new Error("Setting map instance without a map file.");
+      const crs = state.mapProvider?.getCrs();
+      const mapProjection = map.getView().getProjection();
+      const paperToProjected = (c: Coordinate) => toProjectedCoord(crs, c);
+      const projectedToPaper = (c: Coordinate) => fromProjectedCoord(crs, c);
+      addCoordinateTransforms(
+        ppenProjection,
+        mapProjection,
+        paperToProjected,
+        projectedToPaper
+      );
 
-        const mapProjection = map.getView().getProjection();
-        const paperToProjected = (c: Coordinate) => toProjectedCoord(crs, c);
-        const projectedToPaper = (c: Coordinate) => fromProjectedCoord(crs, c);
-        projections = {
-          mapProjection,
-          paperToProjected,
-          projectedToPaper,
-        };
-        addCoordinateTransforms(
-          ppenProjection,
-          mapProjection,
-          paperToProjected,
-          projectedToPaper
-        );
-      }
-
-      return {
-        ...state,
-        map,
-        projections,
-      };
+      return { map };
     }),
   setClipGeometry: (clipGeometry) =>
     set((state) => ({ ...state, clipGeometry })),
@@ -130,12 +112,12 @@ export const useMap = create<MapState>((set) => ({
 }));
 
 export function useCrs(): OcadCrs | undefined {
-  const mapFile = useMap(getMapFile);
-  return useMemo(() => mapFile?.getCrs(), [mapFile]);
+  const mapProvider = useMap(getMapProvider);
+  return useMemo(() => mapProvider?.getCrs(), [mapProvider]);
 }
 
-function getMapFile({ mapFile }: MapState) {
-  return mapFile;
+function getMapProvider({ mapProvider }: MapState) {
+  return mapProvider;
 }
 
 export enum Mode {

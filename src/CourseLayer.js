@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useCrs, useMap } from "./store";
 import GeoJSON from "ol/format/GeoJSON";
 import useControls from "./services/use-controls";
@@ -18,17 +18,15 @@ import { ppenProjection } from "./services/ppen";
 import { getPrintAreaExtent } from "./models/course";
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
-  const {
-    map,
-    mapFile,
-    clipLayer,
-    setControlsSource,
-    projections: { paperToProjected },
-  } = useMap(getMap);
+  const { map, mapProvider, clipLayer, setControlsSource } = useMap(getMap);
   const crs = useCrs();
   const mapProjection = useMemo(() => map?.getView().getProjection(), [map]);
 
-  const mapScale = useMemo(() => mapFile.getCrs().scale, [mapFile]);
+  const mapScale = useMemo(() => mapProvider.getCrs().scale, [mapProvider]);
+  const paperToProjected = useCallback(
+    (c) => mapProvider.paperToProjected(c),
+    [mapProvider]
+  );
   const objScale = useMemo(
     () =>
       getObjectScale(courseAppearance.scaleSizes, mapScale, course.printScale),
@@ -46,7 +44,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
       clipSource.clear();
       clipSource.addFeature(new Feature(extentPolygon));
     }
-  }, [clipLayer, course, crs, paperToProjected]);
+  }, [clipLayer, course, crs, mapScale, paperToProjected]);
 
   const controlsGeoJSON = useControls(course.controls);
   const controlConnectionsGeoJSON = useControlConnections(
@@ -128,8 +126,14 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
   return null;
 }
 
-function getMap({ map, mapFile, clipLayer, setControlsSource, projections }) {
-  return { map, mapFile, clipLayer, setControlsSource, projections };
+function getMap({
+  map,
+  mapProvider,
+  clipLayer,
+  setControlsSource,
+  projections,
+}) {
+  return { map, mapProvider, clipLayer, setControlsSource, projections };
 }
 
 const objectLayerOptions = {

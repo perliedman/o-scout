@@ -1,9 +1,5 @@
 import OlMap from "ol/Map";
-import { register } from "ol/proj/proj4";
-import { get as getOlProjection } from "ol/proj";
 import { useCallback, useEffect, useRef, useState } from "react";
-import proj4 from "proj4";
-import { getProjection } from "./services/epsg";
 import "ol/ol.css";
 import useEvent, { useMap, useNotifications } from "./store";
 import { View } from "ol";
@@ -11,13 +7,14 @@ import Spinner from "./ui/Spinner";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import useClip from "./use-clip";
-import useMapLayer from "./services/use-map-layer";
 import shallow from "zustand/shallow";
 import EventMapMismatchDialog from "./EventMapMismatchDialog";
 
 export default function MapComponent() {
-  const { mapFile, map, tiler, tileWorker, setMapInstance, setClipLayer } =
-    useMap(getMap, shallow);
+  const { mapProvider, map, setMapInstance, setClipLayer } = useMap(
+    getMap,
+    shallow
+  );
   const pushNotification = useNotifications(getPush);
 
   useRestoredData();
@@ -27,7 +24,7 @@ export default function MapComponent() {
   const hasTileErrors = useRef(false);
   const [state, setState] = useState("idle");
 
-  const registerProjection = useCallback(_registerProjection, [mapFile]);
+  const registerProjection = useCallback(_registerProjection, [mapProvider]);
   useEffect(() => {
     setState("loading");
     hasTileErrors.current = false;
@@ -35,8 +32,8 @@ export default function MapComponent() {
     return () => {
       setProjection(null);
     };
-  }, [registerProjection, hasTileErrors, mapFile]);
-  useEffect(createMap, [setMapInstance, mapFile, projection]);
+  }, [registerProjection, hasTileErrors, mapProvider]);
+  useEffect(createMap, [setMapInstance, mapProvider, projection]);
   const onSuccess = useCallback(() => setState("idle"), []);
   const onError = useCallback(
     (e) => {
@@ -53,21 +50,19 @@ export default function MapComponent() {
     [hasTileErrors, pushNotification]
   );
   const mapLayer = useMapLayer({
-    map,
-    projection,
-    tileWorker,
+    mapProvider,
     onSuccess,
     onError,
   });
   useEffect(() => {
     if (map && mapLayer) {
       map.addLayer(mapLayer);
-      map.getView().fit(tiler.bounds, { padding: [50, 370, 50, 50] });
+      map.getView().fit(mapLayer.getExtent(), { padding: [50, 370, 50, 50] });
       return () => {
         map.removeLayer(mapLayer);
       };
     }
-  }, [map, mapLayer, tiler?.bounds]);
+  }, [map, mapLayer]);
   useEffect(addClipLayer, [map, setClipLayer]);
   useClip(mapLayer);
 
@@ -85,16 +80,10 @@ export default function MapComponent() {
   );
 
   async function _registerProjection() {
-    const crs = mapFile.getCrs();
-    const [projectionName, code] =
-      crs.catalog === "EPSG"
-        ? [`${crs.catalog}:${crs.code}`, crs.code]
-        : // TODO: This is a really stupid fallback; figure out how
-          // to set a really "generic" projection
-          ["EPSG:3006", 3006];
-    proj4.defs(projectionName, await getProjection(code));
-    register(proj4);
-    setProjection(getOlProjection(projectionName));
+    if (mapProvider) {
+      const projection = await mapProvider.getOlProjection();
+      setProjection(projection);
+    }
   }
 
   function createMap() {
@@ -132,19 +121,15 @@ export default function MapComponent() {
 }
 
 function getMap({
-  mapFile,
+  mapProvider,
   map,
-  tiler,
-  tileWorker,
   setMapInstance,
   clipGeometry,
   setClipLayer,
 }) {
   return {
-    mapFile,
+    mapProvider,
     map,
-    tiler,
-    tileWorker,
     setMapInstance,
     clipGeometry,
     setClipLayer,
@@ -180,4 +165,19 @@ function useRestoredData() {
       );
     }
   }, [push, pop, isRestored, currentMapFilename, eventMapName]);
+}
+
+function useMapLayer({ mapProvider, onError, onSuccess }) {
+  const [layer, setLayer] = useState();
+  useEffect(() => {
+    if (mapProvider) {
+      createLayer();
+    }
+
+    async function createLayer() {
+      setLayer(await mapProvider.createTileLayer({ onError, onSuccess }));
+    }
+  }, [mapProvider, onError, onSuccess]);
+
+  return layer;
 }

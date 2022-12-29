@@ -5,6 +5,7 @@ import OcadTiler from "ocad-tiler";
 
 import { useMap, useNotifications } from "./store";
 import { readMap } from "./services/map";
+import OcadMap from "./services/ocad-map";
 
 export default function SelectMap({
   className,
@@ -49,7 +50,7 @@ export default function SelectMap({
     try {
       const [blob] = e.target.files;
       const map = await readMap(blob);
-      setMap(blob.name, map, new OcadTiler(map), blob);
+      setMap(new OcadMap(blob.name, map, blob));
       onMapLoaded && onMapLoaded(map, blob.name);
       setState("idle");
     } catch (e) {
@@ -61,7 +62,7 @@ export default function SelectMap({
 }
 
 function getSetter(state) {
-  return state.setMapFile;
+  return state.setMapProvider;
 }
 
 function getPush({ push }) {

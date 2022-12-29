@@ -9,6 +9,12 @@ export function svgToBitmap(
   return svgUrlToBitmapDataUrl(svgUrl, [width, height]);
 }
 
+/**
+ *
+ * @param {string} svgUrl
+ * @param {Array<number|null>} param1
+ * @returns
+ */
 export function svgUrlToBitmapDataUrl(
   svgUrl,
   [width = null, height = null] = []

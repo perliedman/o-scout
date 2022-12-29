@@ -21,7 +21,7 @@ export default function PrintAndExport() {
     courses,
     selectedCourseId,
   } = event;
-  const { mapFile, tiler } = useMap(getMap, shallow);
+  const { mapProvider } = useMap(getMap, shallow);
   const selectedCourse = useMemo(
     () => courses.find((course) => course.id === selectedCourseId),
     [courses, selectedCourseId]
@@ -101,7 +101,7 @@ export default function PrintAndExport() {
       format === "pdf"
         ? (svg) =>
             renderPdf(
-              mapFile,
+              mapProvider,
               selectedCourse?.printArea || defaultPrintArea,
               svg
             )
@@ -118,7 +118,7 @@ export default function PrintAndExport() {
       printNext();
     } else {
       try {
-        const crs = mapFile.getCrs();
+        const crs = mapProvider.getCrs();
         let projectedToLngLat;
         if (crs.catalog === "EPSG") {
           projectedToLngLat = proj4(`EPSG:${crs.code}`, "EPSG:4326").forward;
@@ -149,8 +149,7 @@ export default function PrintAndExport() {
           course,
           courseAppearance,
           eventName,
-          mapFile,
-          tiler,
+          mapProvider,
           {
             fill: format !== "pdf" ? "white" : undefined,
           }
@@ -172,10 +171,10 @@ export default function PrintAndExport() {
   }
 
   function emptyCourse() {
-    const crs = mapFile.getCrs();
+    const crs = mapProvider.getCrs();
     const course = Course.create(0, "", [], crs.scale, "");
     course.printArea = {
-      extent: transformExtent(tiler.bounds, (c) => {
+      extent: transformExtent(mapProvider.getExtent(), (c) => {
         const [x, y] = crs.toMapCoord(c);
         return [x / 100, y / 100];
       }),
@@ -210,8 +209,8 @@ const defaultPrintArea = {
   pageHeight: 1169,
 };
 
-function getMap({ mapFile, tiler }) {
-  return { mapFile, tiler };
+function getMap({ mapProvider }) {
+  return { mapProvider };
 }
 
 function getPush({ push }) {
