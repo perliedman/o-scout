@@ -1,9 +1,23 @@
+const svgNamespace = "http://www.w3.org/2000/svg";
+
+export function createSvg(svgChildren) {
+  const doc = document.implementation.createDocument(null, "xml", null);
+  const rootNode = createSvgNode(doc, {
+    type: "svg",
+    attrs: {
+      xmlns: svgNamespace,
+    },
+    children: svgChildren,
+  });
+  return createSvgNode(doc, rootNode);
+}
+
 export function createSvgNode(document, n) {
   if (n instanceof SVGElement) {
     return n;
   }
 
-  const node = document.createElementNS("http://www.w3.org/2000/svg", n.type);
+  const node = document.createElementNS(svgNamespace, n.type);
   n.id && (node.id = n.id);
   n.attrs &&
     Object.keys(n.attrs).forEach((attrName) =>
