@@ -27,6 +27,7 @@ export const circle = ([cx, cy], r, stroke, scale) => ({
     r: r * (scale || 1),
     stroke,
     "stroke-width": overprintLineWidth * (scale || 1),
+    fill: "transparent",
   },
 });
 
@@ -197,7 +198,7 @@ export async function courseToSvg(
           ),
           true,
           courseOverPrintRgb,
-          null,
+          "transparent",
           objScale
         );
       case "normal":

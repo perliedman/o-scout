@@ -48,6 +48,14 @@ export default function StartScreen() {
               </Button>
             </span>
           </div>
+          <div className="mt-8">
+            <Button
+              className="w-48 h-16"
+              onClick={() => setMap(new GoKartor())}
+            >
+              🇸🇪 Use GO-kartor
+            </Button>
+          </div>
         </div>
       </div>
     </>

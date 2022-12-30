@@ -146,9 +146,10 @@ function getEvent({ isRestored, mapFilename }) {
 
 function useRestoredData() {
   const { isRestored, mapFilename: eventMapName } = useEvent(getEvent, shallow);
-  const { mapFilename: currentMapFilename } = useMap(({ mapFilename }) => ({
-    mapFilename,
+  const { mapProvider } = useMap(({ mapProvider }) => ({
+    mapProvider,
   }));
+  const currentMapFilename = mapProvider.mapName;
   const { push, pop } = useNotifications(
     ({ push, pop }) => ({
       push,

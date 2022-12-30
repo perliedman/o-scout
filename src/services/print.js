@@ -65,7 +65,7 @@ export async function printCourse(
   // Output dimensions in pt on the actually printed paper (in print scale)
   const outputWidthPt = printAreaWidthMm * scaleFactor * mmToPt;
   const outputHeightPt = printAreaHeightMm * scaleFactor * mmToPt;
-  const mapSvg = mapProvider.renderSvg(projectedExtent, 1, svgOptions);
+  const mapSvg = await mapProvider.renderSvg(projectedExtent, 1, svgOptions);
   mapSvg.setAttribute("width", outputWidthPt);
   mapSvg.setAttribute("height", outputHeightPt);
   mapSvg.setAttribute(

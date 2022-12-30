@@ -68,7 +68,7 @@ export interface MapProvider {
     onError: (err: unknown) => void;
     onSuccess: () => void;
   }) => Promise<TileLayer<XYZ>>;
-  renderSvg: (extent: Extent, svgOptions: SvgOptions) => XMLDocument;
+  renderSvg: (extent: Extent, svgOptions: SvgOptions) => Promise<XMLDocument>;
   close: () => void;
 }
 
@@ -142,7 +142,7 @@ interface Actions {
   actions: {
     event: {
       set: (event: EventType) => void;
-      setMap: (mapFile: OcadFile, mapFilename: string) => void;
+      setMapProvider: (mapProvider: MapProvider) => void;
       setName: (name: string) => void;
       addControl: (
         options: Event.ControlCreationOptions,
@@ -214,10 +214,14 @@ const useEvent = create<StateWithActions>(
                 ? getModeFromCourse(event.courses[0])
                 : Mode.CreateCourse,
             })),
-          setMap: (mapFile, mapFilename) =>
+          setMapProvider: (mapProvider) =>
             set((state) =>
               produce(state, (draft) =>
-                Event.setMap(draft, mapFile.getCrs().scale, mapFilename)
+                Event.setMap(
+                  draft,
+                  mapProvider.getCrs().scale,
+                  mapProvider.mapName
+                )
               )
             ),
           setName: (name) =>

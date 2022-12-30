@@ -5,12 +5,11 @@ import Button from "./ui/Button";
 export default function EventMapMismatchDialog({ onClose }) {
   const {
     mapFilename: eventMapName,
-    setEventMap,
+    setEventMapProvider,
     newEvent,
   } = useEvent(getEvent, shallow);
-  const { mapFilename: currentMapFilename, mapFile } = useMap(
-    ({ mapFilename, mapFile }) => ({ mapFilename, mapFile })
-  );
+  const { mapProvider } = useMap(({ mapProvider }) => ({ mapProvider }));
+  const currentMapFilename = mapProvider.mapName;
 
   return (
     <>
@@ -29,7 +28,7 @@ export default function EventMapMismatchDialog({ onClose }) {
         <Button
           type="primary"
           onClick={() => {
-            setEventMap(mapFile, currentMapFilename);
+            setEventMapProvider(mapProvider);
             onClose();
           }}
           className="mr-2"
@@ -43,7 +42,7 @@ export default function EventMapMismatchDialog({ onClose }) {
           type="primary"
           onClick={() => {
             newEvent();
-            setEventMap(mapFile, currentMapFilename);
+            setEventMapProvider(mapProvider);
             onClose();
           }}
         >
@@ -57,8 +56,8 @@ export default function EventMapMismatchDialog({ onClose }) {
 function getEvent({
   mapFilename,
   actions: {
-    event: { setMap: setEventMap, newEvent },
+    event: { setMapProvider: setEventMapProvider, newEvent },
   },
 }) {
-  return { mapFilename, setEventMap, newEvent };
+  return { mapFilename, setEventMapProvider, newEvent };
 }

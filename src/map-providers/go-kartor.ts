@@ -9,6 +9,7 @@ import TileGrid from "ol/tilegrid/TileGrid";
 import proj4 from "proj4";
 import { fromProjectedCoord, toProjectedCoord } from "../services/coordinates";
 import { getProjection } from "../services/epsg";
+import { createSvg } from "../services/svg-utils";
 import { Color, MapProvider, OcadCrs } from "../store";
 
 const projectionCode = 3006;
@@ -48,7 +49,20 @@ const mapMinResolution = Math.pow(2, mapMaxZoom) * mapMaxResolution;
 const resolutions = Array.from({ length: mapMaxZoom + 1 }).map(
   (_, i: number) => 1 / (Math.pow(2, i) / mapMinResolution)
 );
-console.log(resolutions);
+
+const tileGrid = new TileGrid({
+  extent,
+  origin: [extent[0], extent[3]],
+  resolutions,
+  minZoom: mapMinZoom,
+});
+
+type SVGNodeTemplate = {
+  type: string;
+  attrs?: Record<string, string>;
+  children?: SVGNodeTemplate[];
+};
+
 export default class GoKartor implements MapProvider {
   mapName = "GO-Kartor";
 
@@ -91,20 +105,65 @@ export default class GoKartor implements MapProvider {
         source: new XYZ({
           projection,
           url: "https://kartor.gokartor.se/Master/{z}/{y}/{x}.png",
-          tileGrid: new TileGrid({
-            extent,
-            origin: [extent[0], extent[3]],
-            resolutions,
-            minZoom: mapMinZoom,
-          }),
+          tileGrid,
         }),
         extent,
       })
     );
   }
 
-  renderSvg(projectedExtent: Extent, svgOptions: SvgOptions): XMLDocument {
-    return document.implementation.createDocument(null, "xml", null);
+  async renderSvg(
+    projectedExtent: Extent,
+    svgOptions: SvgOptions
+  ): Promise<XMLDocument> {
+    const tiles: SVGNodeTemplate[] = [];
+    tileGrid.forEachTileCoord(projectedExtent, 14, (tileCoord) => {
+      const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+      const [z, x, y] = tileCoord;
+      tiles.push({
+        type: "image",
+        attrs: {
+          x: tileExtent[0].toString(),
+          y: (-tileExtent[3]).toString(),
+          width: "256",
+          height: "256",
+          "xlink:href": `https://kartor.gokartor.se/Master/${z}/${y}/${x}.png`,
+        },
+      });
+    });
+
+    // for (const tile of tiles) {
+    //   const url = tile.attrs?.["xlink:href"];
+    //   if (tile.attrs && url) {
+    //     tile.attrs["xlink:href"] = await new Promise((resolve, reject) => {
+    //       const image = new Image();
+    //       image.src = url;
+    //       image.crossOrigin = "anonymous";
+    //       image.onload = () => {
+    //         const canvas = document.createElement("canvas");
+    //         canvas.width = image.width;
+    //         canvas.height = image.height;
+    //         const ctx = canvas.getContext("2d");
+    //         ctx?.drawImage(image, 0, 0);
+    //         resolve(canvas.toDataURL());
+    //       };
+    //       image.onerror = (err) => reject(new Error(err.toString()));
+    //     });
+    //   }
+    // }
+
+    const transform = `translate(${-projectedExtent[0]}, ${
+      projectedExtent[3]
+    })`;
+    const mapGroup = {
+      type: "g",
+      attrs: { transform, fill: "transparent" },
+      children: tiles,
+    };
+    const svg = createSvg([mapGroup]);
+    svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+    return svg;
   }
 
   paperToProjected(c: Coordinate): Coordinate {

@@ -156,8 +156,13 @@ export default class OcadMap implements MapProvider {
     }
   }
 
-  renderSvg(projectedExtent: Extent, svgOptions: SvgOptions): XMLDocument {
-    return this.tiler.renderSvg(projectedExtent, 1, svgOptions);
+  renderSvg(
+    projectedExtent: Extent,
+    svgOptions: SvgOptions
+  ): Promise<XMLDocument> {
+    return Promise.resolve(
+      this.tiler.renderSvg(projectedExtent, 1, svgOptions)
+    );
   }
 
   paperToProjected(c: Coordinate): Coordinate {
