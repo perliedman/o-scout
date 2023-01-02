@@ -1,6 +1,9 @@
 import { renderHook, act } from "@testing-library/react";
+import OcadMap from "./map-providers/ocad-map";
 import { ALL_CONTROLS_ID, getAllControls } from "./models/event";
 import useEvent, { Mode } from "./store";
+import readOcad from "ocad2geojson/src/ocad-reader";
+import { readFileSync } from "fs";
 
 describe("store", () => {
   test("can set name", () => {
@@ -117,21 +120,22 @@ describe("store", () => {
     ).toBeFalsy();
   });
 
-  test("setting map sets print scale for course without controls", () => {
+  test("setting map sets print scale for course without controls", async () => {
+    const ocadMap = await readOcad(readFileSync("./test-data/basic-1.ocd"));
     const { result } = renderHook(() => useEvent());
     act(() =>
-      result.current.actions.event.setMap(
-        { getCrs: () => ({ scale: 4000 }) },
-        "olle.ocd"
+      result.current.actions.event.setMapProvider(
+        new OcadMap("olle.ocd", ocadMap)
       )
     );
 
     result.current.courses.forEach((course) =>
-      expect(course.printScale).toBe(4000)
+      expect(course.printScale).toBe(15000)
     );
   });
 
-  test("setting map leaves print scale for course with controls", () => {
+  test("setting map leaves print scale for course with controls", async () => {
+    const ocadMap = await readOcad(readFileSync("./test-data/basic-1.ocd"));
     const { result } = renderHook(() => useEvent());
     act(() =>
       result.current.actions.event.addControl(
@@ -141,32 +145,32 @@ describe("store", () => {
     );
 
     act(() =>
-      result.current.actions.event.setMap(
-        { getCrs: () => ({ scale: 4000 }) },
-        "olle.ocd"
+      result.current.actions.event.setMapProvider(
+        new OcadMap("olle.ocd", ocadMap)
       )
     );
 
     expect(result.current.courses[0].printScale).toBe(15000);
   });
 
-  test("setting map sets event's map name", () => {
+  test("setting map sets event's map name", async () => {
+    const ocadMap = await readOcad(readFileSync("./test-data/basic-1.ocd"));
     const { result } = renderHook(() => useEvent());
     act(() =>
-      result.current.actions.event.setMap(
-        { getCrs: () => ({ scale: 4000 }) },
-        "olle.ocd"
+      result.current.actions.event.setMapProvider(
+        new OcadMap("olle.ocd", ocadMap)
       )
     );
 
     expect(result.current.mapFilename).toBe("olle.ocd");
   });
 
-  test("creating a new event sets event's map name to current map", () => {
+  test("creating a new event sets event's map name to current map", async () => {
+    const ocadMap = await readOcad(readFileSync("./test-data/basic-1.ocd"));
     const { result } = renderHook(() => useEvent());
     act(() =>
-      result.current.actions.event.setMap(
-        { getCrs: () => ({ scale: 4000 }) },
+      result.current.actions.event.setMapProvider(
+        new OcadMap("olle.ocd", ocadMap),
         "olle.ocd"
       )
     );
