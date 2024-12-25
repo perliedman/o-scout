@@ -87,11 +87,18 @@ export default function CourseOptions({
           index={1}
           onChange={(extent) => setPrintArea({ extent })}
         />
+        
         <div />
+        Size on paper
+        <div>Height: {((extent[3]-extent[1])*(mapScale/printScale)).toFixed(2)} mm ({(printArea.pageHeight/3.937).toFixed()} mm) </div>
+        <div>Width: {((extent[2]-extent[0])*(mapScale/printScale)).toFixed(2)} mm ({(printArea.pageWidth/3.937).toFixed()} mm) </div>  
       </div>
     </>
+    
   );
 }
+
+
 
 function ExtentInput({ extent, index, onChange }) {
   return (
