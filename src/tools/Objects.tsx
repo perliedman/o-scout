@@ -53,22 +53,25 @@ export default function Objects(): JSX.Element {
         cursor: "crosshair",
       });
       interaction.on("extentchangeend", ({ extent }: { extent: Extent }) => {
-        const locations = mapExtentToDescriptionLocations(
-          extent,
-          map.getView().getProjection(),
-          (selectedCourse?.controls.length || 0) + 2
-        );
-        addSpecialObject(
-          {
-            kind: "descriptions",
-            locations,
-            isAllCourses: false,
-          },
-          selectedCourse.id
-        );
-        const objects = useEvent.getState().specialObjects;
-        setSelectedObjectId(objects[objects.length - 1].id);
-        setMode("edit");
+        if (extent){
+          const locations = mapExtentToDescriptionLocations(
+            extent,
+            map.getView().getProjection(),
+            (selectedCourse?.controls.length || 0) + 2
+          );
+          addSpecialObject(
+            {
+              kind: "descriptions",
+              locations,
+              isAllCourses: false,
+            },
+            selectedCourse.id
+          );
+          const objects = useEvent.getState().specialObjects;
+          setSelectedObjectId(objects[objects.length - 1].id);
+          setMode("edit");
+        }  
+        else alert("Single clicks are not allowed.")
       });
       map.addInteraction(interaction);
 
