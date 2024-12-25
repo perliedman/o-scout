@@ -21,7 +21,7 @@ import { fromProjectedCoord, toProjectedCoord } from "./services/coordinates";
 import { addCoordinateTransforms } from "ol/proj";
 import { ppenProjection } from "./services/ppen";
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import TileWorker from "worker-loader!./tile.worker.js";
+import TileWorker from "./tile.worker.js?worker";
 import { SpecialObject } from "./models/special-object";
 
 enablePatches();

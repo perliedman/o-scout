@@ -1,4 +1,6 @@
-module.exports = {
+import forms from "@tailwindcss/forms";
+
+export default {
   purge: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
   darkMode: false, // or 'media' or 'class'
   theme: {
@@ -13,5 +15,5 @@ module.exports = {
       borderRadius: ["first", "last"],
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [forms],
 };

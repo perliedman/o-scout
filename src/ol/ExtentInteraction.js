@@ -9,10 +9,6 @@ import OlExtentInteraction from "ol/interaction/Extent";
  *     clicking outside the map
  */
 export default class ExtentInteraction extends OlExtentInteraction {
-  /***
-   * @type (eventType: 'extentchangeend', handler: ({type: 'eventchangeend', extent: Extent}) => void)   */
-  on;
-
   constructor(options) {
     super(options);
     this.create_ = options?.create;

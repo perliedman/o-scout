@@ -10,7 +10,7 @@ export function ModeButton({ active, ...props }: ModeButtonProps): JSX.Element {
     <ToolButton
       role="switch"
       aria-checked={active}
-      colorClassName={`${active ? "bg-indigo-600 text-white" : null}`}
+      colorClassName={active ? "bg-indigo-600 text-white" : undefined}
       {...props}
     />
   );
@@ -36,9 +36,8 @@ export default function ToolButton({
         border
         border-t-0
         border-gray-300
-        ${disabled ? "text-gray-400" : colorClassName}
-        font-thin
-        bg-white
+        ${disabled ? "text-gray-400 bg-white" : colorClassName || "bg-white"}
+        font-thin        
         focus:outline-none`}
       disabled={disabled}
       onClick={onClick}
