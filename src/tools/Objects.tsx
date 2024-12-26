@@ -53,7 +53,7 @@ export default function Objects(): JSX.Element {
         cursor: "crosshair",
       });
       interaction.on("extentchangeend", ({ extent }: { extent: Extent }) => {
-        if (extent){
+        if (extent) {
           const locations = mapExtentToDescriptionLocations(
             extent,
             map.getView().getProjection(),
@@ -71,7 +71,6 @@ export default function Objects(): JSX.Element {
           setSelectedObjectId(objects[objects.length - 1].id);
           setMode("edit");
         }  
-        else alert("Single clicks are not allowed.")
       });
       map.addInteraction(interaction);
 
