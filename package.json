@@ -1,12 +1,17 @@
 {
   "name": "o-scout",
-  "version": "0.1.0",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@craco/craco": "^6.1.2",
     "@heroicons/react": "^1.0.1",
     "@react-pdf/pdfkit": "^2.4.0",
-    "@tailwindcss/forms": "^0.3.3",
     "@turf/bbox-polygon": "^6.4.0",
     "@turf/helpers": "^6.4.0",
     "@turf/line-offset": "^6.5.0",
@@ -18,84 +23,41 @@
     "ocad2geojson": "^2.1.12",
     "ol": "^6.15.1",
     "proj4": "^2.7.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-error-boundary": "^3.1.4",
     "react-hotkeys-hook": "^3.3.2",
     "react-scripts": "4.0.3",
     "svg-control-descriptions": "^1.1.0",
     "svg-to-pdfkit": "perliedman/SVG-to-PDFKit#make-insensitive-to-name-mangling",
-    "web-vitals": "^1.0.1",
     "zustand": "^3.5.1"
   },
-  "scripts": {
-    "start": "craco start",
-    "prebuild": "yarn test --watchAll=false",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "*.{ts,tsx}"
-        ],
-        "extends": [
-          "react-app",
-          "react-app/jest",
-          "plugin:@typescript-eslint/recommended"
-        ]
-      }
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "@eslint/js": "^9.17.0",
+    "@tailwindcss/forms": "^0.5.9",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
-    "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^12.1.10",
     "@types/jest": "^27.0.1",
     "@types/lodash": "^4.14.172",
-    "@types/node": "^16.9.1",
+    "@types/node": "^22",
     "@types/ol": "^6.5.3",
-    "@types/react": "^17.0.20",
-    "@types/react-dom": "^17.0.9",
-    "@typescript-eslint/eslint-plugin": "^4.31.0",
-    "@typescript-eslint/parser": "^4.31.0",
-    "autoprefixer": "^9.8.6",
-    "eslint-config-react-app": "^6.0.0",
-    "postcss": "^7.0.35",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.2",
-    "typescript": "^4.4.3",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.5",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "worker-loader": "^3.0.8",
     "xmldom": "^0.6.0"
-  },
-  "license": "AGPL-3.0-or-later",
-  "jest": {
-    "transformIgnorePatterns": [
-      "/node_modules/(?!ol)"
-    ],
-    "moduleNameMapper": {
-      "\\.worker.js": "<rootDir>/src/__mocks__/worker-mock.js"
-    }
   }
 }

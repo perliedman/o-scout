@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Button({
   children,
   onClick,
@@ -13,7 +11,7 @@ export default function Button({
         type === "primary"
           ? "bg-indigo-600 text-white"
           : "text-indigo-700 border-2 border-indigo-600"
-      } text-white px-4 py-2 ${className}`}
+      } px-4 py-2 ${className}`}
       onClick={onClick}
       disabled={disabled}
     >

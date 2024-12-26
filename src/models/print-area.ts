@@ -20,7 +20,16 @@ export function create(options?: PrintArea): PrintArea {
 export interface PrintArea {
   auto: boolean;
   restrictToPage: boolean;
+  /**
+   * Page width in 1/100 inches
+   */
   pageWidth: number;
+  /**
+   * Page height in 1/100 inches
+   */
   pageHeight: number;
+  /**
+   * The manually selected extent (if any); only used if `auto` is `false`
+   */
   extent?: Extent;
 }

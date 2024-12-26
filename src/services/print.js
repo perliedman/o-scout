@@ -8,6 +8,10 @@ import { getSvgDimensions } from "./svg-utils";
 
 const mmToPt = 2.83465;
 const inToPt = 72;
+/**
+ * Factor to convert paper size units (1/100 inch) to millimeters
+ */
+export const paperSizeToMm = inToPt / 100 / mmToPt;
 
 /*
   Printing a map correctly is a complex task, since it involves data in
