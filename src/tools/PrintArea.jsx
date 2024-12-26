@@ -1,8 +1,9 @@
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import {
   fromProjectedCoord,
+  mmToMeter,
   toProjectedCoord,
   transformExtent,
 } from "../services/coordinates";
@@ -10,12 +11,14 @@ import useEvent, { useMap } from "../store";
 import shallow from "zustand/shallow";
 import ExtentInteraction from "../ol/ExtentInteraction";
 import { getPrintAreaExtent } from "../models/course";
-import { printCourse } from "../services/print";
 
-import Feature from 'ol/Feature.js';
-import {Vector as VectorLayer} from 'ol/layer.js';
-import {Vector as VectorSource} from 'ol/source.js';
-import {fromExtent} from 'ol/geom/Polygon.js';
+import Feature from "ol/Feature.js";
+import { Vector as VectorLayer } from "ol/layer.js";
+import { Vector as VectorSource } from "ol/source.js";
+import { fromExtent } from "ol/geom/Polygon.js";
+import { getCenter, getHeight, getWidth } from "ol/extent";
+import Fill from "ol/style/Fill";
+import { paperSizeToMm } from "../services/print";
 
 export default function PrintArea() {
   const { map, mapFile } = useMap(getMap);
@@ -23,70 +26,70 @@ export default function PrintArea() {
 
   const crs = useMemo(() => mapFile?.getCrs(), [mapFile]);
 
-
   useEffect(() => {
     if (map && course) {
-      const initialExtent = transformExtent(
-        getPrintAreaExtent(course, crs.scale),
-        (c) => toProjectedCoord(crs, c)
+      const paperExtent = getPrintAreaExtent(course, crs.scale);
+      const initialExtent = transformExtent(paperExtent, (c) =>
+        toProjectedCoord(crs, c)
       );
-      
-      const PrintAreaExtentI = getPrintAreaExtent(course)
-      const check_height = (course.printArea.pageHeight/3.937)-((PrintAreaExtentI[3]-PrintAreaExtentI[1])*(15000/course.printScale))
-      const check_width = (course.printArea.pageWidth/3.937)-((PrintAreaExtentI[2]-PrintAreaExtentI[0])*(15000/course.printScale))
-    
 
-      let boxStyle;
-      
-      if (check_height < 0 || check_width < 0) {
-        boxStyle = new Style({
-          stroke: new Stroke({ color: "#FF0000", lineDash: [6, 10], width: 3 }),
-          fill: null,
-        });
-      } else {
-        boxStyle = new Style({
-          stroke: new Stroke({ color: "#444", lineDash: [6, 10], width: 3 }),
-          fill: null,
-        });
-      }
-      
+      const { pageWidth, pageHeight } = course.printArea;
+      const pageSizeMm = [
+        pageWidth * paperSizeToMm,
+        pageHeight * paperSizeToMm,
+      ];
+      const printAreaSizeMm = [
+        getWidth(paperExtent),
+        getHeight(paperExtent),
+      ].map((x) => x * (15000 / course.printScale));
+
+      const isValide =
+        pageSizeMm[0] >= printAreaSizeMm[0] &&
+        pageSizeMm[1] >= printAreaSizeMm[1];
+      const boxStyle = new Style({
+        stroke: new Stroke({
+          color: isValide ? "#444" : "#FF0000",
+          lineDash: [6, 10],
+          lineCap: "square",
+          width: 3,
+        }),
+        fill: null,
+      });
+
       const interaction = new ExtentInteraction({
         extent: initialExtent,
         boxStyle,
         pointerStyle: new Style(),
       });
 
-      const rectCoords = []
+      const rectCoords = [];
 
-      
-      //Papersize on map. 15000 mapscale??
-      rectCoords[0] = initialExtent[0] 
-      rectCoords[1] = initialExtent[1] 
-      rectCoords[2] = initialExtent[0]+((course.printArea.pageWidth)*(course.printScale/15000)*(96*(1/25.4)))
-      rectCoords[3] = initialExtent[1]+((course.printArea.pageHeight)*(course.printScale/15000)*(96*(1/25.4)))
-  
+      // Paper size on map
+      const geoPageWidth = pageSizeMm[0] * course.printScale * mmToMeter;
+      const geoPageHeight = pageSizeMm[1] * course.printScale * mmToMeter;
+      const printAreaCenter = getCenter(initialExtent);
+
+      rectCoords[0] = printAreaCenter[0] - geoPageWidth / 2;
+      rectCoords[1] = printAreaCenter[1] - geoPageHeight / 2;
+      rectCoords[2] = printAreaCenter[0] + geoPageWidth / 2;
+      rectCoords[3] = printAreaCenter[1] + geoPageHeight / 2;
 
       const printLayer = new VectorLayer({
         source: new VectorSource({
-          features: [
-            new Feature(
-              fromExtent(rectCoords),
-            ),
-          ],
+          features: [new Feature(fromExtent(rectCoords))],
+        }),
+        style: new Style({
+          stroke: new Stroke({ color: "#4f46e5", width: 1 }),
+          fill: new Fill({ color: [255, 255, 255, 0.2] }),
         }),
       });
-      
 
-  
       interaction.on("extentchangeend", ({ extent }) => {
-        
         if (extent) {
           setPrintAreaExtent(
             course.id,
             transformExtent(extent, (c) => fromProjectedCoord(crs, c))
           );
-         
-          
         }
       });
       map.addInteraction(interaction);
@@ -101,8 +104,6 @@ export default function PrintArea() {
 
   return null;
 }
-
-
 
 function getMap({ map, mapFile }) {
   return { map, mapFile };

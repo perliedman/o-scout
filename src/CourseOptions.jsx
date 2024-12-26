@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { getPrintAreaExtent } from "./models/course";
-import { PAPER_SIZES } from "./services/print";
+import { PAPER_SIZES, paperSizeToMm } from "./services/print";
 import Checkbox from "./ui/Checkbox";
 import Input from "./ui/Input";
 
@@ -87,18 +87,31 @@ export default function CourseOptions({
           index={1}
           onChange={(extent) => setPrintArea({ extent })}
         />
-        
         <div />
-        Size on paper
-        <div>Height: {((extent[3]-extent[1])*(mapScale/printScale)).toFixed(2)} mm ({(printArea.pageHeight/3.937).toFixed()} mm) </div>
-        <div>Width: {((extent[2]-extent[0])*(mapScale/printScale)).toFixed(2)} mm ({(printArea.pageWidth/3.937).toFixed()} mm) </div>  
       </div>
+      <table className="w-full">
+        <thead>
+          <th />
+          <th className="font-thin">Height</th>
+          <th className="font-thin">Width</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Size on paper</td>
+            <td>
+              {((extent[3] - extent[1]) * (mapScale / printScale)).toFixed(2)}{" "}
+              mm ({(printArea.pageHeight * paperSizeToMm).toFixed()} mm)
+            </td>
+            <td>
+              {((extent[2] - extent[0]) * (mapScale / printScale)).toFixed(2)}{" "}
+              mm ({(printArea.pageWidth * paperSizeToMm).toFixed()} mm)
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </>
-    
   );
 }
-
-
 
 function ExtentInput({ extent, index, onChange }) {
   return (
