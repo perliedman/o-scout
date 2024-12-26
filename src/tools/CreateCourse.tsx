@@ -192,11 +192,37 @@ export default function CreateCourse(): JSX.Element {
         map.un("pointermove", onPointerMove);
       };
     }
+ 
+
 
     async function onPointerMove(e: MapBrowserEvent<PointerEvent>) {
       const features = await otherControlsLayer.getFeatures(e.pixel);
       if (features.length > 0) {
         const [feature] = features;
+
+        const controlKind = feature.get("kind");
+
+        const numberControls = controlsSource?.getFeatures().length || 0;
+      
+        let expectedKind: "start" | "normal" | "finish";
+
+        if (numberControls === 0) {
+          expectedKind = "start";
+        } else if (activeModeRef.current === "Finish") {
+          expectedKind = "finish";
+        } else {
+          expectedKind = "normal";
+        }
+
+        if (controlKind !== expectedKind) {
+          if (highlightFeatureRef.current) {
+            const previousHighlight = highlightFeatureRef.current;
+            highlightFeatureRef.current = undefined;
+            previousHighlight.changed();
+          }
+          return;
+        }
+
         if (feature !== highlightFeatureRef.current) {
           highlightFeatureRef.current = feature;
           feature.changed();
@@ -261,3 +287,4 @@ function getEvent({
     addControl,
   };
 }
+
