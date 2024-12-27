@@ -10,23 +10,25 @@ Currently very much a work in progress!
 
 In the project directory, you can run:
 
-### `yarn start`
+```
+npm install --force # sorry, yes force, some deps are currently a mess
+npm run dev
+```
 
 Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
 
-### `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+npm run build
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Builds the app for production to the `build` folder.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+o-scout currently uses [Vite](https://vite.dev/) for bundling etc.
 
 ## License
 
@@ -35,7 +37,7 @@ O-Scout is free and open source, distributed under the GNU Affero General Public
 > O-SCOUT
 > Web-based Course Setting for Orienteering
 >
-> Copyright (C) 2021 Per Liedman <per@liedman.net>
+> Copyright (C) 2024 Per Liedman <per@liedman.net>
 >
 > This program is free software: you can redistribute it and/or modify
 > it under the terms of the GNU Affero General Public License as published
