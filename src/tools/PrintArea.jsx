@@ -41,7 +41,7 @@ export default function PrintArea() {
       const printAreaSizeMm = [
         getWidth(paperExtent),
         getHeight(paperExtent),
-      ].map((x) => x * (15000 / course.printScale));
+      ].map((x) => x * (crs.scale / course.printScale));
 
       const isValide =
         pageSizeMm[0] >= printAreaSizeMm[0] &&
