@@ -16,6 +16,7 @@ import useVector from "./ol/use-vector";
 import useStyle from "./course-feature-style";
 import { ppenProjection } from "./services/ppen";
 import { getPrintAreaExtent } from "./models/course";
+import { isEmpty } from "ol/extent";
 
 export default function CourseLayer({ eventName, course, courseAppearance }) {
   const {
@@ -41,10 +42,12 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
         getPrintAreaExtent(course, mapScale),
         paperToProjected
       );
-      const extentPolygon = polygonFromExtent(extent);
       const clipSource = clipLayer.getSource();
       clipSource.clear();
-      clipSource.addFeature(new Feature(extentPolygon));
+      if (!isEmpty(extent)) {
+        const extentPolygon = extent ? polygonFromExtent(extent) : null;
+        clipSource.addFeature(new Feature(extentPolygon));
+      }
     }
   }, [clipLayer, course, crs, paperToProjected]);
 
