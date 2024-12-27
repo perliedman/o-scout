@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { controlDistance } from "./models/control";
 import { courseDistance } from "./models/course";
 import DefinitionTexts from "svg-control-descriptions/symbols/lang.json";
 import Button from "./ui/Button";
 import { useHotkeys } from "react-hotkeys-hook";
+import { descriptionSymbols } from "./services/fetch-symbol-svg";
 
 export default function ControlDescriptionSheet({
   eventName,
@@ -156,8 +157,8 @@ function DescriptionSymbol({ symbol }) {
   const [svg, setSvg] = useState();
 
   useEffect(() => {
-    if (symbol) {
-      import(`svg-control-descriptions/symbols/${symbol}.svg`).then(setSvg);
+    if (symbol && symbol in descriptionSymbols) {
+      descriptionSymbols[symbol]().then(setSvg);
     } else {
       setSvg(null);
     }

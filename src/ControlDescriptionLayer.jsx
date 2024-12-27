@@ -2,10 +2,7 @@ import ImageLayer from "ol/layer/Image";
 import Static from "ol/source/ImageStatic";
 import { useEffect, useState } from "react";
 import { svgToUrl } from "./services/svg-to-bitmap";
-import {
-  courseDefinitionToSvg,
-  getControlDescriptionExtent,
-} from "./services/create-svg";
+import { courseDefinitionToSvg } from "./services/create-svg";
 import { transformExtent } from "./services/coordinates";
 
 export function useControlDescriptions(
