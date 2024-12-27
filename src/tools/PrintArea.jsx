@@ -60,6 +60,7 @@ export default function PrintArea() {
         extent: initialExtent,
         boxStyle,
         pointerStyle: new Style(),
+        keepCentered: true,
       });
 
       const rectCoords = [];

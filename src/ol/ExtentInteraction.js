@@ -13,6 +13,7 @@ export default class ExtentInteraction extends OlExtentInteraction {
     super(options);
     this.create_ = options?.create;
     this.cursor_ = options?.cursor || "auto";
+    this.keepCentered_ = !!options?.keepCentered;
   }
 
   handleEvent(mapBrowserEvent) {
@@ -123,7 +124,25 @@ export default class ExtentInteraction extends OlExtentInteraction {
       ]);
       return true;
     } else {
-      return super.handleDragEvent(mapBrowserEvent);
+      if (this.keepCentered_ && this.pointerHandler_) {
+        const prevExtent = this._dragStartExtent;
+        const center = getCenter(prevExtent);
+        const prevWidth = getWidth(prevExtent);
+        const prevHeight = getHeight(prevExtent);
+        const pixelCoordinate = mapBrowserEvent.coordinate;
+        const modifiedExtent = this.pointerHandler_(pixelCoordinate);
+        const widthDelta = getWidth(modifiedExtent) - prevWidth;
+        const heightDelta = getHeight(modifiedExtent) - prevHeight;
+        this.setExtent([
+          center[0] - prevWidth / 2 - widthDelta,
+          center[1] - prevHeight / 2 - heightDelta,
+          center[0] + prevWidth / 2 + widthDelta,
+          center[1] + prevHeight / 2 + heightDelta,
+        ]);
+        this.createOrUpdatePointerFeature_(pixelCoordinate);
+      } else {
+        return super.handleDragEvent(mapBrowserEvent);
+      }
     }
   }
 }
