@@ -232,14 +232,14 @@ function DescriptionSelector({
 
 function DescriptionList({ selected, onSelect, column }) {
   const symbols = useMemo(() => {
-    const symbols = Object.keys(DefinitionTexts);
+   const symbols = Object.keys(DefinitionTexts).filter((key) => {
+      if (column === "E") {
+        return DefinitionTexts[key].kind === "E" || DefinitionTexts[key].kind === "D";
+      }
+      return DefinitionTexts[key].kind === column;
+    });
     symbols.sort((a, b) => {
-      const aDef = DefinitionTexts[a];
-      const bDef = DefinitionTexts[b];
-      const aIsCol = aDef.kind === column ? -1 : 1;
-      const bIsCol = bDef.kind === column ? -1 : 1;
-
-      return compare(aIsCol, bIsCol) || compare(a, b);
+      return compare(a, b);
     });
     return symbols;
   }, [column]);
