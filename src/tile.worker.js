@@ -1,7 +1,7 @@
 import { readMap } from "./services/map";
 import OcadTiler from "ocad-tiler";
 import { svgToUrl } from "./services/svg-to-bitmap";
-import { XMLSerializer, DOMImplementation } from "xmldom";
+import { XMLSerializer, DOMImplementation } from "@xmldom/xmldom";
 
 const domImplementation = new DOMImplementation();
 

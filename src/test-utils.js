@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { parsePPen } from "./services/ppen";
-import { DOMImplementation } from "xmldom";
+import { DOMImplementation } from "@xmldom/xmldom";
 
 export function parsePpenFile(path) {
   const ppenStr = readFileSync(path, "utf-8");
