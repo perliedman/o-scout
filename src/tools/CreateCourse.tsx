@@ -146,6 +146,15 @@ export default function CreateCourse(): JSX.Element {
           addControl({ ...control }, selectedCourseId);
         } else {
           const numberControls = controlsSource.getFeatures().length;
+
+          const hasFinishControl = controlsSource.getFeatures().some(
+            (feature) => feature.get("kind") === "finish"
+          );
+          
+          if (hasFinishControl) {
+            return;
+          }
+          
           const kind =
             activeModeRef.current === "Finish"
               ? "finish"
