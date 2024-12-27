@@ -332,18 +332,18 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
                     cellSize - 1 // TODO: LOL
                   ),
                   text(
-                    Math.round(
-                      ((controlDistance(
-                        course.controls[index - 1],
-                        course.controls[index]
-                      ) /
-                        1000) *
-                        // TODO: Use correct map scale
-                        mapScale) /
-                        10
-                    ) *
-                      10 +
-                      " m",
+                    (index > 0
+                      ? Math.round(
+                          ((controlDistance(
+                            course.controls[index - 1],
+                            course.controls[index]
+                          ) /
+                            1000) *
+                            // TODO: Use correct map scale
+                            mapScale) /
+                            10
+                        ) * 10
+                      : 0) + " m",
                     cellSize * 4 + cellSize / 2,
                     baseLine,
                     "black",
