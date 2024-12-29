@@ -91,7 +91,7 @@ export default function Courses() {
               newCourse(
                 Course.create(
                   null,
-                  "New course",
+                  "Course " + courses.length,
                   [],
                   selectedCourse.printScale,
                   "normal"
