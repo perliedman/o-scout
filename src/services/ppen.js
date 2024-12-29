@@ -273,7 +273,7 @@ export function writePpen(event) {
           {
             type: "map",
             attrs: {
-              type: "OCAD",
+              kind: "OCAD",
               scale: event.mapScale,
               "ignore-missing-fonts": false,
               "absolute-path": event.mapFilename,
