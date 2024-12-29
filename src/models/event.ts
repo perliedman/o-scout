@@ -1,4 +1,4 @@
-import cloneDeep from "lodash/cloneDeep";
+import { cloneDeep } from "lodash";
 import { MakeOptional } from "../ts-utils";
 import * as Control from "./control";
 import { Control as ControlType } from "./control";
@@ -228,4 +228,54 @@ const sequence = (
 
 function toFinite(x: number, fallback: number): number {
   return !isNaN(x) && Math.abs(x) !== Infinity ? x : fallback;
+}
+
+type Xml = {
+  type: string;
+  id?: string | number;
+  text?: string;
+  attrs?: Record<string, string | boolean | number | undefined>;
+  children?: Xml[];
+};
+
+export function toPpen(event: Event): Xml {
+  const allControls = event.courses.find((c) => c.id === ALL_CONTROLS_ID);
+  return {
+    type: "course-scribe-event",
+    children: [
+      {
+        type: "event",
+        id: 1,
+        children: [
+          { type: "title", text: event.name },
+          {
+            type: "map",
+            attrs: {
+              kind: "OCAD",
+              scale: event.mapScale,
+              "ignore-missing-fonts": false,
+              "absolute-path": event.mapFilename,
+              text: event.mapFilename,
+            },
+          },
+          { type: "standards", attrs: { map: "2017", description: "2018" } },
+          ...(allControls
+            ? [
+                {
+                  type: "all-controls",
+                  attrs: {
+                    "print-scale": allControls.printScale,
+                    "description-kind": "symbols",
+                  },
+                },
+                CourseAppearance.toPpen(event.courseAppearance),
+              ]
+            : []),
+          PrintArea.toPpen(event.printArea),
+        ],
+      },
+      ...Object.values(event.controls).map((c) => Control.toPpen(c)),
+      ...Course.toPpen(event.courses),
+    ],
+  };
 }

@@ -1,4 +1,3 @@
-import flatten from "arr-flatten";
 import * as Event from "../models/event";
 import * as Control from "../models/control";
 import * as Course from "../models/course";
@@ -6,7 +5,6 @@ import * as PrintArea from "../models/print-area";
 import * as CourseAppearance from "../models/course-appearance";
 import Projection from "ol/proj/Projection";
 import { createXml } from "./xml-utils";
-import { ALL_CONTROLS_ID } from "../models/event";
 
 export function parsePPen(doc) {
   const eventTag = doc.getElementsByTagName("event")[0];
@@ -214,122 +212,9 @@ export function parsePPen(doc) {
   }
 }
 
-const courses = (courses) => {
-  let id = 1;
-
-  return flatten(
-    courses.map((course, i) => {
-      const ids = course.controls.map(() => ++id);
-      return [
-        {
-          type: "course",
-          id: course.id,
-          attrs: {
-            kind: "normal",
-            order: i + 1,
-          },
-          children: [
-            { type: "name", text: course.name },
-            { type: "labels", attrs: { "label-kind": "sequence" } },
-            {
-              type: "options",
-              attrs: {
-                "print-scale": course.printScale,
-                load: 10, // TODO: what?
-                "description-kind": "symbols",
-              },
-            },
-          ].concat(
-            course.controls.length > 0
-              ? [{ type: "first", attrs: { "course-control": ids[0] } }]
-              : []
-          ),
-        },
-      ].concat(
-        course.controls.map((control, i, cs) => ({
-          type: "course-control",
-          id: ids[i],
-          attrs: { control: control.id },
-          children:
-            i < cs.length - 1
-              ? [{ type: "next", attrs: { "course-control": ids[i + 1] } }]
-              : [],
-        }))
-      );
-    })
-  );
-};
-
 export function writePpen(event) {
   const doc = document.implementation.createDocument("", "", null);
-  const allControls = event.courses.find((c) => c.id === ALL_CONTROLS_ID);
-  const root = createXml(doc, {
-    type: "course-scribe-event",
-    children: [
-      {
-        type: "event",
-        id: 1,
-        children: [
-          { type: "title", text: event.name },
-          {
-            type: "map",
-            attrs: {
-              kind: "OCAD",
-              scale: event.mapScale,
-              "ignore-missing-fonts": false,
-              "absolute-path": event.mapFilename,
-              text: event.mapFilename,
-            },
-          },
-          { type: "standards", attrs: { map: "2017", description: "2018" } },
-          {
-            type: "all-controls",
-            attrs: {
-              "print-scale": allControls.printScale,
-              "description-kind": "symbols",
-            },
-          },
-          {
-            type: "course-appearance",
-            attrs: {
-              "scale-sizes": event.courseAppearance.scaleSizes,
-              "scale-sizes-circle-gaps":
-                event.courseAppearance.scaleSizesCircleGaps,
-              "auto-leg-gap-size": event.courseAppearance.autoLegGapSize,
-              "blend-purple": event.courseAppearance.blendPurple,
-            },
-          },
-        ],
-      },
-    ]
-      .concat(
-        Object.values(event.controls).map((c) => ({
-          type: "control",
-          id: c.id,
-          attrs: {
-            kind: c.kind,
-          },
-          children: [
-            {
-              type: "location",
-              attrs: { x: c.coordinates[0], y: c.coordinates[1] },
-            },
-          ]
-            .concat(c.code ? [{ type: "code", text: c.code.toString() }] : [])
-            .concat(
-              Object.keys(c.description)
-                .filter((box) => c.description[box])
-                .map((box) => ({
-                  type: "description",
-                  attrs: { box, "iof-2004-ref": c.description[box] },
-                }))
-            ),
-        }))
-      )
-      .concat(
-        courses(event.courses.filter((course) => course.id !== ALL_CONTROLS_ID))
-      ),
-  });
+  const root = createXml(doc, Event.toPpen(event));
 
   doc.appendChild(root);
   return doc;

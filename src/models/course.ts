@@ -4,6 +4,7 @@ import { Control, controlDistance } from "./control";
 import * as PrintArea from "./print-area";
 import { PrintArea as PrintAreaType } from "./print-area";
 import { SpecialObject } from "./special-object";
+import { ALL_CONTROLS_ID } from "./event";
 
 export interface Course {
   id: number;
@@ -89,4 +90,50 @@ export function getStartRotation({ controls }: Course): number {
     return angle;
   }
   return 0;
+}
+
+export function toPpen(courses: Course[]) {
+  let id = 1;
+
+  return courses
+    .filter((course) => course.id !== ALL_CONTROLS_ID)
+    .map((course, i) => {
+      const ids = course.controls.map(() => ++id);
+      return [
+        {
+          type: "course",
+          id: course.id,
+          attrs: {
+            kind: "normal",
+            order: i + 1,
+          },
+          children: [
+            { type: "name", text: course.name },
+            { type: "labels", attrs: { "label-kind": "sequence" } },
+            {
+              type: "options",
+              attrs: {
+                "print-scale": course.printScale,
+                load: 10, // TODO: what?
+                "description-kind": "symbols",
+              },
+            },
+            ...(course.printArea ? [PrintArea.toPpen(course.printArea)] : []),
+            ...(course.controls.length > 0
+              ? [{ type: "first", attrs: { "course-control": ids[0] } }]
+              : []),
+          ],
+        },
+        ...course.controls.map((control, i, cs) => ({
+          type: "course-control",
+          id: ids[i],
+          attrs: { control: control.id },
+          children:
+            i < cs.length - 1
+              ? [{ type: "next", attrs: { "course-control": ids[i + 1] } }]
+              : [],
+        })),
+      ];
+    })
+    .flat();
 }

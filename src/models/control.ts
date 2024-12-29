@@ -66,3 +66,29 @@ export interface Control {
   coordinates: number[];
   description: Description;
 }
+
+export function toPpen(c: Control) {
+  return {
+    type: "control",
+    id: c.id,
+    attrs: {
+      kind: c.kind,
+    },
+    children: [
+      {
+        type: "location",
+        attrs: { x: c.coordinates[0], y: c.coordinates[1] },
+      },
+      ...(c.code ? [{ type: "code", text: c.code.toString() }] : []),
+      ...Object.keys(c.description)
+        .filter((box) => c.description[box as keyof Description])
+        .map((box) => ({
+          type: "description",
+          attrs: {
+            box,
+            "iof-2004-ref": c.description[box as keyof Description],
+          },
+        })),
+    ],
+  };
+}

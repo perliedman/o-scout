@@ -367,6 +367,7 @@ const useEvent = create<StateWithActions>(
                   ? draft.printArea
                   : findCourse(draft, courseId).printArea;
                 printArea.auto = false;
+                printArea.restrictToPage = false;
                 printArea.extent = extent;
 
                 if (isAllControls) {
