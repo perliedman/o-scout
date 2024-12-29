@@ -5,6 +5,16 @@ import DefinitionTexts from "svg-control-descriptions/symbols/lang.json";
 import Button from "./ui/Button";
 import { useHotkeys } from "react-hotkeys-hook";
 import { descriptionSymbols } from "./services/fetch-symbol-svg";
+import {
+  useFloating,
+  FloatingOverlay,
+  FloatingFocusManager,
+  useClick,
+  useDismiss,
+  useRole,
+  useInteractions,
+} from "@floating-ui/react";
+import { autoPlacement } from "@floating-ui/dom";
 
 export default function ControlDescriptionSheet({
   eventName,
@@ -17,6 +27,27 @@ export default function ControlDescriptionSheet({
 }) {
   const containerRef = useRef();
   const [descriptionSelector, setDescriptionSelector] = useState();
+  const { refs, context, floatingStyles } = useFloating({
+    middleware: [autoPlacement()],
+    open: !!descriptionSelector,
+    onOpenChange: (open) => {
+      if (!open) {
+        setDescriptionSelector(null);
+      }
+    },
+  });
+  const click = useClick(context);
+  const dismiss = useDismiss(context, {
+    outsidePressEvent: "mousedown",
+  });
+  const role = useRole(context);
+
+  // Merge all the interactions into prop getters
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+  ]);
 
   return (
     <div ref={containerRef}>
@@ -115,20 +146,32 @@ export default function ControlDescriptionSheet({
         </tbody>
       </table>
       {descriptionSelector && (
-        <DescriptionSelector
-          selected={
-            descriptionSelector.control.description[descriptionSelector.column]
-          }
-          coordinates={descriptionSelector.coordinates}
-          column={descriptionSelector.column}
-          onSelect={(symbol) => {
-            onChangeDescription(descriptionSelector.control.id, {
-              ...descriptionSelector.control.description,
-              [descriptionSelector.column]: symbol,
-            });
-            setDescriptionSelector(null);
-          }}
-        />
+        <FloatingOverlay lockScroll style={{ background: "rgba(0,0,0,0.3)" }}>
+          <FloatingFocusManager context={context}>
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+            >
+              <DescriptionSelector
+                selected={
+                  descriptionSelector.control.description[
+                    descriptionSelector.column
+                  ]
+                }
+                coordinates={descriptionSelector.coordinates}
+                column={descriptionSelector.column}
+                onSelect={(symbol) => {
+                  onChangeDescription(descriptionSelector.control.id, {
+                    ...descriptionSelector.control.description,
+                    [descriptionSelector.column]: symbol,
+                  });
+                  setDescriptionSelector(null);
+                }}
+              />
+            </div>
+          </FloatingFocusManager>
+        </FloatingOverlay>
       )}
     </div>
   );
@@ -142,14 +185,11 @@ export default function ControlDescriptionSheet({
       return;
     }
 
-    const { left, bottom } = currentTarget.getBoundingClientRect();
-    const { top: containerTop, left: containerLeft } =
-      containerRef.current.getBoundingClientRect();
     setDescriptionSelector({
       control,
       column,
-      coordinates: [left - containerLeft, bottom - containerTop],
     });
+    refs.setReference(currentTarget);
   }
 }
 
@@ -166,28 +206,13 @@ function DescriptionSymbol({ symbol }) {
   return svg ? <img src={svg.default} alt={symbol} /> : null;
 }
 
-function DescriptionSelector({
-  selected,
-  coordinates: [x, y],
-  column,
-  onSelect,
-}) {
-  const pos = useMemo(() => {
-    if (x < 287 / 2) {
-      return { top: `${y + 244}px`, left: `${x}px` };
-    } else {
-      return { top: `${y + 244}px`, right: `${287 - 40 - x}px` };
-    }
-  }, [x, y]);
+function DescriptionSelector({ selected, column, onSelect }) {
   const [tempSelection, setTempSelection] = useState(selected);
   useHotkeys("escape", () => onSelect(selected));
 
   return (
     <>
-      <div
-        className="absolute z-10 bg-white rounded shadow-md p-2 border border-grey-200 w-48 h-70"
-        style={pos}
-      >
+      <div className="bg-white rounded shadow-md p-2 border border-grey-200 w-48 h-70">
         <div className="flex flex-col">
           <DescriptionList
             selected={tempSelection}
@@ -222,19 +247,17 @@ function DescriptionSelector({
           </div>
         </div>
       </div>
-      <div
-        className="absolute inset-y-0 left-8 right-0 bg-black opacity-5"
-        onClick={() => onSelect(tempSelection)}
-      />
     </>
   );
 }
 
 function DescriptionList({ selected, onSelect, column }) {
   const symbols = useMemo(() => {
-   const symbols = Object.keys(DefinitionTexts).filter((key) => {
+    const symbols = Object.keys(DefinitionTexts).filter((key) => {
       if (column === "E") {
-        return DefinitionTexts[key].kind === "E" || DefinitionTexts[key].kind === "D";
+        return (
+          DefinitionTexts[key].kind === "E" || DefinitionTexts[key].kind === "D"
+        );
       }
       return DefinitionTexts[key].kind === column;
     });
