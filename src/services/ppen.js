@@ -262,6 +262,7 @@ const courses = (courses) => {
 
 export function writePpen(event) {
   const doc = document.implementation.createDocument("", "", null);
+  const allControls = event.courses.find((c) => c.id === ALL_CONTROLS_ID);
   const root = createXml(doc, {
     type: "course-scribe-event",
     children: [
@@ -278,6 +279,24 @@ export function writePpen(event) {
               "ignore-missing-fonts": false,
               "absolute-path": event.mapFilename,
               text: event.mapFilename,
+            },
+          },
+          { type: "standards", attrs: { map: "2017", description: "2018" } },
+          {
+            type: "all-controls",
+            attrs: {
+              "print-scale": allControls.printScale,
+              "description-kind": "symbols",
+            },
+          },
+          {
+            type: "course-appearance",
+            attrs: {
+              "scale-sizes": event.courseAppearance.scaleSizes,
+              "scale-sizes-circle-gaps":
+                event.courseAppearance.scaleSizesCircleGaps,
+              "auto-leg-gap-size": event.courseAppearance.autoLegGapSize,
+              "blend-purple": event.courseAppearance.blendPurple,
             },
           },
         ],
