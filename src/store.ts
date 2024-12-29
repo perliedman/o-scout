@@ -545,7 +545,7 @@ function createNewEvent(state?: EventState): EventState {
 
   Event.addCourse(
     event,
-    Course.create(event.idGenerator.next(), "New course", [], scale, "normal")
+    Course.create(event.idGenerator.next(), "Course 1", [], scale, "normal")
   );
 
   return {
