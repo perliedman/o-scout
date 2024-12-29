@@ -17,7 +17,7 @@ export default function Sidebar() {
             h-32
             p-1
             my-auto
-            rounded
+            rounded-l
             text-gray-600
             bg-white
             opacity-75
