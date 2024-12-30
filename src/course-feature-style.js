@@ -102,11 +102,16 @@ export function courseFeatureStyle(
     style = finishStyle;
   } else if (kind === "line") {
     const stroke = lineStyle.getStroke();
-    stroke.setWidth(
-      ((feature.get("lineWidth") || overprintLineWidth) / resolution) *
-        5 /* TODO: most likely incorrect, but without this lines are much too thin - should be conversion of paper mm to geographic coordinates */ *
-        lineWidthRatio
-    );
+    const lineWidth = feature.get("lineWidth");
+    if (lineWidth) {
+      stroke.setWidth(
+        (lineWidth / resolution) *
+          5 /* TODO: most likely incorrect, but without this lines are much too thin - should be conversion of paper mm to geographic coordinates */ *
+          lineWidthRatio
+      );
+    } else {
+      stroke.setWidth(dimension(overprintLineWidth) * lineWidthRatio);
+    }
     stroke.setColor(color);
     style = lineStyle;
   } else if (kind === "number") {
