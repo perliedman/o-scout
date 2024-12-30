@@ -1,10 +1,11 @@
-import { buffer, Extent } from "ol/extent";
+import { boundingExtent, buffer, extend, Extent } from "ol/extent";
 import { mmToMeter } from "../services/coordinates";
 import { Control, controlDistance } from "./control";
 import * as PrintArea from "./print-area";
 import { PrintArea as PrintAreaType } from "./print-area";
 import { SpecialObject } from "./special-object";
 import { ALL_CONTROLS_ID } from "./event";
+import { getControlDescriptionExtent } from "../services/create-svg";
 
 export interface Course {
   id: number;
@@ -59,22 +60,25 @@ export function courseDistance(course: Course, scale: number): number {
 }
 
 export function courseBounds(course: Course): Extent {
-  return course.controls.reduce(
-    (a, c) => [
-      Math.min(a[0], c.coordinates[0]),
-      Math.min(a[1], c.coordinates[1]),
-      Math.max(a[2], c.coordinates[0]),
-      Math.max(a[3], c.coordinates[1]),
-    ],
-    [Number.MAX_VALUE, Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
-  );
+  return boundingExtent(course.controls.map((c) => c.coordinates));
 }
 
 export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
   const { printArea } = course;
-  return !printArea.auto && printArea.extent
-    ? printArea.extent
-    : buffer(courseBounds(course), 200 / mmToMeter / mapScale);
+  if (!printArea.auto && printArea.extent) {
+    return printArea.extent;
+  } else {
+    let extent = buffer(courseBounds(course), 200 / mmToMeter / mapScale);
+    for (const object of course.specialObjects) {
+      if (object.kind === "descriptions") {
+        extent = extend(
+          extent,
+          getControlDescriptionExtent(object, course.controls.length + 2)
+        );
+      }
+    }
+    return extent;
+  }
 }
 
 export function getStartRotation({ controls }: Course): number {
