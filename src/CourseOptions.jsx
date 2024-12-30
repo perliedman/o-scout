@@ -60,32 +60,34 @@ export default function CourseOptions({
       <Checkbox
         checked={printArea.auto}
         label="Auto"
-        onChange={(auto) => setPrintArea({ auto })}
+        onChange={(auto) =>
+          setPrintArea({ auto, ...(auto ? { restrictToPage: false } : {}) })
+        }
       />
       <div className="grid grid-cols-3 gap-2 items-center">
         <div />
         <ExtentInput
           extent={extent}
           index={3}
-          onChange={(extent) => setPrintArea({ extent })}
+          onChange={(extent) => setPrintArea({ extent, restrictToPage: false })}
         />
         <div />
         <ExtentInput
           extent={extent}
           index={0}
-          onChange={(extent) => setPrintArea({ extent })}
+          onChange={(extent) => setPrintArea({ extent, restrictToPage: false })}
         />
         <div className="justify-self-center w-8 h-8 border border-dashed border-gray-400" />
         <ExtentInput
           extent={extent}
           index={2}
-          onChange={(extent) => setPrintArea({ extent })}
+          onChange={(extent) => setPrintArea({ extent, restrictToPage: false })}
         />
         <div />
         <ExtentInput
           extent={extent}
           index={1}
-          onChange={(extent) => setPrintArea({ extent })}
+          onChange={(extent) => setPrintArea({ extent, restrictToPage: false })}
         />
         <div />
       </div>

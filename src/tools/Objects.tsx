@@ -23,6 +23,7 @@ import ToolButton, { ModeButton } from "../ui/ToolButton";
 import { Coordinate } from "ol/coordinate";
 import Draw from "ol/interaction/Draw";
 import { Polygon } from "ol/geom";
+import { overprintLineWidth } from "../services/use-number-positions";
 
 type ObjectMode = "edit" | "white-out" | "line" | "descriptions";
 
@@ -70,7 +71,7 @@ export default function Objects(): JSX.Element {
           const objects = useEvent.getState().specialObjects;
           setSelectedObjectId(objects[objects.length - 1].id);
           setMode("edit");
-        }  
+        }
       });
       map.addInteraction(interaction);
 
@@ -97,6 +98,9 @@ export default function Objects(): JSX.Element {
               transform(c, map.getView().getProjection(), ppenProjection)
             ),
             isAllCourses: false,
+            ...(mode === "line"
+              ? { lineWidth: overprintLineWidth, color: "purple" }
+              : null),
           },
           selectedCourse.id
         );

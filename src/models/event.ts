@@ -8,7 +8,8 @@ import * as CourseAppearance from "./course-appearance";
 import { CourseAppearance as CourseAppearanceType } from "./course-appearance";
 import * as PrintArea from "./print-area";
 import { PrintArea as PrintAreaType } from "./print-area";
-import { SpecialObject } from "./special-object";
+import { SpecialObject as SpecialObjectType } from "./special-object";
+import * as SpecialObject from "./special-object";
 
 export const ALL_CONTROLS_ID = -1;
 
@@ -25,7 +26,7 @@ export interface Event {
   mapScale: number;
   mapFilename: string;
   controls: Record<string, ControlType>;
-  specialObjects: SpecialObject[];
+  specialObjects: SpecialObjectType[];
   courseAppearance: CourseAppearanceType;
   printArea: PrintAreaType;
   // allControls: CourseType;
@@ -181,9 +182,9 @@ export function getAllControls(event: Event): CourseType {
 
 export function addSpecialObject(
   event: Event,
-  object: Omit<SpecialObject, "id">,
+  object: Omit<SpecialObjectType, "id">,
   courseId: number | undefined
-): SpecialObject {
+): SpecialObjectType {
   const specialObject = { id: event.idGenerator.next(), ...object };
 
   event.specialObjects.push(specialObject);
@@ -276,6 +277,9 @@ export function toPpen(event: Event): Xml {
       },
       ...Object.values(event.controls).map((c) => Control.toPpen(c)),
       ...Course.toPpen(event.courses),
+      ...event.specialObjects.map((o) =>
+        SpecialObject.toPpen(o, event.courses)
+      ),
     ],
   };
 }
