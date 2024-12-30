@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Spinner({ className = "text-white" }) {
   return (
     <svg

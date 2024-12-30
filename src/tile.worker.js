@@ -8,14 +8,15 @@ const domImplementation = new DOMImplementation();
 onmessage = async function ({ data }) {
   try {
     switch (data.type) {
-      case "SET_MAP_FILE":
+      case "SET_MAP_FILE": {
         const mapFile = await readMap(data.blob);
         this.tiler = new OcadTiler(mapFile);
         postMessage({
           type: "READY",
         });
         break;
-      case "GET_TILE":
+      }
+      case "GET_TILE": {
         const { tileId, extent, resolution, tileSize } = data;
 
         const svg = this.tiler.renderSvg(extent, resolution, {
@@ -32,6 +33,7 @@ onmessage = async function ({ data }) {
           url: svgToUrl(svg, new XMLSerializer()),
         });
         break;
+      }
       default:
         throw new Error(`Unhandled message type "${data.type}.`);
     }
@@ -47,7 +49,7 @@ onmessage = async function ({ data }) {
 // In xmldom, node ids are normal attributes, while in the browser's
 // DOM, they are a property on the node object itself. This method
 // recursively "fixes" nodes by adding id attributes.
-function fixIds(n) {
+export function fixIds(n) {
   if (n.id) {
     n.setAttributeNS("http://www.w3.org/2000/svg", "id", n.id);
   }

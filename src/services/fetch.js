@@ -7,7 +7,7 @@ export default async function fetch(url, fetchOptions, options) {
     try {
       const body = response[options.format]();
       throw new FetchError(response.status, response.statusText, body);
-    } catch (e) {
+    } catch {
       throw new FetchError(response.status, response.statusText);
     }
   }

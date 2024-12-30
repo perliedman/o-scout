@@ -103,7 +103,7 @@ export async function courseToSvg(
       courseObjects,
       objScale,
       labelKind
-    ).features.map(({ properties, geometry: { coordinates } }, i) => {
+    ).features.map(({ properties, geometry: { coordinates } }) => {
       const [x, y] = toSvgCoord(coordinates);
       return {
         type: "text",
@@ -140,7 +140,7 @@ export async function courseToSvg(
                   "white",
                   objScale
                 );
-              case "line":
+              case "line": {
                 const { color } = specialObject.properties;
                 return lines(
                   coordinates.map(toSvgCoord),
@@ -149,6 +149,7 @@ export async function courseToSvg(
                   null,
                   objScale
                 );
+              }
               case "descriptions": {
                 const descriptionSvg = await courseDefinitionToSvg(
                   eventName,
@@ -189,7 +190,7 @@ export async function courseToSvg(
 
   function controlToSvg({ properties: { kind }, geometry: { coordinates } }) {
     switch (kind) {
-      case "start":
+      case "start": {
         const rotation = getStartRotation(course);
         return lines(
           startTriangle.map((p) =>
@@ -200,6 +201,7 @@ export async function courseToSvg(
           null,
           objScale
         );
+      }
       case "normal":
         return circle(
           toSvgCoord(coordinates),

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Spinner from "./ui/Spinner";
 import Button from "./ui/Button";
 import OcadTiler from "ocad-tiler";

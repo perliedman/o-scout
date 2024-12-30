@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SelectMap from "./SelectMap";
 import { readMap } from "./services/map";
 import { useMap, useNotifications } from "./store";

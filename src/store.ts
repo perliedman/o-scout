@@ -71,7 +71,7 @@ export const useMap = create<MapState>((set) => ({
   setMapFile: async (mapFilename, mapFile, tiler, mapFileBlob) =>
     await new Promise((resolve, reject) => {
       const tileWorker = new TileWorker();
-      tileWorker.onmessage = (message) => {
+      tileWorker.onmessage = (message: any) => {
         if (message.data.type === "READY") {
           set((state) => {
             if (state.tileWorker) {

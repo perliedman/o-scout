@@ -3,7 +3,6 @@ import useEvent, { useMap } from "./store";
 import { ExclamationIcon } from "@heroicons/react/outline";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 import Section from "./ui/Section";
-import { Fragment } from "react";
 
 export default function MapSection() {
   const { mapFilename, mapFile } = useMap(getState);
@@ -86,8 +85,8 @@ function Warnings({ mapFile }) {
       >
         <div className="pl-4 bg-indigo-100 rounded">
           <ul className="ml-4 my-4 py-2 list-disc">
-            {mapFile.warnings.map((w) => (
-              <li>{w.toString()}</li>
+            {mapFile.warnings.map((w, i) => (
+              <li key={i}>{w.toString()}</li>
             ))}
           </ul>
         </div>

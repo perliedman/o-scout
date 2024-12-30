@@ -130,9 +130,9 @@ export function courseObjectsGeoJSON(
   specialObjectsGeoJSON
 ) {
   return featureCollection([
-    ...controlConnectionsGeoJSON?.features,
-    ...specialObjectsGeoJSON?.features.filter(
+    ...(controlConnectionsGeoJSON?.features || []),
+    ...(specialObjectsGeoJSON?.features.filter(
       ({ properties: { kind } }) => kind === "line"
-    ),
+    ) || []),
   ]);
 }

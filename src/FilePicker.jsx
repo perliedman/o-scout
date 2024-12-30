@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export default function FilePicker({ active, accept, onSelect }) {
   const fileRef = useRef();

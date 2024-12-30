@@ -49,7 +49,7 @@ export default function CourseLayer({ eventName, course, courseAppearance }) {
         clipSource.addFeature(new Feature(extentPolygon));
       }
     }
-  }, [clipLayer, course, crs, paperToProjected]);
+  }, [clipLayer, course, crs, mapScale, paperToProjected]);
 
   const controlsGeoJSON = useControls(course.controls);
   const controlConnectionsGeoJSON = useControlConnections(
