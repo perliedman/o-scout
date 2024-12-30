@@ -355,11 +355,21 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
                   await Promise.all(
                     ["C", "D", "E", "F", "G", "H"].map(
                       async (column, colIndex) => [
-                        await descriptionSymbol(
-                          description[column],
-                          index + 2,
-                          colIndex + 2
-                        ),
+                        description[column]
+                          ? typeof description[column] === "string"
+                            ? await descriptionSymbol(
+                                description[column],
+                                index + 2,
+                                colIndex + 2
+                              )
+                            : text(
+                                description[column].value,
+                                cellSize * (colIndex + 2) + cellSize / 2,
+                                baseLine,
+                                "black",
+                                fontSize
+                              )
+                          : null,
                         colLine(
                           colIndex + 2,
                           index + 2,

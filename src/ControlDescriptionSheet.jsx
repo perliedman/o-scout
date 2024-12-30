@@ -15,6 +15,7 @@ import {
   useInteractions,
 } from "@floating-ui/react";
 import { autoPlacement } from "@floating-ui/dom";
+import Input from "./ui/Input";
 
 export default function ControlDescriptionSheet({
   eventName,
@@ -42,12 +43,7 @@ export default function ControlDescriptionSheet({
   });
   const role = useRole(context);
 
-  // Merge all the interactions into prop getters
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    click,
-    dismiss,
-    role,
-  ]);
+  const { getFloatingProps } = useInteractions([click, dismiss, role]);
 
   return (
     <div ref={containerRef}>
@@ -117,7 +113,11 @@ export default function ControlDescriptionSheet({
                         className="w-full focus:outline-none"
                         style={{ height: "32px" }} // TODO: yuck
                       >
-                        <DescriptionSymbol symbol={c.description[column]} />
+                        {typeof c.description[column] === "string" ? (
+                          <DescriptionSymbol symbol={c.description[column]} />
+                        ) : (
+                          c.description[column]?.value
+                        )}
                       </button>
                     </td>
                   ))}
@@ -161,6 +161,7 @@ export default function ControlDescriptionSheet({
                 }
                 coordinates={descriptionSelector.coordinates}
                 column={descriptionSelector.column}
+                allowValue={descriptionSelector.column === "F"}
                 onSelect={(symbol) => {
                   onChangeDescription(descriptionSelector.control.id, {
                     ...descriptionSelector.control.description,
@@ -197,7 +198,7 @@ function DescriptionSymbol({ symbol }) {
   const [svg, setSvg] = useState();
 
   useEffect(() => {
-    if (symbol && symbol in descriptionSymbols) {
+    if (symbol && typeof symbol === "string" && symbol in descriptionSymbols) {
       descriptionSymbols[symbol]().then(setSvg);
     } else {
       setSvg(null);
@@ -206,7 +207,7 @@ function DescriptionSymbol({ symbol }) {
   return svg ? <img src={svg.default} alt={symbol} /> : null;
 }
 
-function DescriptionSelector({ selected, column, onSelect }) {
+function DescriptionSelector({ selected, column, allowValue, onSelect }) {
   const [tempSelection, setTempSelection] = useState(selected);
   useHotkeys("escape", () => onSelect(selected));
 
@@ -230,6 +231,16 @@ function DescriptionSelector({ selected, column, onSelect }) {
               <DescriptionSymbol symbol={tempSelection} />
             </div>
           </div>
+          {allowValue ? (
+            <>
+              <label htmlFor="description-value">Feature dimension</label>
+              <Input
+                id="description-value"
+                value={tempSelection?.value || ""}
+                onChange={(e) => setTempSelection({ value: e.target.value })}
+              />
+            </>
+          ) : null}
           <div className="border-t border-gray-600 mt-2">
             <Button
               type="primary"

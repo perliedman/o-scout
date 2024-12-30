@@ -47,16 +47,18 @@ export function clone(control: Control): Control {
   };
 }
 
+type DescriptionColumn = string | { value: string };
+
 export interface Description {
-  A?: string;
-  B?: string;
-  C?: string;
-  D?: string;
-  E?: string;
-  F?: string;
-  G?: string;
-  H?: string;
-  all?: string;
+  A?: DescriptionColumn;
+  B?: DescriptionColumn;
+  C?: DescriptionColumn;
+  D?: DescriptionColumn;
+  E?: DescriptionColumn;
+  F?: DescriptionColumn;
+  G?: DescriptionColumn;
+  H?: DescriptionColumn;
+  all?: DescriptionColumn;
 }
 
 export interface Control {
@@ -81,14 +83,31 @@ export function toPpen(c: Control) {
       },
       ...(c.code ? [{ type: "code", text: c.code.toString() }] : []),
       ...Object.keys(c.description)
-        .filter((box) => c.description[box as keyof Description])
-        .map((box) => ({
-          type: "description",
-          attrs: {
-            box,
-            "iof-2004-ref": c.description[box as keyof Description],
-          },
-        })),
+        .filter(
+          (box): box is keyof Description =>
+            !!c.description[box as keyof Description]
+        )
+        .map((box) => {
+          const d = c.description[box];
+
+          if (typeof d === "string") {
+            return {
+              type: "description",
+              attrs: {
+                box,
+                "iof-2004-ref": d,
+              },
+            };
+          } else {
+            return {
+              type: "description",
+              attrs: {
+                box,
+              },
+              text: d?.value,
+            };
+          }
+        }),
     ],
   };
 }

@@ -103,13 +103,17 @@ export function parsePPen(doc) {
       kind: tag.getAttribute("kind"),
       code: codeTag ? codeTag.textContent : undefined,
       coordinates: parseLocation(tag.getElementsByTagName("location")[0]),
-      description: Array.from(tag.getElementsByTagName("description")).reduce(
-        (a, dtag) => {
-          a[dtag.getAttribute("box")] = dtag.getAttribute("iof-2004-ref");
-          return a;
-        },
-        {}
-      ),
+      description: {
+        ...Array.from(tag.getElementsByTagName("description")).reduce(
+          (a, dtag) => {
+            a[dtag.getAttribute("box")] = dtag.getAttribute("iof-2004-ref") || {
+              value: dtag.textContent,
+            };
+            return a;
+          },
+          {}
+        ),
+      },
     });
   }
 
