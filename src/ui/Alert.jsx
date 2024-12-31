@@ -1,3 +1,4 @@
+import { FloatingOverlay } from "@floating-ui/react";
 import {
   InformationCircleIcon,
   CheckCircleIcon,
@@ -18,23 +19,28 @@ export default function Alert({ message, detail, type = "info", onClose }) {
       : "bg-white";
   const Icon = getIcon(type);
   return (
-    <div className="container">
-      <div
-        className={`container w-96 ${background} flex items-center text-white text-sm font-bold px-4 py-3 relative`}
-        role="alert"
-      >
-        <Icon className="h-7 w-7 mr-2" />
-        <div>
-          <p className="mb-4">{message}</p>
-          <p className="font-thin">{detail}</p>
+    <FloatingOverlay
+      lockScroll
+      style={{ background: "rgba(0, 0, 0, 0.6)", zIndex: 10000 }}
+    >
+      <div className="w-full h-full flex justify-center items-center">
+        <div
+          className={`max-w-md ${background} rounded text-white text-sm font-bold px-4 py-3 relative shadow-lg`}
+          role="alert"
+        >
+          <div className="flex flex-row justify-between items-start">
+            <Icon className="h-7 w-7 mr-2" />
+            <div>
+              <p className="mb-4">{message}</p>
+              <p className="font-thin">{detail}</p>
+            </div>
+            <button onClick={onClose}>
+              <XIcon className="h-7 w-7" />
+            </button>
+          </div>
         </div>
-        <span className="absolute top-0 bottom-0 right-0 px-4 py-3 h-fit">
-          <button onClick={onClose}>
-            <XIcon className="h-7 w-7" />
-          </button>
-        </span>
       </div>
-    </div>
+    </FloatingOverlay>
   );
 }
 
