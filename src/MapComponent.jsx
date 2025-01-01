@@ -14,6 +14,7 @@ import useClip from "./use-clip";
 import useMapLayer from "./services/use-map-layer";
 import shallow from "zustand/shallow";
 import EventMapMismatchDialog from "./EventMapMismatchDialog";
+import { createPortal } from "react-dom";
 
 export default function MapComponent() {
   const { mapFile, map, tiler, tileWorker, setMapInstance, setClipLayer } =
@@ -81,6 +82,7 @@ export default function MapComponent() {
           </div>
         </div>
       )}
+      <div id="map-info-box" className="absolute z-10 bottom-4 left-4" />
     </>
   );
 
@@ -180,4 +182,15 @@ function useRestoredData() {
       );
     }
   }, [push, pop, isRestored, currentMapFilename, eventMapName]);
+}
+
+export function MapInfoBox({ children }) {
+  return createPortal(
+    children ? (
+      <div className="max-w-sm bg-white rounded shadow px-3 py-2 font-thin">
+        {children}
+      </div>
+    ) : null,
+    document.getElementById("map-info-box")
+  );
 }

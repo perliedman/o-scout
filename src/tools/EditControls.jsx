@@ -13,6 +13,8 @@ import { Feature } from "ol";
 import { selectedOverPrintRgb } from "../models/course";
 import useOtherControls from "./use-other-controls";
 import { ALL_CONTROLS_ID } from "../models/event";
+import { MapInfoBox } from "../MapComponent";
+import { plural } from "../services/lang";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -20,6 +22,7 @@ export default function EditControls() {
     selectedCourseId,
     selectedCourse,
     allControls,
+    courses,
     courseAppearance,
     addControl,
     replaceControl,
@@ -204,26 +207,60 @@ export default function EditControls() {
   ]);
 
   return (
-    <div className="flex items-start">
-      <ToolButton
-        disabled={!selectedControlId}
-        onClick={deleteSelected}
-        title="Del"
-      >
-        Delete
-      </ToolButton>
-      <ToolButton>
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={showAllControls}
-            onChange={(e) => setShowAllControls(e.target.checked)}
-            className="mr-2 rounded-sm"
-          />{" "}
-          Reuse controls
-        </label>
-      </ToolButton>
-    </div>
+    <>
+      <div className="flex items-start">
+        <ToolButton
+          disabled={!selectedControlId}
+          onClick={deleteSelected}
+          title="Del"
+        >
+          Delete
+        </ToolButton>
+        <ToolButton>
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={showAllControls}
+              onChange={(e) => setShowAllControls(e.target.checked)}
+              className="mr-2 rounded-sm"
+            />{" "}
+            Reuse controls
+          </label>
+        </ToolButton>
+      </div>
+      {selectedFeature ? (
+        <MapInfoBox>
+          <p>
+            {selectedFeature.get("kind") === "start" ? (
+              "Start"
+            ) : selectedFeature.get("kind") === "finish" ? (
+              "Finish"
+            ) : (
+              <>
+                #
+                {selectedCourse.controls.findIndex(
+                  (c) => c.id === selectedFeature.getId()
+                )}{" "}
+                ({selectedFeature.get("code")})
+              </>
+            )}
+          </p>
+          <p>
+            Used in{" "}
+            {plural(
+              courses.filter(
+                (course) =>
+                  course.id !== ALL_CONTROLS_ID &&
+                  course.controls.some(
+                    (control) => control.id === selectedFeature.getId()
+                  )
+              ).length,
+              "course"
+            )}
+          </p>
+        </MapInfoBox>
+      ) : null}
+    </>
   );
 
   function moveSelected(dx, dy) {
@@ -288,6 +325,7 @@ function getEvent({
     selectedCourseId,
     selectedCourse,
     allControls,
+    courses,
     courseAppearance,
     addControl,
     replaceControl,
