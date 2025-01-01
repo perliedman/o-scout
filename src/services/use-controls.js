@@ -10,6 +10,7 @@ export function createControls(controls) {
     features: controls
       .map((control, index) => ({
         type: "Feature",
+        id: control.id,
         properties: { ...control, index },
         geometry: {
           type: "Point",
