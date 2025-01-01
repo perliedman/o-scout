@@ -121,6 +121,7 @@ export default function EditControls() {
                 {
                   kind: "normal",
                   coordinates: fromProjectedCoord(crs, coordinates),
+                  description: {},
                 },
                 selectedCourseId,
                 beforeId
