@@ -9,6 +9,8 @@ export function svgToBitmap(
   return svgUrlToBitmapDataUrl(svgUrl, [width, height]);
 }
 
+let canvas;
+
 export function svgUrlToBitmapDataUrl(
   svgUrl,
   [width = null, height = null] = []
@@ -18,13 +20,25 @@ export function svgUrlToBitmapDataUrl(
     image.src = svgUrl;
 
     image.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
+      let ctx;
+      if (!canvas) {
+        canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        ctx = canvas.getContext("2d");
+      } else {
+        if (width !== canvas.width || height !== canvas.height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+        ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, width, height);
+      }
+
       ctx.drawImage(image, 0, 0);
 
-      resolve(canvas.toDataURL());
+      canvas.toBlob((blob) => resolve(URL.createObjectURL(blob)));
     };
     image.onerror = (err) =>
       reject(new Error(`Failed to convert SVG to bitmap: ${err.toString()}`));

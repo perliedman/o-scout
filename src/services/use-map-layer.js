@@ -33,7 +33,15 @@ export default function useMapLayer({
               );
               // Ideally, converting the SVG to a bitmap data URL should also
               // be done in the worker, but I have not found a way to do that yet.
-              tile.getImage().src = await svgUrlToBitmapDataUrl(url, tileSize);
+              const bitmapUrl = await svgUrlToBitmapDataUrl(url, tileSize);
+              const tileImage = tile.getImage();
+              tileImage.src = bitmapUrl;
+              tileImage.addEventListener("load", () => {
+                // Revoking the object URL here looks *right* (see example in
+                // https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob),
+                // but doing so fails in Firefox 132 on Ubuntu/NVidia (most tiles end up white)
+                // URL.revokeObjectURL(bitmapUrl);
+              });
               delete awaitedTiles[tileId];
               onSuccess();
               resolve();
