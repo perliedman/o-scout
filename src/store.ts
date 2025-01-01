@@ -164,6 +164,7 @@ interface Actions {
         courseId?: number,
         beforeId?: number
       ) => void;
+      deleteControl: (controlId: number) => void;
       newEvent: () => void;
       addSpecialObject: (
         specialObject: Omit<SpecialObject, "id">,
@@ -270,6 +271,12 @@ const useEvent = create<StateWithActions>(
                     draft.mode = Mode.EditControls;
                   }
                 }
+              })
+            ),
+          deleteControl: (controlId) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                Event.deleteControl(draft, controlId);
               })
             ),
           newEvent: () => set((state) => createNewEvent(state)),

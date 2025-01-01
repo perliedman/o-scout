@@ -25,6 +25,7 @@ export default function EditControls() {
     replaceControl,
     setControlCoordinates,
     removeControl,
+    deleteControl,
   } = useEvent(getEvent, shallow);
 
   const [showAllControls, setShowAllControls] = useState(true);
@@ -237,9 +238,13 @@ export default function EditControls() {
     );
   }
 
-  function deleteSelected() {
+  function deleteSelected(e) {
     if (selectedFeature) {
-      removeControl(selectedCourseId, selectedFeature.get("id"));
+      if (selectedCourse.id === ALL_CONTROLS_ID || e.shiftKey) {
+        deleteControl(selectedFeature.get("id"));
+      } else {
+        removeControl(selectedCourseId, selectedFeature.get("id"));
+      }
       setSelectedControlId(null);
     }
   }
@@ -270,7 +275,7 @@ function getEvent({
   courses,
   courseAppearance,
   actions: {
-    event: { addControl },
+    event: { addControl, deleteControl },
     control: { remove: removeControl, setCoordinates: setControlCoordinates },
     course: { replaceControl },
   },
@@ -288,5 +293,6 @@ function getEvent({
     replaceControl,
     setControlCoordinates,
     removeControl,
+    deleteControl,
   };
 }

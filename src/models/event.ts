@@ -152,6 +152,16 @@ export function updateControl(
   );
 }
 
+export function deleteControl(event: Event, controlId: number) {
+  event.courses.forEach((course) => {
+    course.controls = course.controls.filter(
+      (control) => control.id !== controlId
+    );
+  });
+  delete event.controls[controlId];
+  updateAllControls(event);
+}
+
 export function updateAllControls(event: Event): void {
   const allControls = getAllControls(event);
   allControls.controls = Object.values(event.controls)
