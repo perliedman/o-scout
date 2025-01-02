@@ -164,7 +164,7 @@ export function parsePPen(doc) {
   }
 
   function parsePrintArea(printAreaTag) {
-    if (!printAreaTag) return { auto: true, restrictToPage: true };
+    if (!printAreaTag) return { auto: true, restrictToPage: false };
     return {
       auto: printAreaTag.getAttribute("automatic") === "true",
       restrictToPage:
