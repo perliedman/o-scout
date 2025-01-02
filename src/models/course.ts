@@ -64,6 +64,13 @@ export function courseBounds(course: Course): Extent {
   return boundingExtent(course.controls.map((c) => c.coordinates));
 }
 
+/**
+ * Calculates the print area's extent for the given course and its current print area settings.
+ * The returned extent is in millimeters on paper.
+ * @param course the course to calculate the extent for
+ * @param mapScale the scale of the map
+ * @returns an extent in millimeters on paper
+ */
 export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
   const { printArea } = course;
   if (!printArea.auto && printArea.extent) {

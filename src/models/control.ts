@@ -62,9 +62,21 @@ export interface Description {
 }
 
 export interface Control {
+  /**
+   * Control's internal id
+   */
   id: number;
+  /**
+   * Type of control (start, finish, etc.)
+   */
   kind: ControlKind;
+  /**
+   * Control's punch code, usually 31, 32, etc.
+   */
   code?: number;
+  /**
+   * Control's coordinates (x, y) in paper coordinates (millimeters).
+   */
   coordinates: number[];
   description: Description;
 }
