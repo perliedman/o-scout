@@ -1,4 +1,4 @@
-import { boundingExtent, buffer, extend, Extent } from "ol/extent";
+import { boundingExtent, buffer, extend, Extent, getCenter } from "ol/extent";
 import { mmToMeter } from "../services/coordinates";
 import { Control, controlDistance } from "./control";
 import * as PrintArea from "./print-area";
@@ -6,6 +6,7 @@ import { PrintArea as PrintAreaType } from "./print-area";
 import { SpecialObject } from "./special-object";
 import { ALL_CONTROLS_ID } from "./event";
 import { getControlDescriptionExtent } from "../services/create-svg";
+import { paperSizeToMm } from "../services/print";
 
 export interface Course {
   id: number;
@@ -67,6 +68,17 @@ export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
   const { printArea } = course;
   if (!printArea.auto && printArea.extent) {
     return printArea.extent;
+  } else if (printArea.restrictToPage) {
+    const { pageWidth, pageHeight } = printArea;
+    const pageSizeMm = [pageWidth * paperSizeToMm, pageHeight * paperSizeToMm];
+    const printAreaCenter = getCenter(courseBounds(course));
+
+    return [
+      printAreaCenter[0] - pageSizeMm[0] / 4,
+      printAreaCenter[1] - pageSizeMm[1] / 4,
+      printAreaCenter[0] + pageSizeMm[0] / 4,
+      printAreaCenter[1] + pageSizeMm[1] / 4,
+    ];
   } else {
     let extent = buffer(courseBounds(course), 200 / mmToMeter / mapScale);
     for (const object of course.specialObjects) {

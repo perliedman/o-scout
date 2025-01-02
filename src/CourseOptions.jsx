@@ -57,13 +57,28 @@ export default function CourseOptions({
         </select>
       </div>
       <label>Print Area</label>
-      <Checkbox
-        checked={printArea.auto}
-        label="Auto"
-        onChange={(auto) =>
-          setPrintArea({ auto, ...(auto ? { restrictToPage: false } : {}) })
-        }
-      />
+      <div className="flex flex-col gap-y-1 my-2">
+        <div className="flex items-center gap-x-2">
+          <input
+            type="radio"
+            name="print-area-mode"
+            id="print-area-auto"
+            checked={printArea.auto}
+            onChange={() => setPrintArea({ auto: true, restrictToPage: false })}
+          ></input>
+          <label htmlFor="print-area-auto">Auto</label>
+        </div>
+        <div className="flex items-center gap-x-2">
+          <input
+            type="radio"
+            name="print-area-mode"
+            id="print-area-fit-to-page"
+            checked={printArea.restrictToPage}
+            onChange={() => setPrintArea({ auto: false, restrictToPage: true })}
+          ></input>
+          <label htmlFor="print-area-fit-to-page">Fit to Page</label>
+        </div>
+      </div>
       <div className="grid grid-cols-3 gap-2 items-center">
         <div />
         <ExtentInput
