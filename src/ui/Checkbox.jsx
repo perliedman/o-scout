@@ -1,5 +1,20 @@
 import Toggle from "./Toggle";
 
+/**
+ * @typedef {Object} CheckboxProps
+ * @property {boolean=} checked
+ * @property {string} label
+ * @property {string} id
+ * @property {string=} additionalInfo
+ * @property {(boolean) => void} onChange
+ *
+ */
+
+/**
+ *
+ * @param {CheckboxProps} props
+ * @returns
+ */
 export default function Checkbox({
   checked,
   id,
