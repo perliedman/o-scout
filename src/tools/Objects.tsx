@@ -18,7 +18,7 @@ import VectorSource from "ol/source/Vector";
 import { SpecialObject } from "../models/special-object";
 import ExtentInteraction from "../ol/ExtentInteraction";
 import { Projection, transform, transformExtent } from "ol/proj";
-import { Extent } from "ol/extent";
+import { Extent, getCenter, getHeight, getWidth } from "ol/extent";
 import ToolButton, { ModeButton } from "../ui/ToolButton";
 import { Coordinate } from "ol/coordinate";
 import Draw from "ol/interaction/Draw";
@@ -26,7 +26,8 @@ import { Polygon } from "ol/geom";
 import { overprintLineWidth } from "../services/use-number-positions";
 import { MapInfoBox } from "../MapComponent";
 import { capitalize } from "lodash";
-import Checkbox from "../ui/Checkbox";
+import Button from "../ui/Button";
+import { getControlDescriptionExtent } from "../services/create-svg";
 
 type ObjectMode = "edit" | "white-out" | "line" | "descriptions";
 
@@ -38,7 +39,7 @@ const modes: Array<[ObjectMode, string]> = [
 ];
 
 export default function Objects(): JSX.Element {
-  const { map } = useMap(getMap);
+  const { map, mapScale } = useMap(getMap);
   const {
     selectedCourse,
     addSpecialObject,
@@ -134,6 +135,7 @@ export default function Objects(): JSX.Element {
         {mode === "edit" && (
           <EditObjects
             map={map}
+            mapScale={mapScale}
             selectedCourse={selectedCourse}
             selectedObjectId={selectedObjectId}
             setSelectedObjectId={setSelectedObjectId}
@@ -149,6 +151,7 @@ export default function Objects(): JSX.Element {
 
 type EditObjectsProps = {
   map?: Map;
+  mapScale?: number;
   selectedCourse?: CourseType;
   selectedObjectId?: number;
   setSelectedObjectId: (objectId: number | undefined) => void;
@@ -162,6 +165,7 @@ type EditObjectsProps = {
 
 function EditObjects({
   map,
+  mapScale,
   selectedCourse,
   selectedObjectId,
   setSelectedObjectId,
@@ -300,6 +304,8 @@ function EditObjects({
         <MapInfoBox>
           <ObjectProperties
             object={selectedObjectRef.current}
+            selectedCourse={selectedCourse}
+            mapScale={mapScale}
             updateObject={(update) =>
               updateSpecialObject(selectedObjectId, update)
             }
@@ -321,8 +327,8 @@ function EditObjects({
   }
 }
 
-function getMap({ map }: MapState) {
-  return { map };
+function getMap({ map, mapFile }: MapState) {
+  return { map, mapScale: mapFile?.getCrs().scale };
 }
 
 function getEvent({
@@ -375,13 +381,15 @@ const selectedStyle = new Style({
   zIndex: 1000,
 });
 
-function ObjectProperties({
-  object,
-  updateObject,
-}: {
+type ObjectPropertiesProps = {
   object: SpecialObject;
+  mapScale?: number;
+  selectedCourse?: CourseType;
   updateObject: (update: Partial<SpecialObject>) => void;
-}) {
+};
+
+function ObjectProperties(props: ObjectPropertiesProps) {
+  const { object, updateObject } = props;
   return (
     <>
       {capitalize(object.kind)}
@@ -393,6 +401,50 @@ function ObjectProperties({
           onChange={(e) => updateObject({ isAllCourses: e.target.checked })}
         />
         <label htmlFor="use-on-all-courses">Use on all courses</label>
+      </div>
+      {object.kind === "descriptions" ? (
+        <DescriptionProperties {...props} />
+      ) : null}
+    </>
+  );
+}
+
+function DescriptionProperties({
+  object,
+  selectedCourse,
+  mapScale,
+  updateObject,
+}: ObjectPropertiesProps) {
+  const cellSize = object.locations[1][0] - object.locations[0][0];
+  const rows = (selectedCourse?.controls.length || 0) + 2;
+  const extent = getControlDescriptionExtent(object, rows);
+  const scaleFactor =
+    selectedCourse && mapScale ? mapScale / selectedCourse.printScale : 1;
+  return (
+    <>
+      <div className="flex justify-between gap-x-2">
+        <div>Cell size: {(cellSize * scaleFactor).toFixed(1)} mm</div>
+        <Button
+          size="small"
+          onClick={() => {
+            const center = getCenter(extent);
+            const cellSize = 5 / scaleFactor;
+            const width = cellSize * 8;
+            const height = cellSize * rows;
+            updateObject({
+              locations: [
+                [center[0] - width / 2, center[1] + height / 2],
+                [center[0] - width / 2 + cellSize, center[1] + height / 2],
+              ],
+            });
+          }}
+        >
+          Set standard
+        </Button>
+      </div>
+      <div>
+        Dimensions: {(getWidth(extent) * scaleFactor).toFixed(1)} &times;{" "}
+        {(getHeight(extent) * scaleFactor).toFixed(1)} mm
       </div>
     </>
   );
