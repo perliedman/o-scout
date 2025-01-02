@@ -188,6 +188,7 @@ interface Actions {
         controlIndex: number,
         newControlId: number
       ) => void;
+      removeSpecialObject: (courseId: number, specialObjectId: number) => void;
     };
     control: {
       remove: (courseId: number, controlId: number) => void;
@@ -301,13 +302,20 @@ const useEvent = create<StateWithActions>(
                 };
                 draft.specialObjects[objectIndex] = updatedObject;
                 for (const course of draft.courses) {
+                  let found = false;
                   for (let i = 0; i < course.specialObjects.length; i++) {
                     if (course.specialObjects[i].id === objectId) {
                       course.specialObjects[i] = {
                         ...updatedObject,
                         locations: [...updatedObject.locations],
                       };
+                      found = true;
+                      break;
                     }
+                  }
+
+                  if (!found && updatedObject.isAllCourses) {
+                    course.specialObjects.push({ ...updatedObject });
                   }
                 }
               })
@@ -425,6 +433,42 @@ const useEvent = create<StateWithActions>(
                 const draftCourse = findCourse(draft, courseId);
                 const newControl = draft.controls[newControlId];
                 draftCourse.controls.splice(controlIndex, 1, newControl);
+              })
+            ),
+          removeSpecialObject: (courseId, specialObjectId) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                const draftCourse = findCourse(draft, courseId);
+                const specialObjectIndex = draft.specialObjects.findIndex(
+                  (o) => o.id === specialObjectId
+                );
+                if (specialObjectIndex >= 0) {
+                  draftCourse.specialObjects.splice(specialObjectIndex, 1);
+                }
+                let isUsedOnOtherCourse = false;
+                for (const course of draft.courses) {
+                  for (const object of course.specialObjects) {
+                    if (object.id === specialObjectId) {
+                      object.isAllCourses = false;
+                      isUsedOnOtherCourse = true;
+                    }
+                  }
+                }
+
+                if (!isUsedOnOtherCourse) {
+                  draft.specialObjects.splice(
+                    draft.specialObjects.findIndex(
+                      (o) => o.id === specialObjectId
+                    ),
+                    1
+                  );
+                } else {
+                  for (const object of draft.specialObjects) {
+                    if (object.id === specialObjectId) {
+                      object.isAllCourses = false;
+                    }
+                  }
+                }
               })
             ),
         },

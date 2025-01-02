@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import shallow from "zustand/shallow";
 import useSpecialObjects from "../services/use-special-objects";
 import useEvent, { MapState, StateWithActions, useMap } from "../store";
@@ -24,6 +24,9 @@ import { Coordinate } from "ol/coordinate";
 import Draw from "ol/interaction/Draw";
 import { Polygon } from "ol/geom";
 import { overprintLineWidth } from "../services/use-number-positions";
+import { MapInfoBox } from "../MapComponent";
+import { capitalize } from "lodash";
+import Checkbox from "../ui/Checkbox";
 
 type ObjectMode = "edit" | "white-out" | "line" | "descriptions";
 
@@ -41,6 +44,7 @@ export default function Objects(): JSX.Element {
     addSpecialObject,
     updateSpecialObject,
     deleteSpecialObject,
+    removeSpecialObject,
   } = useEvent(getEvent, shallow);
   const [selectedObjectId, setSelectedObjectId] = useState<number>();
   const [mode, setMode] = useState<ObjectMode>("edit");
@@ -135,6 +139,7 @@ export default function Objects(): JSX.Element {
             setSelectedObjectId={setSelectedObjectId}
             updateSpecialObject={updateSpecialObject}
             deleteSpecialObject={deleteSpecialObject}
+            removeSpecialObject={removeSpecialObject}
           />
         )}
       </div>
@@ -152,6 +157,7 @@ type EditObjectsProps = {
     update: Partial<SpecialObject>
   ) => void;
   deleteSpecialObject: (objectId: number) => void;
+  removeSpecialObject: (courseId: number, objectId: number) => void;
 };
 
 function EditObjects({
@@ -161,6 +167,7 @@ function EditObjects({
   setSelectedObjectId,
   updateSpecialObject,
   deleteSpecialObject,
+  removeSpecialObject,
 }: EditObjectsProps): JSX.Element {
   const specialObjectsGeoJSON = useSpecialObjects(
     selectedCourse?.specialObjects || [],
@@ -285,14 +292,30 @@ function EditObjects({
   ]);
 
   return (
-    <ToolButton disabled={selectedObjectId === undefined} onClick={onDelete}>
-      Delete
-    </ToolButton>
+    <>
+      <ToolButton disabled={selectedObjectId === undefined} onClick={onDelete}>
+        Delete
+      </ToolButton>
+      {selectedObjectId && selectedObjectRef.current ? (
+        <MapInfoBox>
+          <ObjectProperties
+            object={selectedObjectRef.current}
+            updateObject={(update) =>
+              updateSpecialObject(selectedObjectId, update)
+            }
+          />
+        </MapInfoBox>
+      ) : null}
+    </>
   );
 
-  function onDelete() {
+  function onDelete(e: MouseEvent) {
     if (selectedObjectId) {
-      deleteSpecialObject(selectedObjectId);
+      if (e.shiftKey) {
+        deleteSpecialObject(selectedObjectId);
+      } else if (selectedCourse) {
+        removeSpecialObject(selectedCourse.id, selectedObjectId);
+      }
       setSelectedObjectId(undefined);
     }
   }
@@ -307,6 +330,7 @@ function getEvent({
   courses,
   actions: {
     event: { addSpecialObject, updateSpecialObject, deleteSpecialObject },
+    course: { removeSpecialObject },
   },
 }: StateWithActions) {
   const selectedCourse = courses.find(
@@ -318,6 +342,7 @@ function getEvent({
     addSpecialObject,
     updateSpecialObject,
     deleteSpecialObject,
+    removeSpecialObject,
   };
 }
 
@@ -349,3 +374,26 @@ const selectedStyle = new Style({
   fill: new Fill({ color: fillColor }),
   zIndex: 1000,
 });
+
+function ObjectProperties({
+  object,
+  updateObject,
+}: {
+  object: SpecialObject;
+  updateObject: (update: Partial<SpecialObject>) => void;
+}) {
+  return (
+    <>
+      {capitalize(object.kind)}
+      <div className="flex gap-x-2 items-center">
+        <input
+          type="checkbox"
+          id="use-on-all-courses"
+          checked={object.isAllCourses}
+          onChange={(e) => updateObject({ isAllCourses: e.target.checked })}
+        />
+        <label htmlFor="use-on-all-courses">Use on all courses</label>
+      </div>
+    </>
+  );
+}
