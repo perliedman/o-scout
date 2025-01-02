@@ -4,14 +4,17 @@ export default function Button({
   className,
   disabled,
   type = "normal",
+  size = "normal",
 }) {
   return (
     <button
       className={`focus:outline-none focus:ring-2 ring-indigo-600 rounded font-thin ${
         type === "primary"
           ? "bg-indigo-600 text-white"
-          : "text-indigo-700 border-2 border-indigo-600"
-      } px-4 py-2 ${className}`}
+          : "text-indigo-700  border-indigo-600"
+      } ${
+        size === "small" ? "px-1 py-px text-xs border" : "px-4 py-2 border-2"
+      } ${className}`}
       onClick={onClick}
       disabled={disabled}
     >
