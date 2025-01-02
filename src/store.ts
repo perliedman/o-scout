@@ -11,7 +11,7 @@ import { ReactNode, useMemo } from "react";
 import { Map } from "ol";
 import Geometry from "ol/geom/Geometry";
 import VectorLayer from "ol/layer/Vector";
-import { Extent } from "ol/extent";
+import { Extent, getHeight, getWidth } from "ol/extent";
 import { PrintArea } from "./models/print-area";
 import OcadTiler from "ocad-tiler";
 import VectorSource from "ol/source/Vector";
@@ -374,7 +374,6 @@ const useEvent = create<StateWithActions>(
                   ? draft.printArea
                   : findCourse(draft, courseId).printArea;
                 printArea.auto = false;
-                printArea.restrictToPage = false;
                 printArea.extent = extent;
 
                 if (isAllControls) {

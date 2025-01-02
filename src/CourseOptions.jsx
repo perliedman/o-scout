@@ -57,27 +57,22 @@ export default function CourseOptions({
         </select>
       </div>
       <label>Print Area</label>
-      <div className="flex flex-col gap-y-1 my-2">
-        <div className="flex items-center gap-x-2">
-          <input
-            type="radio"
-            name="print-area-mode"
-            id="print-area-auto"
-            checked={printArea.auto}
-            onChange={() => setPrintArea({ auto: true, restrictToPage: false })}
-          ></input>
-          <label htmlFor="print-area-auto">Auto</label>
-        </div>
-        <div className="flex items-center gap-x-2">
-          <input
-            type="radio"
-            name="print-area-mode"
-            id="print-area-fit-to-page"
-            checked={printArea.restrictToPage}
-            onChange={() => setPrintArea({ auto: false, restrictToPage: true })}
-          ></input>
-          <label htmlFor="print-area-fit-to-page">Fit to Page</label>
-        </div>
+      <div className="flex flex-row justify-between my-2">
+        {sizeOptions.map(([label, auto, restrictToPage]) => (
+          <div key={label} className="flex items-center gap-x-2">
+            <input
+              type="radio"
+              name="print-area-mode"
+              id={`print-area-${label}`}
+              checked={
+                printArea.auto === auto &&
+                printArea.restrictToPage === restrictToPage
+              }
+              onChange={() => setPrintArea({ auto, restrictToPage })}
+            ></input>
+            <label htmlFor={`print-area-${label}`}>{label}</label>
+          </div>
+        ))}
       </div>
       <div className="grid grid-cols-3 gap-2 items-center">
         <div />
@@ -145,3 +140,9 @@ function ExtentInput({ extent, index, onChange }) {
     />
   );
 }
+
+const sizeOptions = [
+  ["Auto", true, false],
+  ["Fit to Page", false, true],
+  ["Manual", false, false],
+];

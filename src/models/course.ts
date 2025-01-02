@@ -73,12 +73,14 @@ export function courseBounds(course: Course): Extent {
  */
 export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
   const { printArea } = course;
-  if (!printArea.auto && printArea.extent) {
-    return printArea.extent;
-  } else if (printArea.restrictToPage) {
+  const courseExtent =
+    !printArea.auto && printArea.extent
+      ? printArea.extent
+      : courseBounds(course);
+  if (printArea.restrictToPage) {
     const { pageWidth, pageHeight } = printArea;
     const pageSizeMm = [pageWidth * paperSizeToMm, pageHeight * paperSizeToMm];
-    const printAreaCenter = getCenter(courseBounds(course));
+    const printAreaCenter = getCenter(courseExtent);
     const scale = course.printScale / mapScale;
 
     return [
@@ -87,8 +89,10 @@ export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
       printAreaCenter[0] + (pageSizeMm[0] / 2) * scale,
       printAreaCenter[1] + (pageSizeMm[1] / 2) * scale,
     ];
+  } else if (!printArea.auto) {
+    return courseExtent;
   } else {
-    let extent = buffer(courseBounds(course), 200 / mmToMeter / mapScale);
+    let extent = buffer(courseExtent, 200 / mmToMeter / mapScale);
     for (const object of course.specialObjects) {
       if (object.kind === "descriptions") {
         extent = extend(

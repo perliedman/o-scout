@@ -22,7 +22,10 @@ import { paperSizeToMm } from "../services/print";
 
 export default function PrintArea() {
   const { map, mapFile } = useMap(getMap);
-  const { course, setPrintAreaExtent } = useEvent(getSelectedCourse, shallow);
+  const { course, setPrintAreaExtent, setPrintArea } = useEvent(
+    getSelectedCourse,
+    shallow
+  );
 
   const crs = useMemo(() => mapFile?.getCrs(), [mapFile]);
 
@@ -85,12 +88,20 @@ export default function PrintArea() {
         }),
       });
 
+      let lastExtent = initialExtent;
       interaction.on("extentchangeend", ({ extent }) => {
         if (extent) {
+          const sizeChanged =
+            Math.abs(getWidth(extent) - getWidth(lastExtent)) > 1e-3 ||
+            Math.abs(getHeight(extent) - getHeight(lastExtent)) > 1e-3;
+
           setPrintAreaExtent(
             course.id,
             transformExtent(extent, (c) => fromProjectedCoord(crs, c))
           );
+          if (sizeChanged) {
+            setPrintArea(course.id, { restrictToPage: false });
+          }
         }
       });
       map.addInteraction(interaction);
@@ -101,7 +112,7 @@ export default function PrintArea() {
         map.removeLayer(printLayer);
       };
     }
-  }, [crs, mapFile, map, course, setPrintAreaExtent]);
+  }, [crs, mapFile, map, course, setPrintAreaExtent, setPrintArea]);
 
   return null;
 }
@@ -114,11 +125,12 @@ function getSelectedCourse({
   courses,
   selectedCourseId,
   actions: {
-    course: { setPrintAreaExtent },
+    course: { setPrintAreaExtent, setPrintArea },
   },
 }) {
   return {
     course: courses.find(({ id }) => id === selectedCourseId),
     setPrintAreaExtent,
+    setPrintArea,
   };
 }
