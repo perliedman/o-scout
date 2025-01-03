@@ -439,7 +439,7 @@ const useEvent = create<StateWithActions>(
             set(
               undoable((draft: StateWithActions) => {
                 const draftCourse = findCourse(draft, courseId);
-                const specialObjectIndex = draft.specialObjects.findIndex(
+                const specialObjectIndex = draftCourse.specialObjects.findIndex(
                   (o) => o.id === specialObjectId
                 );
                 if (specialObjectIndex >= 0) {
