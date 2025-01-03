@@ -68,63 +68,78 @@ export function courseFeatureStyle(
   // forces OL to actually update the style of circles.
   // See https://github.com/openlayers/openlayers/issues/6233
 
-  if (kind === "normal") {
-    const image = controlStyle.getImage();
-    const stroke = image.getStroke();
-    stroke.setWidth(dimension(overprintLineWidth * controlCircleSizeRatio));
-    stroke.setColor(color);
-    image.setRadius(
-      dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio
-    );
-    style = controlStyle;
-  } else if (kind === "start") {
-    style = getStartStyle(color);
-    const image = style.getImage();
-    image.setScale(dimension(0.05 * controlCircleSizeRatio));
-
-    const next = featuresRef.current[feature.get("index") + 1];
-    if (next) {
-      const c1 = feature.getGeometry().getCoordinates();
-      const c2 = next.getGeometry().getCoordinates();
-      const dx = c1[0] - c2[0];
-      const dy = c1[1] - c2[1];
-      const angle = Math.atan2(-dy, dx);
-      image.setRotation(angle - Math.PI / 2);
-    }
-  } else if (kind === "finish") {
-    finishStyle.forEach((style, i) => {
-      const image = style.getImage();
+  switch (kind) {
+    case "normal": {
+      const image = controlStyle.getImage();
       const stroke = image.getStroke();
-      stroke.setWidth(dimension(overprintLineWidth) * controlCircleSizeRatio);
+      stroke.setWidth(dimension(overprintLineWidth * controlCircleSizeRatio));
       stroke.setColor(color);
-      image.setRadius(dimension(2 + i) * controlCircleSizeRatio);
-    });
-    style = finishStyle;
-  } else if (kind === "line") {
-    const stroke = lineStyle.getStroke();
-    const lineWidth = feature.get("lineWidth");
-    if (lineWidth) {
-      stroke.setWidth(
-        (lineWidth / resolution) *
-          5 /* TODO: most likely incorrect, but without this lines are much too thin - should be conversion of paper mm to geographic coordinates */ *
-          lineWidthRatio
+      image.setRadius(
+        dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio
       );
-    } else {
-      stroke.setWidth(dimension(overprintLineWidth) * lineWidthRatio);
+      style = controlStyle;
+      break;
     }
-    stroke.setColor(color);
-    style = lineStyle;
-  } else if (kind === "number") {
-    const text = numberStyle.getText();
-    text.setText(feature.get("label"));
-    text.setScale(dimension(0.6) * numberSizeRatio);
-    style = numberStyle;
-  } else if (kind === "white-out") {
-    style = whiteOutStyle;
-  } else if (kind === "descriptions") {
-    return null;
-  } else {
-    console.log(`Unhandled styling for object kind "${kind}".`);
+    case "start": {
+      style = getStartStyle(color);
+      const image = style.getImage();
+      image.setScale(dimension(0.05 * controlCircleSizeRatio));
+
+      const next = featuresRef.current[feature.get("index") + 1];
+      if (next) {
+        const c1 = feature.getGeometry().getCoordinates();
+        const c2 = next.getGeometry().getCoordinates();
+        const dx = c1[0] - c2[0];
+        const dy = c1[1] - c2[1];
+        const angle = Math.atan2(-dy, dx);
+        image.setRotation(angle - Math.PI / 2);
+      }
+      break;
+    }
+    case "finish": {
+      finishStyle.forEach((style, i) => {
+        const image = style.getImage();
+        const stroke = image.getStroke();
+        stroke.setWidth(dimension(overprintLineWidth) * controlCircleSizeRatio);
+        stroke.setColor(color);
+        image.setRadius(dimension(2 + i) * controlCircleSizeRatio);
+      });
+      style = finishStyle;
+      break;
+    }
+    case "line": {
+      const stroke = lineStyle.getStroke();
+      const lineWidth = feature.get("lineWidth");
+      if (lineWidth) {
+        stroke.setWidth(
+          (lineWidth / resolution) *
+            5 /* TODO: most likely incorrect, but without this lines are much too thin - should be conversion of paper mm to geographic coordinates */ *
+            lineWidthRatio
+        );
+      } else {
+        stroke.setWidth(dimension(overprintLineWidth) * lineWidthRatio);
+      }
+      stroke.setColor(color);
+      style = lineStyle;
+      break;
+    }
+    case "number": {
+      const text = numberStyle.getText();
+      text.setText(feature.get("label"));
+      text.setScale(dimension(0.6) * numberSizeRatio);
+      style = numberStyle;
+      break;
+    }
+    case "white-out": {
+      style = whiteOutStyle;
+      break;
+    }
+    case "descriptions": {
+      return null;
+    }
+    default: {
+      console.log(`Unhandled styling for object kind "${kind}".`);
+    }
   }
 
   return style;
