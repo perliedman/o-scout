@@ -124,7 +124,7 @@ export async function courseToSvg(
     return (
       await Promise.all(
         createSpecialObjects(course.specialObjects, course.controls.length)
-          // Sortera så att beskrivningarna hamnar på toppen
+          // Put descriptions last, to render them on top of everything else
           .features.sort(descriptionsOnTop)
           .map(async (specialObject) => {
             const {
@@ -159,13 +159,29 @@ export async function courseToSvg(
                 };
   
               case "white-out":
-                return lines(coordinates[0].map(toSvgCoord), true, null, "white", objScale);
+                return lines(
+                  coordinates[0].map(toSvgCoord),
+                  true,
+                  null,
+                  "white",
+                  objScale
+                );
               case "line": {
                 const { color } = specialObject.properties;
-                return lines(coordinates.map(toSvgCoord), false, palette[color] || courseOverPrintRgb, null, objScale);
+                return lines(
+                  coordinates.map(toSvgCoord),
+                  false,
+                  palette[color] || courseOverPrintRgb,
+                  null,
+                  objScale
+                );
               }
               case "descriptions": {
-                const descriptionSvg = await courseDefinitionToSvg(eventName, course, mapScale);
+                const descriptionSvg = await courseDefinitionToSvg(
+                  eventName,
+                  course,
+                  mapScale
+                );
                 const descriptionDimensions = getSvgDimensions(descriptionSvg);
                 const descriptionGroup = descriptionSvg.firstChild;
                 const [extentXmin, extentYmin, extentXmax, extentYmax] = [
@@ -174,8 +190,12 @@ export async function courseToSvg(
                 ];
                 const extentMin = toSvgCoord([extentXmin, extentYmin]);
                 const extentMax = toSvgCoord([extentXmax, extentYmax]);
-                const scale = (extentMax[0] - extentMin[0]) / descriptionDimensions[0];
-                descriptionGroup.setAttribute("transform", `translate(${extentMin[0]}, ${extentMax[1]}) scale(${scale}) `);
+                const scale =
+                  (extentMax[0] - extentMin[0]) / descriptionDimensions[0];
+                descriptionGroup.setAttribute(
+                  "transform",
+                  `translate(${extentMin[0]}, ${extentMax[1]}) scale(${scale}) `
+                );
                 return descriptionGroup;
               }
               default:
