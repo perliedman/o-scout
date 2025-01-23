@@ -124,38 +124,48 @@ export async function courseToSvg(
     return (
       await Promise.all(
         createSpecialObjects(course.specialObjects, course.controls.length)
-          // Put descriptions last, to render them on top of everything else
+          // Sortera så att beskrivningarna hamnar på toppen
           .features.sort(descriptionsOnTop)
           .map(async (specialObject) => {
             const {
               properties: { kind },
               geometry: { coordinates },
             } = specialObject;
+  
             switch (kind) {
+              case "forbidden-area":
+                const patternId = "forbidden-pattern";
+                const pattern = createPatternForbiddenArea();
+  
+                return {
+                  type: "g",
+                  children: [
+                    {
+                      type: "defs",
+                      children: [pattern],
+                    },
+                    {
+                      type: "path",
+                      attrs: {
+                        d: coordinates[0].map(toSvgCoord)
+                          .map((c, i) => `${i ? "L" : "M"} ${c[0]} ${c[1]}`)
+                          .concat(["Z"])
+                          .join(" "),
+                        fill: `url(#${patternId})`,
+                        "stroke-width": 2,
+                      },
+                    },
+                  ],
+                };
+  
               case "white-out":
-                return lines(
-                  coordinates[0].map(toSvgCoord),
-                  true,
-                  null,
-                  "white",
-                  objScale
-                );
+                return lines(coordinates[0].map(toSvgCoord), true, null, "white", objScale);
               case "line": {
                 const { color } = specialObject.properties;
-                return lines(
-                  coordinates.map(toSvgCoord),
-                  false,
-                  palette[color] || courseOverPrintRgb,
-                  null,
-                  objScale
-                );
+                return lines(coordinates.map(toSvgCoord), false, palette[color] || courseOverPrintRgb, null, objScale);
               }
               case "descriptions": {
-                const descriptionSvg = await courseDefinitionToSvg(
-                  eventName,
-                  course,
-                  mapScale
-                );
+                const descriptionSvg = await courseDefinitionToSvg(eventName, course, mapScale);
                 const descriptionDimensions = getSvgDimensions(descriptionSvg);
                 const descriptionGroup = descriptionSvg.firstChild;
                 const [extentXmin, extentYmin, extentXmax, extentYmax] = [
@@ -164,12 +174,8 @@ export async function courseToSvg(
                 ];
                 const extentMin = toSvgCoord([extentXmin, extentYmin]);
                 const extentMax = toSvgCoord([extentXmax, extentYmax]);
-                const scale =
-                  (extentMax[0] - extentMin[0]) / descriptionDimensions[0];
-                descriptionGroup.setAttribute(
-                  "transform",
-                  `translate(${extentMin[0]}, ${extentMax[1]}) scale(${scale}) `
-                );
+                const scale = (extentMax[0] - extentMin[0]) / descriptionDimensions[0];
+                descriptionGroup.setAttribute("transform", `translate(${extentMin[0]}, ${extentMax[1]}) scale(${scale}) `);
                 return descriptionGroup;
               }
               default:
@@ -180,6 +186,63 @@ export async function courseToSvg(
       )
     ).filter(Boolean);
   }
+  
+//Function for pattern forbidden-area, scale and area need to be fixed
+function createPatternForbiddenArea() {
+
+  const canvas = document.createElement('canvas');
+  const highResSize = 20;
+  canvas.width = highResSize;
+  canvas.height = highResSize;
+
+  const ctx = canvas.getContext('2d');
+  
+  ctx.strokeStyle = 'rgba(197,86,173,255)';
+  ctx.lineWidth = 2;
+
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(highResSize, highResSize);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(0, highResSize);
+  ctx.lineTo(highResSize, 0);
+  ctx.stroke();
+
+  
+  const patternId = "forbidden-pattern";
+  const pattern = {
+    type: "pattern",
+    attrs: {
+      id: patternId,
+      patternUnits: "userSpaceOnUse",
+      width: 2,
+      height: 2, 
+    },
+    children: [
+      {
+        type: "image",
+        attrs: {
+          href: canvas.toDataURL(),
+          width: 2, 
+          height: 2, 
+        },
+      },
+    ],
+  };
+
+  return pattern;
+}
+
+
+
+
+
+
+  
+  
 
   function descriptionsOnTop(
     { properties: { kind: aKind } },
