@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import SelectMap from "./SelectMap";
 import { readMap } from "./services/map";
@@ -10,7 +11,18 @@ export default function StartScreen() {
   const [state, setState] = useState("idle");
   const setMap = useMap(getSetter);
   const pushNotification = useNotifications(getPush);
-  const event = useEvent();
+  const { setEventMap, mapFilename: eventMapFilename } = useEvent(
+    getEvent,
+  );
+
+  function getEvent({
+    mapFilename,
+    actions: {
+      event: { setMap: setEventMap },
+    },
+  }) {
+    return { mapFilename, setEventMap };
+  }
 
   return (
     <>
@@ -72,6 +84,9 @@ export default function StartScreen() {
       const mapFile = await readMap(blob);
       const mapFilename = "Demo Map";
       setMap(mapFilename, mapFile, new OcadTiler(mapFile), blob);
+      if (!eventMapFilename) {
+        setEventMap(mapFile, mapFilename);
+      }
     } catch (e) {
       console.error(e);
       setState("error");
