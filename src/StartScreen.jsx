@@ -48,11 +48,11 @@ export default function StartScreen() {
               </a>
               .
             </p>
-            {event.mapFilename ? (
+            {eventmapFilename ? (
               <p className="p-3 border border-indigo-600 rounded">
                 You have courses saved from a previous session using the map
                 <br />
-                <strong>{event.mapFilename}</strong>
+                <strong>{eventmapFilename}</strong>
                 <br />
                 Open this map to continue working.
               </p>
