@@ -47,8 +47,8 @@ export default function PrintArea() {
       ].map((x) => x * (crs.scale / course.printScale));
 
       const isValid =
-        pageSizeMm[0] >= printAreaSizeMm[0] &&
-        pageSizeMm[1] >= printAreaSizeMm[1];
+        pageSizeMm[0].toFixed(5) >= printAreaSizeMm[0].toFixed(5) &&
+        pageSizeMm[1].toFixed(5) >= printAreaSizeMm[1].toFixed(5);
       const boxStyle = new Style({
         stroke: new Stroke({
           color: isValid ? "#444" : "#FF0000",
