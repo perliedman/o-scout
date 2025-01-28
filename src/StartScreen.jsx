@@ -2,8 +2,7 @@ import { useRef, useState } from "react";
 import Spinner from "./ui/Spinner";
 import Button from "./ui/Button";
 import OcadTiler from "ocad-tiler";
-
-import { useMap, useNotifications } from "./store";
+import useEvent, { useMap, useNotifications } from "./store";
 import { readMap } from "./services/map";
 
 export default function SelectMap({
@@ -17,6 +16,19 @@ export default function SelectMap({
   const fileRef = useRef();
   const setMap = useMap(getSetter);
   const pushNotification = useNotifications(getPush);
+
+  const { setEventMap, mapFilename: eventMapFilename } = useEvent(
+    getEvent,
+  );
+
+  function getEvent({
+    mapFilename,
+    actions: {
+      event: { setMap: setEventMap },
+    },
+  }) {
+    return { mapFilename, setEventMap };
+  }
 
   return (
     <>
@@ -48,9 +60,14 @@ export default function SelectMap({
     setState("loading");
     try {
       const [blob] = e.target.files;
-      const map = await readMap(blob);
-      setMap(blob.name, map, new OcadTiler(map), blob);
-      onMapLoaded && onMapLoaded(map, blob.name);
+      const mapFile = await readMap(blob);
+      const mapFilename = blob.name;
+      setMap(mapFilename, mapFile, new OcadTiler(mapFile), blob);  
+      if (!eventMapFilename) {
+        setEventMap(mapFile, mapFilename);
+      }
+  
+      onMapLoaded && onMapLoaded(mapFile, mapFilename);
       setState("idle");
     } catch (e) {
       console.error(e);
