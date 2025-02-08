@@ -32,9 +32,13 @@ export default function PrintArea() {
   useEffect(() => {
     if (map && course) {
       const paperExtent = getPrintAreaExtent(course, crs.scale);
-      const initialExtent = transformExtent(paperExtent, (c) =>
+      const validExtent = paperExtent.every((value) => isFinite(value)) 
+      ? paperExtent 
+      : [-40, -60, 60, 40];
+      const initialExtent = transformExtent(validExtent, (c) =>
         toProjectedCoord(crs, c)
       );
+
 
       const { pageWidth, pageHeight } = course.printArea;
       const pageSizeMm = [
