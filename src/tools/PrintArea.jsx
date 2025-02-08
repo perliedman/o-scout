@@ -16,7 +16,7 @@ import Feature from "ol/Feature.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import { Vector as VectorSource } from "ol/source.js";
 import { fromExtent } from "ol/geom/Polygon.js";
-import { getCenter, getHeight, getWidth } from "ol/extent";
+import { getCenter, getHeight, getWidth, isEmpty } from "ol/extent";
 import Fill from "ol/style/Fill";
 import { paperSizeToMm } from "../services/print";
 
@@ -31,20 +31,24 @@ export default function PrintArea() {
 
   useEffect(() => {
     if (map && course) {
-      const paperExtent = getPrintAreaExtent(course, crs.scale);
-      const validExtent = paperExtent.every((value) => isFinite(value)) 
-      ? paperExtent 
-      : [-40, -60, 60, 40];
-      const initialExtent = transformExtent(validExtent, (c) =>
-        toProjectedCoord(crs, c)
-      );
-
-
       const { pageWidth, pageHeight } = course.printArea;
       const pageSizeMm = [
         pageWidth * paperSizeToMm,
         pageHeight * paperSizeToMm,
       ];
+      const paperExtent = getPrintAreaExtent(course, crs.scale);
+      const validExtent = !isEmpty(paperExtent)
+        ? paperExtent
+        : [
+            -pageSizeMm[0] / 2,
+            -pageSizeMm[1] / 2,
+            pageSizeMm[0] / 2,
+            pageSizeMm[1] / 2,
+          ];
+      const initialExtent = transformExtent(validExtent, (c) =>
+        toProjectedCoord(crs, c)
+      );
+
       const printAreaSizeMm = [
         getWidth(paperExtent),
         getHeight(paperExtent),
