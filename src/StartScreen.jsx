@@ -48,7 +48,15 @@ export default function StartScreen() {
           </div>
           <div className="mt-24">
             <span className="md:mr-4 block md:inline">
-              <SelectMap type="primary" className="text-xl w-48 h-16">
+              <SelectMap
+                type="primary"
+                className="text-xl w-48 h-16"
+                onMapLoaded={(mapFile, mapFilename) => {
+                  if (!event.mapFilename) {
+                    event.actions.event.setMap(mapFile, mapFilename);
+                  }
+                }}
+              >
                 Open a Map
               </SelectMap>
             </span>
