@@ -134,6 +134,10 @@ export function courseFeatureStyle(
       style = whiteOutStyle;
       break;
     }
+    case "forbidden-area": {
+    style = forbiddenAreaStyle;
+    break;
+    }
     case "descriptions": {
       return null;
     }
@@ -241,4 +245,39 @@ export const numberStyle = new Style({
 
 export const whiteOutStyle = new Style({
   fill: new Fill({ color: "white" }),
+});
+
+
+
+// Create canvas for forbiddenarea, size and scaling need to be fixed
+const canvas = document.createElement('canvas');
+canvas.width = 20; 
+canvas.height = 20; 
+
+const ctx = canvas.getContext('2d');
+
+ctx.strokeStyle = 'rgba(197,86,173,255)'; 
+ctx.lineWidth = 2;
+
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(20, 20);
+ctx.stroke();
+
+
+ctx.beginPath();
+ctx.moveTo(0, 20);
+ctx.lineTo(20, 0);
+ctx.stroke();
+
+
+const pattern = ctx.createPattern(canvas, 'repeat');
+
+const fill = new Fill({
+  color: pattern, 
+});
+
+const forbiddenAreaStyle = new Style({
+  fill: fill,
+  zIndex: 1000,
 });
