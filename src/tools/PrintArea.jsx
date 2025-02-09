@@ -54,9 +54,11 @@ export default function PrintArea() {
         getHeight(paperExtent),
       ].map((x) => x * (crs.scale / course.printScale));
 
+      // Check that print area isn't significantly larger
+      // (1e-5 is the tolerance so we don't complain about tiny rounding errors)
       const isValid =
-        pageSizeMm[0] >= printAreaSizeMm[0] &&
-        pageSizeMm[1] >= printAreaSizeMm[1];
+        pageSizeMm[0] + 1e-5 >= printAreaSizeMm[0] &&
+        pageSizeMm[1] + 1e-5 >= printAreaSizeMm[1];
       const boxStyle = new Style({
         stroke: new Stroke({
           color: isValid ? "#444" : "#FF0000",
