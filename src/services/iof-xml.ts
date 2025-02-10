@@ -44,7 +44,7 @@ export function writeIofXml(
           )
         : [undefined, undefined];
       return {
-        type: "Control",
+        type: "Control", attrs: {type: controlKindToIofType(control.kind)},
         children: [
           { type: "Id", text: control.code || `_${control.id}` },
           ...(lng != null
