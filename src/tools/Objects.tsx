@@ -29,13 +29,14 @@ import { capitalize } from "lodash";
 import Button from "../ui/Button";
 import { getControlDescriptionExtent } from "../services/create-svg";
 
-type ObjectMode = "edit" | "white-out" | "line" | "descriptions";
+type ObjectMode = "edit" | "white-out" | "line" | "descriptions" | "forbidden-area";
 
 const modes: Array<[ObjectMode, string]> = [
   ["edit", "Edit"],
   ["white-out", "White-Out"],
   ["line", "Line"],
   ["descriptions", "Descriptions"],
+  ["forbidden-area", "Forbidden Area"],
 ];
 
 export default function Objects(): JSX.Element {
