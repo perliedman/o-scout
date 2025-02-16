@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { getPrintAreaExtent } from "./models/course";
 import { PAPER_SIZES, paperSizeToMm } from "./services/print";
-import Checkbox from "./ui/Checkbox";
 import Input from "./ui/Input";
 
 export default function CourseOptions({
