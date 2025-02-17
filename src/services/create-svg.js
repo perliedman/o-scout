@@ -43,6 +43,18 @@ export const lines = (coordinates, close, stroke, fill, scale) => ({
   },
 });
 
+/**
+ * Create SVG representation of a course.
+ * Output coordinate system should be paper coordinates (millimeters) but y-axis inverted
+ * since SVG has y-axis growing downwards
+ *
+ * @param {import("../models/course").Course} course
+ * @param {import("../models/course-appearance").CourseAppearance} courseAppearance
+ * @param {string} eventName
+ * @param {number} mapScale
+ * @param {Document} document
+ * @returns
+ */
 export async function courseToSvg(
   course,
   courseAppearance,
@@ -50,6 +62,7 @@ export async function courseToSvg(
   mapScale,
   document
 ) {
+  const patterns = { forbiddenArea: createPatternForbiddenArea() };
   const controls = course.controls;
   const objScale = getObjectScale(
     courseAppearance.scaleSizes,
@@ -71,6 +84,10 @@ export async function courseToSvg(
   return createSvgNode(document, {
     type: "g",
     children: [
+      {
+        type: "defs",
+        children: Object.values(patterns).flat(),
+      },
       ...(await specialObjectsToSvg()),
       ...controlsToSvg(),
       ...controlConnectionsToSvg(controlConnections),
@@ -131,33 +148,27 @@ export async function courseToSvg(
               properties: { kind },
               geometry: { coordinates },
             } = specialObject;
-  
+
             switch (kind) {
-              case "forbidden-area":
-                const patternId = "forbidden-pattern";
-                const pattern = createPatternForbiddenArea();
-  
+              case "forbidden-area": {
                 return {
                   type: "g",
                   children: [
                     {
-                      type: "defs",
-                      children: [pattern],
-                    },
-                    {
                       type: "path",
                       attrs: {
-                        d: coordinates[0].map(toSvgCoord)
+                        d: coordinates[0]
+                          .map(toSvgCoord)
                           .map((c, i) => `${i ? "L" : "M"} ${c[0]} ${c[1]}`)
                           .concat(["Z"])
                           .join(" "),
-                        fill: `url(#${patternId})`,
+                        fill: `url(#${patterns.forbiddenArea[0].id})`,
                         "stroke-width": 2,
                       },
                     },
                   ],
                 };
-  
+              }
               case "white-out":
                 return lines(
                   coordinates[0].map(toSvgCoord),
@@ -263,6 +274,46 @@ function createPatternForbiddenArea() {
 
   
   
+
+  // Function for pattern forbidden-area, scale and area need to be fixed
+  function createPatternForbiddenArea() {
+    const d = 1.2;
+    return [
+      {
+        type: "pattern",
+        id: "oscout-forbidden-area",
+        attrs: {
+          patternUnits: "userSpaceOnUse",
+          width: d,
+          height: d,
+        },
+        children: [
+          {
+            type: "line",
+            attrs: {
+              x1: 0,
+              y1: 0,
+              x2: d,
+              y2: d,
+              stroke: "rgb(182,44,152)",
+              "stroke-width": 0.2,
+            },
+          },
+          {
+            type: "line",
+            attrs: {
+              x1: d,
+              y1: 0,
+              x2: 0,
+              y2: d,
+              stroke: "rgb(182,44,152)",
+              "stroke-width": 0.2,
+            },
+          },
+        ],
+      },
+    ];
+  }
 
   function descriptionsOnTop(
     { properties: { kind: aKind } },

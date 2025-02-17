@@ -135,8 +135,8 @@ export function courseFeatureStyle(
       break;
     }
     case "forbidden-area": {
-    style = forbiddenAreaStyle;
-    break;
+      style = createForbiddenAreaStyle(dimension(1.2));
+      break;
     }
     case "descriptions": {
       return null;
@@ -247,37 +247,41 @@ export const whiteOutStyle = new Style({
   fill: new Fill({ color: "white" }),
 });
 
-
-
-// Create canvas for forbiddenarea, size and scaling need to be fixed
-const canvas = document.createElement('canvas');
-canvas.width = 20; 
-canvas.height = 20; 
-
-const ctx = canvas.getContext('2d');
-
-ctx.strokeStyle = 'rgba(197,86,173,255)'; 
-ctx.lineWidth = 2;
-
-ctx.beginPath();
-ctx.moveTo(0, 0);
-ctx.lineTo(20, 20);
-ctx.stroke();
-
-
-ctx.beginPath();
-ctx.moveTo(0, 20);
-ctx.lineTo(20, 0);
-ctx.stroke();
-
-
-const pattern = ctx.createPattern(canvas, 'repeat');
-
-const fill = new Fill({
-  color: pattern, 
-});
-
 const forbiddenAreaStyle = new Style({
-  fill: fill,
-  zIndex: 1000,
+  fill: new Fill(),
 });
+
+let forbiddenAreaStyleSize = null;
+
+function createForbiddenAreaStyle(size) {
+  if (forbiddenAreaStyleSize === size) {
+    return forbiddenAreaStyle;
+  }
+
+  // Create canvas for forbiddenarea, size and scaling need to be fixed
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.strokeStyle = selectedOverPrintRgb;
+  ctx.lineWidth = size / 6;
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(size, size);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(0, size);
+  ctx.lineTo(size, 0);
+  ctx.stroke();
+
+  const pattern = ctx.createPattern(canvas, "repeat");
+
+  forbiddenAreaStyle.getFill().setColor(pattern);
+  forbiddenAreaStyleSize = size;
+
+  return forbiddenAreaStyle;
+}
