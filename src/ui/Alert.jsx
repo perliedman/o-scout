@@ -25,14 +25,16 @@ export default function Alert({ message, detail, type = "info", onClose }) {
     >
       <div className="w-full h-full flex justify-center items-center">
         <div
-          className={`max-w-md ${background} rounded text-white text-sm font-bold px-4 py-3 relative shadow-lg`}
+          className={`${background} rounded text-white text-sm font-bold px-4 py-3 relative shadow-lg`}
           role="alert"
         >
           <div className="flex flex-row justify-between items-start">
             <Icon className="h-7 w-7 mr-2" />
             <div>
               <p className="mb-4">{message}</p>
-              <p className="font-thin">{detail}</p>
+              <p className="font-thin max-w-md text-wrap overflow-hidden">
+                {detail}
+              </p>
             </div>
             <button onClick={onClose}>
               <XIcon className="h-7 w-7" />

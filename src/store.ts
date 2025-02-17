@@ -421,10 +421,6 @@ const useEvent = create<StateWithActions>(
                     mapTo(printArea, printAreaProps, prop);
                   }
                 );
-
-                if (isAllControls) {
-                  Event.updateAllControls(draft);
-                }
               })
             ),
           replaceControl: (courseId, controlIndex, newControlId) =>

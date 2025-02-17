@@ -47,7 +47,7 @@ export default function ControlDescriptionSheet({
 
   return (
     <div ref={containerRef}>
-      <table className="control-sheet">
+      <table className="control-sheet bg-white">
         <tbody>
           <tr>
             <td colSpan="8">

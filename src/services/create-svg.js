@@ -217,6 +217,63 @@ export async function courseToSvg(
       )
     ).filter(Boolean);
   }
+  
+//Function for pattern forbidden-area, scale and area need to be fixed
+function createPatternForbiddenArea() {
+
+  const canvas = document.createElement('canvas');
+  const highResSize = 20;
+  canvas.width = highResSize;
+  canvas.height = highResSize;
+
+  const ctx = canvas.getContext('2d');
+  
+  ctx.strokeStyle = 'rgba(197,86,173,255)';
+  ctx.lineWidth = 2;
+
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(highResSize, highResSize);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(0, highResSize);
+  ctx.lineTo(highResSize, 0);
+  ctx.stroke();
+
+  
+  const patternId = "forbidden-pattern";
+  const pattern = {
+    type: "pattern",
+    attrs: {
+      id: patternId,
+      patternUnits: "userSpaceOnUse",
+      width: 2,
+      height: 2, 
+    },
+    children: [
+      {
+        type: "image",
+        attrs: {
+          href: canvas.toDataURL(),
+          width: 2, 
+          height: 2, 
+        },
+      },
+    ],
+  };
+
+  return pattern;
+}
+
+
+
+
+
+
+  
+  
 
   // Function for pattern forbidden-area, scale and area need to be fixed
   function createPatternForbiddenArea() {
