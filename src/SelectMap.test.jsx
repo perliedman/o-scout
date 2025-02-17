@@ -1,8 +1,14 @@
 import SelectMap from "./SelectMap";
 import { readFileSync } from "fs";
 import { Simulate } from "react-dom/test-utils";
-import { render, waitFor, act } from "@testing-library/react";
-jest.mock("worker-loader!./tile.worker.js");
+import { render, waitFor } from "@testing-library/react";
+import { vi, describe, expect, test } from "vitest";
+import { act } from "react";
+
+vi.mock("./tile.worker.js?worker", () =>
+  vi.importActual("./__mocks__/worker-mock")
+);
+
 describe("SelectMap", () => {
   test("state returns to idle after loading map", async () => {
     render(<SelectMap>Select Map</SelectMap>);

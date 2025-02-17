@@ -1,6 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import CourseOptions from "./CourseOptions";
 import { PAPER_SIZES } from "./services/print";
+import { describe, expect, test } from "vitest";
 
 describe("CourseOptions", () => {
   test("Renders selected paper size's name", () => {
@@ -12,6 +13,8 @@ describe("CourseOptions", () => {
       <CourseOptions
         mapScale={15000}
         course={{ printScale: 7500, printArea: printArea, controls: [] }}
+        setPrintArea={() => {}}
+        setPrintScale={() => {}}
       />
     );
     const paperSizeSelect = document.querySelector("select");
@@ -51,7 +54,14 @@ describe("CourseOptions", () => {
       target: { value: PAPER_SIZES.findIndex(({ name }) => name === "Letter") },
     });
 
-    rerender(<CourseOptions mapScale={15000} course={course} />);
+    rerender(
+      <CourseOptions
+        mapScale={15000}
+        course={course}
+        setPrintArea={() => {}}
+        setPrintScale={() => {}}
+      />
+    );
 
     const options = Array.from(document.querySelectorAll("option"));
     expect(

@@ -1,6 +1,7 @@
 import { featureCollection, lineString } from "@turf/helpers";
 import { pointToGeometryDistance } from "../models/coordinate";
 import { createNumberPositions } from "./use-number-positions";
+import { describe, expect, test } from "vitest";
 
 describe("create-number-positions", () => {
   test("numbers keep distance to all objects", () => {

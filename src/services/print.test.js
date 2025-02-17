@@ -4,8 +4,9 @@ import { parsePpenFile, createDocument } from "../test-utils";
 import { printCourse, renderPdf } from "./print";
 import readOcad from "ocad2geojson/src/ocad-reader";
 import OcadTiler from "ocad-tiler";
+import { vi, describe, test } from "vitest";
 
-jest.mock("./fetch-symbol-svg");
+vi.mock("./fetch-symbol-svg");
 
 describe("print", () => {
   describe("printCourse", () => {

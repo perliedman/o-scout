@@ -7,8 +7,9 @@ import * as Course from "./models/course";
 import * as Control from "./models/control";
 // eslint-disable-next-line jest/no-mocks-import
 import { stores } from "./__mocks__/zustand";
+import { vi, describe, expect, test } from "vitest";
 
-jest.mock("ol/style/RegularShape");
+vi.mock("ol/style/RegularShape");
 
 describe.skip("Toolbar", () => {
   test("Uses create mode in initial state", () => {
