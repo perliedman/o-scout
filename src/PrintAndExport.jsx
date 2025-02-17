@@ -124,8 +124,11 @@ export default function PrintAndExport() {
           projectedToLngLat = proj4(`EPSG:${crs.code}`, "EPSG:4326").forward;
         }
         const doc = writeIofXml(event, crs, projectedToLngLat);
-        const output = new Blob([new XMLSerializer().serializeToString(doc)], {
-          mime: "application/xml",
+          let xmlString = new XMLSerializer().serializeToString(doc);
+          xmlString = '<?xml version="1.0" encoding="utf-8"?>\n' + xmlString;
+
+          const output = new Blob([xmlString], {
+              type: "application/xml",
         });
         downloadBlob(output, `${eventName}.xml`);
         setState("idle");
