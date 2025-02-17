@@ -126,7 +126,6 @@ export default function PrintAndExport() {
         const doc = writeIofXml(event, crs, projectedToLngLat);
           let xmlString = new XMLSerializer().serializeToString(doc);
           xmlString = '<?xml version="1.0" encoding="utf-8"?>\n' + xmlString;
-          xmlString = formatXml(xmlString);
 
           const output = new Blob([xmlString], {
               type: "application/xml",
@@ -220,32 +219,4 @@ function getMap({ mapFile, tiler }) {
 
 function getPush({ push }) {
   return push;
-}
-
-function formatXml(xml) {
-  xml = xml.replace(/(>)(<)/g, '$1\n$2');
-
-  const lines = xml.split('\n');
-  let formatted = '';
-  let indent = 0;
-
-  lines.forEach((line) => {
-    line = line.trim();
-
-    if (line.match(/^<\/\w/)) {
-      indent--;
-    }
-
-    formatted += '  '.repeat(indent) + line + '\n';
-    if (
-      line.match(/^<\w/) &&
-      !line.match(/^<\/\w/) && 
-      !line.endsWith('/>') &&
-      !line.includes('</') 
-    ) {
-      indent++;
-    }
-  });
-
-  return formatted;
 }
