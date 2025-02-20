@@ -254,6 +254,7 @@ const forbiddenAreaStyle = new Style({
 let forbiddenAreaStyleSize = null;
 
 function createForbiddenAreaStyle(size) {
+  size = Math.max(1, size);
   if (forbiddenAreaStyleSize === size) {
     return forbiddenAreaStyle;
   }
