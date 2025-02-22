@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { lineSegmentDistance, pointToGeometryDistance } from "./coordinate";
 
 describe("coordinate", () => {

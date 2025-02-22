@@ -1,9 +1,10 @@
+import { vi, describe, expect, test } from "vitest";
 import fetchSymbolSvg from "./fetch-symbol-svg";
 import { courseToSvg } from "./create-svg";
 import { parsePpenFile, createDocument } from "../test-utils";
 import { controlCircleOutsideDiameter } from "./use-number-positions";
 
-jest.mock("./fetch-symbol-svg");
+vi.mock("./fetch-symbol-svg");
 
 describe("create-svg", () => {
   describe("courseToSvg", () => {

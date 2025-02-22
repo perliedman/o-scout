@@ -1,10 +1,22 @@
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { ALL_CONTROLS_ID, getAllControls } from "./models/event";
 import useEvent, { Mode } from "./store";
+import { act } from "react";
+import { vi, describe, expect, test } from "vitest";
+
+vi.mock("zustand", async () => {
+  const { default: actualCreate } = await vi.importActual("zustand");
+  const mock = await vi.importActual("./__mocks__/zustand");
+  const result = { ...mock, default: mock._internalCreate(actualCreate) };
+  return result;
+});
 
 describe("store", () => {
   test("can set name", () => {
-    const { result } = renderHook(() => useEvent());
+    const { result } = renderHook(() => {
+      const store = useEvent();
+      return store;
+    });
     act(() => {
       result.current.actions.event.setName("krfsm");
     });

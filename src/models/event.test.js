@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import * as Event from "./event";
 import * as Course from "./course";
 import * as Control from "./control";

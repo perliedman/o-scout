@@ -47,6 +47,7 @@ export default function CourseOptions({
               pageHeight: height,
             });
           }}
+          data-testid="paper-size-select"
         >
           {PAPER_SIZES.map(({ name }, i) => (
             <option key={i} value={i}>
@@ -102,9 +103,11 @@ export default function CourseOptions({
       </div>
       <table className="w-full">
         <thead>
-          <th />
-          <th className="font-thin">Height</th>
-          <th className="font-thin">Width</th>
+          <tr>
+            <th />
+            <th className="font-thin">Height</th>
+            <th className="font-thin">Width</th>
+          </tr>
         </thead>
         <tbody>
           <tr>
