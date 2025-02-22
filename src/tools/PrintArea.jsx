@@ -13,12 +13,12 @@ import ExtentInteraction from "../ol/ExtentInteraction";
 import { getPrintAreaExtent } from "../models/course";
 
 import Feature from "ol/Feature.js";
-import { Vector as VectorLayer } from "ol/layer.js";
-import { Vector as VectorSource } from "ol/source.js";
 import { fromExtent } from "ol/geom/Polygon.js";
 import { getCenter, getHeight, getWidth, isEmpty } from "ol/extent";
 import Fill from "ol/style/Fill";
 import { paperSizeToMm } from "../services/print";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
 
 export default function PrintArea() {
   const { map, mapFile } = useMap(getMap);

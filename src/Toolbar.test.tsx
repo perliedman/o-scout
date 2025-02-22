@@ -10,6 +10,7 @@ import { stores } from "./__mocks__/zustand";
 import { vi, describe, expect, test } from "vitest";
 
 vi.mock("ol/style/RegularShape");
+vi.mock("ol/layer.js");
 
 describe.skip("Toolbar", () => {
   test("Uses create mode in initial state", () => {

@@ -4,6 +4,7 @@ import { Simulate } from "react-dom/test-utils";
 import { render, waitFor } from "@testing-library/react";
 import { vi, describe, expect, test } from "vitest";
 import { act } from "react";
+import "@testing-library/jest-dom";
 
 vi.mock("./tile.worker.js?worker", () =>
   vi.importActual("./__mocks__/worker-mock")
