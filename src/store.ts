@@ -7,7 +7,7 @@ import * as Control from "./models/control";
 import { Control as ControlType } from "./models/control";
 import * as Course from "./models/course";
 import { Course as CourseType } from "./models/course";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Map } from "ol";
 import Geometry from "ol/geom/Geometry";
 import VectorLayer from "ol/layer/Vector";
@@ -23,6 +23,7 @@ import { ppenProjection } from "./services/ppen";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import TileWorker from "./tile.worker.js?worker";
 import { SpecialObject } from "./models/special-object";
+import { readMap } from "./services/map";
 
 enablePatches();
 
@@ -62,6 +63,11 @@ export interface MapState {
   setControlsSource: (controlSource: VectorSource) => void;
 }
 
+const mapMetadataKey = "mapMetadata";
+const mapBlobKey = "ocadMap";
+
+type MapMetadata = { mapFilename: string };
+
 export const useMap = create<MapState>((set) => ({
   mapFile: undefined,
   mapInstance: undefined,
@@ -92,6 +98,15 @@ export const useMap = create<MapState>((set) => ({
         }
       };
       tileWorker.postMessage({ type: "SET_MAP_FILE", blob: mapFileBlob });
+      const reader = new FileReader();
+      reader.readAsDataURL(mapFileBlob);
+      reader.onloadend = () => {
+        localStorage.setItem(
+          mapMetadataKey,
+          JSON.stringify({ mapFilename } satisfies MapMetadata)
+        );
+        localStorage.setItem(mapBlobKey, reader.result as string);
+      };
     }),
   setMapInstance: (map) =>
     set((state) => {
@@ -132,6 +147,37 @@ export const useMap = create<MapState>((set) => ({
 export function useCrs(): OcadCrs | undefined {
   const mapFile = useMap(getMapFile);
   return useMemo(() => mapFile?.getCrs(), [mapFile]);
+}
+
+export function useSavedMap() {
+  const [done, setDone] = useState(false);
+  const setMapFile = useMap(({ setMapFile }) => setMapFile);
+  useEffect(() => {
+    load();
+    async function load() {
+      try {
+        const storedMap = localStorage.getItem(mapBlobKey);
+        const metadata = localStorage.getItem(mapMetadataKey);
+        if (storedMap && metadata) {
+          const res = await fetch(storedMap);
+          const blob = await res.blob();
+          const mapFile = await readMap(blob);
+          setMapFile(
+            (JSON.parse(metadata) as MapMetadata).mapFilename,
+            mapFile,
+            new OcadTiler(mapFile),
+            blob
+          );
+        }
+      } finally {
+        setDone(true);
+      }
+    }
+    // We only want to run this once, on startup, no matter if deps change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return done;
 }
 
 function getMapFile({ mapFile }: MapState) {
