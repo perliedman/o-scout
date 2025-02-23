@@ -1,7 +1,7 @@
 import Map from "./MapComponent";
 import StartScreen from "./StartScreen";
 import Sidebar from "./Sidebar";
-import useEvent, { useMap, useNotifications } from "./store";
+import useEvent, { useMap, useNotifications, useSavedMap } from "./store";
 import Toolbar from "./Toolbar";
 import Alert from "./ui/Alert";
 import { ErrorBoundary } from "react-error-boundary";
@@ -9,6 +9,7 @@ import Button from "./ui/Button";
 
 function App() {
   const mapFile = useMap(getMap);
+  const hasLoadedSavedMap = useSavedMap();
   const newEvent = useEvent(getNewEvent);
   const { notifications, popNotification } = useNotifications(getNotifications);
   const { type, message, detail } =
@@ -22,9 +23,9 @@ function App() {
           <Sidebar />
           <Toolbar />
         </>
-      ) : (
+      ) : hasLoadedSavedMap ? (
         <StartScreen />
-      )}
+      ) : null}
       {message ? (
         <div className="absolute top-0">
           <div className="z-20">
