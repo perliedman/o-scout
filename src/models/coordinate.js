@@ -1,3 +1,5 @@
+import { toProjectedCoord } from "../services/coordinates";
+
 export function length(vec) {
   return Math.sqrt(length2(vec));
 }
@@ -60,4 +62,8 @@ export function lineSegmentDistance(p, v, w) {
     Math.min(1, ((p[0] - v[0]) * vw[0] + (p[1] - v[1]) * vw[1]) / l2)
   );
   return length(sub(p, [v[0] + t * vw[0], v[1] + t * vw[1]]));
+}
+
+export function applyGrivation(c, grivation) {
+  return rotate(c, grivation);
 }

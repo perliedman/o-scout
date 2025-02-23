@@ -30,8 +30,11 @@ export interface OcadCrs {
   scale: number;
   catalog: string;
   code: number;
+  easting: number;
+  northing: number;
+  grivation: number;
   toProjectedCoord: (c: Coordinate) => Coordinate;
-  fromProjectedCoord: (c: Coordinate) => Coordinate;
+  toMapCoord: (c: Coordinate) => Coordinate;
 }
 
 interface OcadFile {
@@ -202,6 +205,7 @@ interface Actions {
         description: Control.Description
       ) => void;
       setCode: (controlId: number, code: number) => void;
+      transformAll: (transform: (coordinate: Coordinate) => Coordinate) => void;
     };
     setMode: (mode: Mode) => void;
   };
@@ -501,6 +505,16 @@ const useEvent = create<StateWithActions>(
                 Event.updateControl(draft, controlId, (control) => {
                   control.code = code;
                 });
+              })
+            ),
+          transformAll: (transform) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                for (const [id, control] of Object.entries(draft.controls)) {
+                  Event.updateControl(draft, Number(id), (control) => {
+                    control.coordinates = transform(control.coordinates);
+                  });
+                }
               })
             ),
         },

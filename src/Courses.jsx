@@ -10,6 +10,10 @@ import * as Course from "./models/course";
 import Section from "./ui/Section";
 import CourseOptions from "./CourseOptions";
 import downloadBlob from "./services/download-blob";
+import { mmToMeter, toProjectedCoord } from "./services/coordinates";
+import { rotate } from "ol/coordinate";
+
+const enableExtras = import.meta.env.VITE_ENABLE_EXTRAS === "true";
 
 export default function Courses() {
   const {
@@ -27,6 +31,7 @@ export default function Courses() {
     setControlCode,
     makeNewEvent,
     newCourse,
+    transformAll,
   } = useEvent(getCourses, shallow);
   const { mapFile, map, crs, projections } = useMap(getMap, shallow);
   const selectedCourse = useMemo(
@@ -106,6 +111,21 @@ export default function Courses() {
           </DropdownItem>
           <DropdownItem onClick={selectCourse}>Load courses...</DropdownItem>
           <DropdownItem onClick={newEvent}>New event</DropdownItem>
+          {enableExtras ? (
+            <>
+              <DropdownItem
+                onClick={() => {
+                  if (crs) {
+                    transformAll((c) =>
+                      toMapCoord(crs, toProjectedCoord(crs, c))
+                    );
+                  }
+                }}
+              >
+                Apply grivation
+              </DropdownItem>
+            </>
+          ) : null}
         </Dropdown>
       </div>
       <FilePicker
@@ -170,7 +190,11 @@ function getCourses({
       setPrintScale,
       setPrintArea,
     },
-    control: { setDescription: setControlDescription, setCode: setControlCode },
+    control: {
+      setDescription: setControlDescription,
+      setCode: setControlCode,
+      transformAll,
+    },
   },
 }) {
   return {
@@ -188,6 +212,7 @@ function getCourses({
     newCourse,
     setPrintScale,
     setPrintArea,
+    transformAll,
   };
 }
 
@@ -202,4 +227,15 @@ function readAsText(file) {
     reader.onerror = (err) => reject(new Error(`Failed to read file: ${err}`));
     reader.readAsText(file);
   });
+}
+
+// This is a re-implementation of Ocad2GeoJSON's CRS.toMapCoord with the difference that it
+// actually uses the maps grivation (bug in current version) and operates on millimeters of
+// paper (PPen units), *not* 1/100 mm (OCAD units).
+function toMapCoord(crs, coord) {
+  const map = [
+    (coord[0] - crs.easting) / mmToMeter / crs.scale,
+    (coord[1] - crs.northing) / mmToMeter / crs.scale,
+  ];
+  return rotate(map, crs.grivation);
 }
