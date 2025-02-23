@@ -108,6 +108,16 @@ export function addCourse(event: Event, course: CourseType): void {
   updateAllControls(event);
 }
 
+export function removeCourse(event: Event, courseId: number): void {
+  const index = event.courses.findIndex((c) => c.id === courseId);
+
+  if (index < 0) {
+    throw new Error(`No course with id ${courseId}`);
+  }
+
+  event.courses.splice(index, 1);
+}
+
 export type ControlCreationOptions = MakeOptional<ControlType, "id" | "code">;
 
 export function addControl(

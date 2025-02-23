@@ -12,6 +12,8 @@ import CourseOptions from "./CourseOptions";
 import downloadBlob from "./services/download-blob";
 import { mmToMeter, toProjectedCoord } from "./services/coordinates";
 import { rotate } from "ol/coordinate";
+import { TrashIcon } from "@heroicons/react/outline";
+import { ALL_CONTROLS_ID } from "./models/event";
 
 const enableExtras = import.meta.env.VITE_ENABLE_EXTRAS === "true";
 
@@ -31,6 +33,7 @@ export default function Courses() {
     setControlCode,
     makeNewEvent,
     newCourse,
+    deleteCourse,
     transformAll,
   } = useEvent(getCourses, shallow);
   const { mapFile, map, crs, projections } = useMap(getMap, shallow);
@@ -47,16 +50,35 @@ export default function Courses() {
       <ul className="">
         {courses.map((course) => (
           <li key={course.id}>
-            <button
-              onClick={() => setSelected(course.id)}
-              className={`px-4 focus:outline-none focus:ring-2 rounded py-2 ring-indigo-600 font-thin tracking-wide border-t border-gray-200 w-full text-left ${
-                selectedCourseId === course.id
-                  ? "text-indigo-600"
-                  : "text-gray-600"
-              }`}
-            >
-              {course.name}
-            </button>
+            <div className="flex flex-row justify-between border-t border-gray-200 ">
+              <button
+                onClick={() => setSelected(course.id)}
+                className={`flex-grow px-4 focus:outline-none focus:ring-2 rounded py-2 ring-indigo-600 font-thin tracking-wide text-left ${
+                  selectedCourseId === course.id
+                    ? "text-indigo-600"
+                    : "text-gray-600"
+                }`}
+              >
+                {course.name}
+              </button>
+              {selectedCourseId === course.id &&
+                course.id !== ALL_CONTROLS_ID && (
+                  <button
+                    className={`mx-1 mt-2 focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform w-7 h-7 flex items-center justify-center p-1 text-gray-400 hover:text-gray-600`}
+                    onClick={() => {
+                      if (
+                        confirm(
+                          `Are you sure you want to delete ${course.name}?`
+                        )
+                      ) {
+                        deleteCourse(course.id);
+                      }
+                    }}
+                  >
+                    <TrashIcon />
+                  </button>
+                )}
+            </div>
             {selectedCourseId === course.id && (
               <div className="m-4">
                 <ControlDescriptionSheet
@@ -189,6 +211,7 @@ function getCourses({
       new: newCourse,
       setPrintScale,
       setPrintArea,
+      delete: deleteCourse,
     },
     control: {
       setDescription: setControlDescription,
@@ -213,6 +236,7 @@ function getCourses({
     setPrintScale,
     setPrintArea,
     transformAll,
+    deleteCourse,
   };
 }
 

@@ -55,4 +55,20 @@ describe("event", () => {
     });
     expect(event.controlCodeGenerator.next()).toBe(38);
   });
+
+  test("Remove a course", () => {
+    const event = Event.create("Test");
+    const control = Control.create({
+      code: event.controlCodeGenerator.next(),
+      kind: "normal",
+      coordinates: [0, 0],
+    });
+    const course = Course.create(null, "Test course", [control]);
+    Event.addCourse(event, course);
+
+    Event.removeCourse(event, course.id);
+
+    expect(event.courses.length).toBe(1);
+    expect(Object.keys(event.controls).length).toBe(1);
+  });
 });

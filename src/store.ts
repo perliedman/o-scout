@@ -181,6 +181,7 @@ interface Actions {
     };
     course: {
       new: (course: CourseType) => void;
+      delete: (courseId: number) => void;
       setSelected: (selectedCourseId: number) => void;
       setName: (courseId: number, name: string) => void;
       setPrintAreaExtent: (courseId: number, extent: Extent) => void;
@@ -352,6 +353,15 @@ const useEvent = create<StateWithActions>(
               undoable((draft: StateWithActions) => {
                 Event.addCourse(draft, course);
                 draft.selectedCourseId = course.id;
+              })
+            ),
+          delete: (courseId) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                Event.removeCourse(draft, courseId);
+                if (draft.selectedCourseId === courseId) {
+                  draft.selectedCourseId = draft.courses[0].id;
+                }
               })
             ),
           setSelected: (selectedCourseId) =>
