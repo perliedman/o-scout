@@ -15,6 +15,8 @@ export default function useNumberPositions(
   );
 }
 
+const nonNumberedKinds = ["start", "finish", "map-issue"];
+
 export function createNumberPositions(
   controls,
   courseObjects /* GeoJSON FeatureCollection */,
@@ -27,7 +29,7 @@ export function createNumberPositions(
   ];
   const result = [];
   controls
-    .filter((c) => c.kind !== "start" && c.kind !== "finish")
+    .filter((c) => !nonNumberedKinds.includes(c.kind))
     .forEach((c, i) => {
       const textLocation = createTextPlacement(
         objects,
