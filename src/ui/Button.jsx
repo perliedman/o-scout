@@ -1,8 +1,8 @@
 export default function Button({
   children,
   onClick,
-  className,
-  disabled,
+  className = "",
+  disabled = false,
   type = "normal",
   size = "normal",
 }) {
