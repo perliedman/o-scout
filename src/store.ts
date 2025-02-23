@@ -101,11 +101,20 @@ export const useMap = create<MapState>((set) => ({
       const reader = new FileReader();
       reader.readAsDataURL(mapFileBlob);
       reader.onloadend = () => {
-        localStorage.setItem(
-          mapMetadataKey,
-          JSON.stringify({ mapFilename } satisfies MapMetadata)
-        );
-        localStorage.setItem(mapBlobKey, reader.result as string);
+        try {
+          localStorage.setItem(
+            mapMetadataKey,
+            JSON.stringify({ mapFilename } satisfies MapMetadata)
+          );
+          localStorage.setItem(mapBlobKey, reader.result as string);
+        } catch (e) {
+          // Storage failed, likely because data is too large,
+          // clear any data we have there to avoid corrupt state when app is
+          // reloaded
+          console.error(e);
+          localStorage.removeItem(mapMetadataKey);
+          localStorage.removeItem(mapBlobKey);
+        }
       };
     }),
   setMapInstance: (map) =>
