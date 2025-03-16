@@ -70,14 +70,21 @@ export function courseFeatureStyle(
 
   switch (kind) {
     case "normal": {
-      const image = controlStyle.getImage();
-      const stroke = image.getStroke();
-      stroke.setWidth(dimension(overprintLineWidth * controlCircleSizeRatio));
-      stroke.setColor(color);
-      image.setRadius(
-        dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio
-      );
-      style = controlStyle;
+      if (feature.get("gaps")?.length > 0) {
+        style = new Style({
+          renderer: circleGapRenderer,
+          hitDetectionRenderer: cirleGapHitRenderer,
+        });
+      } else {
+        const image = controlStyle.getImage();
+        const stroke = image.getStroke();
+        stroke.setWidth(dimension(overprintLineWidth * controlCircleSizeRatio));
+        stroke.setColor(color);
+        image.setRadius(
+          dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio
+        );
+        style = controlStyle;
+      }
       break;
     }
     case "start": {
@@ -151,6 +158,42 @@ export function courseFeatureStyle(
   // Scales an absolute dimension (mm on paper) to pixels in current resolution
   function dimension(x) {
     return (x / resolution) * objScale;
+  }
+
+  function circleGapRenderer(coordinates, state) {
+    const [x, y] = coordinates;
+    const { context, feature } = state;
+    const gaps = feature.get("gaps");
+    const radius =
+      dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio;
+
+    context.lineWidth = dimension(overprintLineWidth * controlCircleSizeRatio);
+    context.strokeStyle = courseOverPrintRgb;
+    context.fillStyle = "rgba(0,0,0,0)";
+
+    for (let i = 0; i < gaps.length; i++) {
+      const startDegrees = gaps[i][1];
+      const endDegrees = i == gaps.length - 1 ? gaps[0][0] : gaps[i + 1][0];
+      const startRadians = (startDegrees / 180) * Math.PI;
+      const endRadians = (endDegrees / 180) * Math.PI;
+      context.beginPath();
+      context.arc(x, y, radius, startRadians, endRadians, false);
+      context.stroke();
+    }
+  }
+
+  function cirleGapHitRenderer(coordinates, state) {
+    const [x, y] = coordinates;
+    const { context } = state;
+    const radius =
+      dimension(controlCircleOutsideDiameter / 2) * controlCircleSizeRatio;
+
+    context.lineWidth = dimension(overprintLineWidth * controlCircleSizeRatio);
+    context.strokeStyle = "rgba(255,0,0,1)";
+    context.fillStyle = "rgba(255,0,0,1)";
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI, false);
+    context.fill();
   }
 }
 

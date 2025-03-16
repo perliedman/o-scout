@@ -98,11 +98,27 @@ export function parsePPen(doc) {
   function parseControl(tag) {
     const codeTag = tag.getElementsByTagName("code")[0];
     const id = tag.getAttribute("id");
+    const circleGapsEl = tag.getElementsByTagName("circle-gaps");
+    let circleGaps = [];
+    if (circleGapsEl.length > 0) {
+      const gapStrs = circleGapsEl[0].textContent.split(",");
+      // PPen's concept of degrees are counted clockwise, but HTML Canvas uses
+      // counter clockwise, and can't handle negative angles or angles >= 360),
+      // so we recalculate angles to fit the canvas system.
+      circleGaps = gapStrs.map((s) =>
+        s
+          .split(":")
+          .map((s) => normalizeDegrees(360 - Number(s.trim())))
+          .reverse()
+      );
+    }
+
     return Control.create({
       id: Number(id),
       kind: tag.getAttribute("kind"),
       code: codeTag ? codeTag.textContent : undefined,
       coordinates: parseLocation(tag.getElementsByTagName("location")[0]),
+      gaps: circleGaps,
       description: {
         ...Array.from(tag.getElementsByTagName("description")).reduce(
           (a, dtag) => {
@@ -115,6 +131,20 @@ export function parsePPen(doc) {
         ),
       },
     });
+
+    function normalizeDegrees(x) {
+      if (x < 0) {
+        while (x < 0) {
+          x += 360;
+        }
+      } else {
+        while (x >= 360) {
+          x -= 360;
+        }
+      }
+
+      return x;
+    }
   }
 
   function parseSpecialObjects(event, specialObjectsTags) {

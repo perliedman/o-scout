@@ -12,6 +12,7 @@ type CreateProps = {
   code: number;
   coordinates: number[];
   description?: Description;
+  gaps: [number, number][];
 };
 
 export function create({
@@ -20,6 +21,7 @@ export function create({
   code,
   coordinates,
   description,
+  gaps,
 }: CreateProps): Control {
   return {
     id: id,
@@ -36,6 +38,7 @@ export function create({
       all: undefined,
       ...description,
     },
+    gaps,
   };
 }
 
@@ -79,6 +82,7 @@ export interface Control {
    */
   coordinates: number[];
   description: Description;
+  gaps?: [number, number][];
 }
 
 export function toPpen(c: Control) {
