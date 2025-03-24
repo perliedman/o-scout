@@ -206,6 +206,16 @@ export default function EditControls() {
     setControlCoordinates,
   ]);
 
+  const usedCourses = selectedFeature
+    ? courses.filter(
+        (course) =>
+          course.id !== ALL_CONTROLS_ID &&
+          course.controls.some(
+            (control) => control.id === selectedFeature.getId()
+          )
+      )
+    : [];
+
   return (
     <>
       <div className="flex items-start">
@@ -247,16 +257,9 @@ export default function EditControls() {
           </p>
           <p>
             Used in{" "}
-            {plural(
-              courses.filter(
-                (course) =>
-                  course.id !== ALL_CONTROLS_ID &&
-                  course.controls.some(
-                    (control) => control.id === selectedFeature.getId()
-                  )
-              ).length,
-              "course"
-            )}
+            {usedCourses.length > 0 && usedCourses.length < 5
+              ? usedCourses.map((c) => c.name).join(", ")
+              : plural(usedCourses.length, "course")}
           </p>
         </MapInfoBox>
       ) : null}
