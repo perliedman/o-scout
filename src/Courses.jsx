@@ -12,7 +12,7 @@ import CourseOptions from "./CourseOptions";
 import downloadBlob from "./services/download-blob";
 import { mmToMeter, toProjectedCoord } from "./services/coordinates";
 import { rotate } from "ol/coordinate";
-import { TrashIcon } from "@heroicons/react/outline";
+import { ClipboardCopyIcon, TrashIcon } from "@heroicons/react/outline";
 import { ALL_CONTROLS_ID } from "./models/event";
 
 const enableExtras = import.meta.env.VITE_ENABLE_EXTRAS === "true";
@@ -34,6 +34,7 @@ export default function Courses() {
     makeNewEvent,
     newCourse,
     deleteCourse,
+    duplicateCourse,
     transformAll,
   } = useEvent(getCourses, shallow);
   const { mapFile, map, crs, projections } = useMap(getMap, shallow);
@@ -63,20 +64,30 @@ export default function Courses() {
               </button>
               {selectedCourseId === course.id &&
                 course.id !== ALL_CONTROLS_ID && (
-                  <button
-                    className={`mx-1 mt-2 focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform w-7 h-7 flex items-center justify-center p-1 text-gray-400 hover:text-gray-600`}
-                    onClick={() => {
-                      if (
-                        confirm(
-                          `Are you sure you want to delete ${course.name}?`
-                        )
-                      ) {
-                        deleteCourse(course.id);
-                      }
-                    }}
-                  >
-                    <TrashIcon />
-                  </button>
+                  <div className="flex flex-row gap-1 mt-2 mx-4">
+                    <button
+                      className={`focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform w-7 h-7 flex items-center justify-center p-1 text-gray-400 hover:text-gray-600`}
+                      title="Duplicate course"
+                      onClick={() => duplicateCourse(course.id)}
+                    >
+                      <ClipboardCopyIcon />
+                    </button>{" "}
+                    <button
+                      className={`focus:outline-none focus:ring-1 ring-indigo-400 rounded-full border transform w-7 h-7 flex items-center justify-center p-1 text-gray-400 hover:text-gray-600`}
+                      title="Delete course"
+                      onClick={() => {
+                        if (
+                          confirm(
+                            `Are you sure you want to delete ${course.name}?`
+                          )
+                        ) {
+                          deleteCourse(course.id);
+                        }
+                      }}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
                 )}
             </div>
             {selectedCourseId === course.id && (
@@ -212,6 +223,7 @@ function getCourses({
       setPrintScale,
       setPrintArea,
       delete: deleteCourse,
+      duplicate: duplicateCourse,
     },
     control: {
       setDescription: setControlDescription,
@@ -237,6 +249,7 @@ function getCourses({
     setPrintArea,
     transformAll,
     deleteCourse,
+    duplicateCourse,
   };
 }
 

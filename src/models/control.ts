@@ -47,6 +47,7 @@ export function clone(control: Control): Control {
     ...control,
     coordinates: [...control.coordinates],
     description: { ...control.description },
+    gaps: control.gaps && [...control.gaps],
   };
 }
 

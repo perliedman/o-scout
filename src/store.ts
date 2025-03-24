@@ -6,6 +6,7 @@ import { Event as EventType } from "./models/event";
 import * as Control from "./models/control";
 import { Control as ControlType } from "./models/control";
 import * as Course from "./models/course";
+import * as PrintAreaModel from "./models/print-area";
 import { Course as CourseType } from "./models/course";
 import { ReactNode, useMemo } from "react";
 import { Map } from "ol";
@@ -23,6 +24,7 @@ import { ppenProjection } from "./services/ppen";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import TileWorker from "./tile.worker.js?worker";
 import { SpecialObject } from "./models/special-object";
+import PrintArea from "./tools/PrintArea";
 
 enablePatches();
 
@@ -182,6 +184,7 @@ interface Actions {
     course: {
       new: (course: CourseType) => void;
       delete: (courseId: number) => void;
+      duplicate: (courseId: number) => void;
       setSelected: (selectedCourseId: number) => void;
       setName: (courseId: number, name: string) => void;
       setPrintAreaExtent: (courseId: number, extent: Extent) => void;
@@ -362,6 +365,33 @@ const useEvent = create<StateWithActions>(
                 if (draft.selectedCourseId === courseId) {
                   draft.selectedCourseId = draft.courses[0].id;
                 }
+              })
+            ),
+          duplicate: (courseId) =>
+            set(
+              undoable((draft: StateWithActions) => {
+                const src = findCourse(draft, courseId);
+                const course = Course.create(
+                  draft.idGenerator.next(),
+                  `Copy of ${src.name}`,
+                  src.controls.map((c) => Control.clone(c)),
+                  src.printScale,
+                  src.type,
+                  {
+                    labelKind: src.labelKind,
+                    type: src.type,
+                    printArea: PrintAreaModel.create({
+                      ...src.printArea,
+                      extent: src.printArea.extent && [...src.printArea.extent],
+                    }),
+                    specialObjects: src.specialObjects.map((o) => ({
+                      ...o,
+                      locations: o.locations.map((l) => [...l]),
+                    })),
+                  }
+                );
+                Event.addCourse(draft, course);
+                draft.selectedCourseId = course.id;
               })
             ),
           setSelected: (selectedCourseId) =>
