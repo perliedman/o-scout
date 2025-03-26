@@ -69,63 +69,65 @@ export default function ControlDescriptionSheet({
               />
             </td>
             <td colSpan="3" className="heavy-right font-bold">
-              {courseDistance(course, mapScale).toFixed(1)} km
+              {course.labelKind === "sequence" ? (
+                <>{courseDistance(course, mapScale).toFixed(1)} km</>
+              ) : null}
             </td>
             <td colSpan="2"></td>
           </tr>
-          {course.controls.map((c, i) => (
-            <tr key={i}>
-              {!c.description.all ? (
-                <>
-                  <td className="font-bold">
-                    {c.kind !== "start" ? (
-                      course.labelKind === "sequence" ? (
-                        i
-                      ) : (
-                        ""
-                      )
+          {course.controls.map((c, i) =>
+            !c.description.all ? (
+              <tr key={i}>
+                <td className="font-bold">
+                  {c.kind !== "start" ? (
+                    course.labelKind === "sequence" ? (
+                      i
                     ) : (
-                      <DescriptionSymbol symbol="start" />
-                    )}
-                  </td>
-                  <td>
-                    {" "}
-                    <input
-                      type="text"
-                      value={c.code}
-                      className="border-0 p-0 w-full text-center focus:outline-none"
-                      onChange={(e) =>
-                        onChangeControlCode(c.id, Number(e.target.value))
+                      ""
+                    )
+                  ) : (
+                    <DescriptionSymbol symbol="start" />
+                  )}
+                </td>
+                <td>
+                  {" "}
+                  <input
+                    type="text"
+                    value={c.code}
+                    className="border-0 p-0 w-full text-center focus:outline-none"
+                    onChange={(e) =>
+                      onChangeControlCode(c.id, Number(e.target.value))
+                    }
+                  />
+                </td>
+                {["C", "D", "E", "F", "G", "H"].map((column, colIndex) => (
+                  <td
+                    key={column}
+                    className={`h-full ${
+                      colIndex % 3 === 0 ? "heavy-right" : ""
+                    }`}
+                  >
+                    <button
+                      onClick={(event) =>
+                        openDescriptionSelector(c, column, event)
                       }
-                    />
-                  </td>
-                  {["C", "D", "E", "F", "G", "H"].map((column, colIndex) => (
-                    <td
-                      key={column}
-                      className={`h-full ${
-                        colIndex % 3 === 0 ? "heavy-right" : ""
-                      }`}
+                      className="w-full focus:outline-none"
+                      style={{ height: "32px" }} // TODO: yuck
                     >
-                      <button
-                        onClick={(event) =>
-                          openDescriptionSelector(c, column, event)
-                        }
-                        className="w-full focus:outline-none"
-                        style={{ height: "32px" }} // TODO: yuck
-                      >
-                        {typeof c.description[column] === "string" ? (
-                          <DescriptionSymbol symbol={c.description[column]} />
-                        ) : (
-                          c.description[column]?.value
-                        )}
-                      </button>
-                    </td>
-                  ))}
-                </>
-              ) : (
+                      {typeof c.description[column] === "string" ? (
+                        <DescriptionSymbol symbol={c.description[column]} />
+                      ) : (
+                        c.description[column]?.value
+                      )}
+                    </button>
+                  </td>
+                ))}
+              </tr>
+            ) : course.labelKind === "sequence" ? (
+              <tr key={i}>
                 <td colSpan="8">
                   <DescriptionSymbol symbol={c.description.all} />
-                  <div className="relative -top-6 font-bold h-0">
+                  <div className="relative -top-7 font-bold h-0">
                     {i > 0
                       ? Math.round(
                           ((controlDistance(
@@ -140,9 +142,9 @@ export default function ControlDescriptionSheet({
                     m
                   </div>
                 </td>
-              )}
-            </tr>
-          ))}
+              </tr>
+            ) : null
+          )}
         </tbody>
       </table>
       {descriptionSelector && (
