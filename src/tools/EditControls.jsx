@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import useEvent, { useCrs, useMap } from "../store";
+import useEvent, { useCrs, useMap, useNotifications } from "../store";
 import ModifyInteraction from "ol/interaction/Modify";
 import SnapInteraction from "ol/interaction/Snap";
 import { fromProjectedCoord, getObjectScale } from "../services/coordinates";
@@ -15,6 +15,7 @@ import useOtherControls from "./use-other-controls";
 import { ALL_CONTROLS_ID } from "../models/event";
 import { MapInfoBox } from "../MapComponent";
 import { plural } from "../services/lang";
+import { ExclamationIcon } from "@heroicons/react/outline";
 
 export default function EditControls() {
   const { map, controlsSource } = useMap(getMap);
@@ -84,6 +85,9 @@ export default function EditControls() {
     map,
     highlightFeatureRef,
   });
+  const coursesRef = useRef();
+  coursesRef.current = courses;
+  const [message, setMessage] = useState();
 
   useEffect(() => {
     if (map && controlsSource) {
@@ -99,16 +103,35 @@ export default function EditControls() {
       });
       modify.on("modifyend", (e) => {
         e.features.forEach((feature) => {
+          setMessage();
           if (feature.get("kind") !== "line") {
             const coordinates = feature.getGeometry().getCoordinates();
             const snappedControlId = findSnap(otherControlsSource, coordinates);
+            const controlId = feature.get("id");
+            setSelectedControlId(controlId);
 
             if (!snappedControlId) {
               setControlCoordinates(
                 selectedCourseId,
-                feature.get("id"),
+                controlId,
                 fromProjectedCoord(crs, coordinates)
               );
+              const usedCourses = coursesRef.current.filter(
+                (course) =>
+                  course.id !== ALL_CONTROLS_ID &&
+                  course.controls.some((control) => control.id === controlId)
+              );
+              if (usedCourses.length > 1) {
+                setMessage(
+                  <>
+                    <span className="relative top-1 inline-block w-4 h-4 text-orange-600">
+                      <ExclamationIcon />
+                    </span>{" "}
+                    Moving control {feature.get("code")} used in{" "}
+                    {plural(usedCourses.length - 1, "other course")}
+                  </>
+                );
+              }
             } else {
               replaceControl(
                 selectedCourseId,
@@ -261,6 +284,7 @@ export default function EditControls() {
               ? usedCourses.map((c) => c.name).join(", ")
               : plural(usedCourses.length, "course")}
           </p>
+          <p>{message}</p>
         </MapInfoBox>
       ) : null}
     </>
