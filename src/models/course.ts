@@ -80,6 +80,9 @@ export function getPrintAreaExtent(course: Course, mapScale: number): Extent {
   if (printArea.restrictToPage) {
     const { pageWidth, pageHeight } = printArea;
     const pageSizeMm = [pageWidth * paperSizeToMm, pageHeight * paperSizeToMm];
+    if (printArea.pageLandscape) {
+      pageSizeMm.reverse();
+    }
     const printAreaCenter = getCenter(courseExtent);
     const scale = course.printScale / mapScale;
 

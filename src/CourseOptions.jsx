@@ -56,6 +56,20 @@ export default function CourseOptions({
           ))}
         </select>
       </div>
+      <div className="flex flex-row justify-between my-2">
+        {orientationOptions.map(([label, isLandscape]) => (
+          <div key={label} className="flex items-center gap-x-2">
+            <input
+              type="radio"
+              name="print-orientation"
+              id={`print-orientation-${label}`}
+              checked={printArea.pageLandscape == isLandscape}
+              onChange={() => setPrintArea({ pageLandscape: isLandscape })}
+            ></input>
+            <label htmlFor={`print-orientation-${label}`}>{label}</label>
+          </div>
+        ))}
+      </div>
       <label>Print Area</label>
       <div className="flex flex-row justify-between my-2">
         {sizeOptions.map(([label, auto, restrictToPage]) => (
@@ -147,4 +161,9 @@ const sizeOptions = [
   ["Auto", true, false],
   ["Fit to Page", false, true],
   ["Manual", false, false],
+];
+
+const orientationOptions = [
+  ["Portrait", false],
+  ["Landscape", true],
 ];

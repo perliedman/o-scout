@@ -13,6 +13,7 @@ export function create(options?: PrintArea): PrintArea {
     restrictToPage: false,
     pageWidth: defaultWidth,
     pageHeight: defaultHeight,
+    pageLandscape: false,
     ...options,
   };
 }
@@ -32,6 +33,8 @@ export interface PrintArea {
    * The manually selected extent (if any); only used if `auto` is `false`
    */
   extent?: Extent;
+
+  pageLandscape: boolean;
 }
 
 export function toPpen(printArea: PrintArea) {
@@ -44,7 +47,7 @@ export function toPpen(printArea: PrintArea) {
       "page-width": printArea.pageWidth,
       "page-height": printArea.pageHeight,
       "page-margins": 0,
-      "page-landscape": false,
+      "page-landscape": printArea.pageLandscape,
       ...(printArea.extent
         ? {
             left: printArea.extent[0],

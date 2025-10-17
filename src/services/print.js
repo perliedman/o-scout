@@ -103,10 +103,16 @@ export function renderPdf(
   return new Promise((resolve, reject) => {
     const pageSize = [(pageWidth / 100) * inToPt, (pageHeight / 100) * inToPt];
     const doc = new PDFDocument({
-      size: pageSize,
       margin: (pageMargins / 100) * inToPt,
+      autoFirstPage: false,
+    });
+    doc.addPage({
+      size: pageSize,
       layout: pageLandscape ? "landscape" : "portrait",
     });
+    if (pageLandscape) {
+      pageSize.reverse();
+    }
     const stream = doc.pipe(blobStream());
     const [widthPt, heightPt] = getSvgDimensions(svg);
 

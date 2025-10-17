@@ -36,6 +36,9 @@ export default function PrintArea() {
         pageWidth * paperSizeToMm,
         pageHeight * paperSizeToMm,
       ];
+      if (course.printArea.pageLandscape) {
+        pageSizeMm.reverse();
+      }
       const paperExtent = getPrintAreaExtent(course, crs.scale);
       const validExtent = !isEmpty(paperExtent)
         ? paperExtent
