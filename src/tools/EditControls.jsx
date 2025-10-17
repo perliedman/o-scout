@@ -200,6 +200,8 @@ export default function EditControls() {
           .getFeatures()
           .find((feature) => feature.get("id") === selectedControlId)
       : null;
+  const selectedFeatureRef = useRef();
+  selectedFeatureRef.current = selectedFeature;
   useSelect(
     map,
     selectedFeature,
@@ -208,26 +210,10 @@ export default function EditControls() {
   );
 
   useHotkeys("delete,backspace", deleteSelected, [selectedFeature]);
-  useHotkeys("up", () => moveSelected(0, 1), [
-    selectedFeature,
-    map,
-    setControlCoordinates,
-  ]);
-  useHotkeys("down", () => moveSelected(0, -1), [
-    selectedFeature,
-    map,
-    setControlCoordinates,
-  ]);
-  useHotkeys("left", () => moveSelected(-1, 0), [
-    selectedFeature,
-    map,
-    setControlCoordinates,
-  ]);
-  useHotkeys("right", () => moveSelected(1, 0), [
-    selectedFeature,
-    map,
-    setControlCoordinates,
-  ]);
+  useHotkeys("up", () => moveSelected(0, 1), [map, setControlCoordinates]);
+  useHotkeys("down", () => moveSelected(0, -1), [map, setControlCoordinates]);
+  useHotkeys("left", () => moveSelected(-1, 0), [map, setControlCoordinates]);
+  useHotkeys("right", () => moveSelected(1, 0), [map, setControlCoordinates]);
 
   const usedCourses = selectedFeature
     ? courses.filter(
@@ -291,13 +277,13 @@ export default function EditControls() {
   );
 
   function moveSelected(dx, dy) {
-    if (!selectedFeature) return;
+    if (!selectedFeatureRef.current) return;
 
     const resolution = map.getView().getResolution();
-    const [x, y] = selectedFeature.getGeometry().getCoordinates();
+    const [x, y] = selectedFeatureRef.current.getGeometry().getCoordinates();
     setControlCoordinates(
       selectedCourseId,
-      selectedFeature.get("id"),
+      selectedFeatureRef.current.get("id"),
       fromProjectedCoord(crs, [x + dx * resolution, y + dy * resolution])
     );
   }

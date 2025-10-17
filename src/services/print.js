@@ -70,7 +70,11 @@ export async function printCourse(
   // Output dimensions in pt on the actually printed paper (in print scale)
   const outputWidthPt = printAreaWidthMm * scaleFactor * mmToPt;
   const outputHeightPt = printAreaHeightMm * scaleFactor * mmToPt;
-  const mapSvg = tiler.renderSvg(projectedExtent, 1, svgOptions);
+  const blueColorIndex = findBlueIndex(mapFile.colors);
+  const mapSvg = tiler.renderSvg(projectedExtent, 1, {
+    ...svgOptions,
+    ocad2geojsonOptions: { fromColor: blueColorIndex + 1 },
+  });
   mapSvg.setAttribute("width", outputWidthPt);
   mapSvg.setAttribute("height", outputHeightPt);
   mapSvg.setAttribute(
@@ -91,6 +95,14 @@ export async function printCourse(
   }) translate(${-printAreaExtent[0]}, ${printAreaExtent[3]})`;
   courseGroup.setAttributeNS("", "transform", transform);
   mapSvg.appendChild(courseGroup);
+
+  const over = tiler.renderSvg(projectedExtent, 1, {
+    ...svgOptions,
+    ocad2geojsonOptions: { toColor: blueColorIndex },
+  });
+  for (const child of [...over.childNodes]) {
+    mapSvg.appendChild(child);
+  }
 
   return mapSvg;
 }
@@ -161,3 +173,25 @@ export const PAPER_SIZES = [
   { name: "Legal", dimensions: [850, 1400] },
   { name: "Tabloid", dimensions: [1100, 1700] },
 ];
+
+const idealBlueCmyk = [100, 0, 0, 0];
+function findBlueIndex(colors) {
+  let bestMatch = -1;
+  let bestDist = Number.MAX_VALUE;
+  for (let i = 0; i < colors.length; i++) {
+    const c = colors[i];
+    if (!c) continue;
+
+    let dist = 0;
+    for (let j = 0; j < idealBlueCmyk.length; j++) {
+      const d = idealBlueCmyk[j] - c.cmyk[j];
+      dist += d * d;
+    }
+    if (dist < bestDist) {
+      bestMatch = c.renderOrder;
+      bestDist = dist;
+    }
+  }
+
+  return bestMatch;
+}

@@ -20,6 +20,7 @@ import CircleStyle from "ol/style/Circle";
 import Point from "ol/geom/Point";
 import { Feature, MapBrowserEvent } from "ol";
 import useOtherControls from "./use-other-controls";
+import { FeatureLike } from "ol/Feature";
 
 type CreationMode = "Control" | "Finish";
 const creationModes: CreationMode[] = ["Control", "Finish"];
@@ -94,15 +95,15 @@ export default function CreateCourse(): JSX.Element {
   }, [activeModeRef, savedMode, setActiveMode]);
 
   const style = useCallback(
-    (_, resolution) => {
+    (_: FeatureLike, resolution: number) => {
       const numberControls = controlsSource?.getFeatures().length || 0;
 
       if (activeModeRef.current === "Finish") {
         finishStyle.forEach((style, i) => {
           const image = style.getImage() as CircleStyle;
           const stroke = image.getStroke();
-          stroke.setWidth(dimension(overprintLineWidth));
-          stroke.setColor(courseOverPrintRgb);
+          stroke?.setWidth(dimension(overprintLineWidth));
+          stroke?.setColor(courseOverPrintRgb);
           image.setRadius(dimension(2 + i));
         });
         return finishStyle;
@@ -114,8 +115,8 @@ export default function CreateCourse(): JSX.Element {
       } else {
         const image = controlStyle.getImage() as CircleStyle;
         const stroke = image.getStroke();
-        stroke.setWidth(dimension(overprintLineWidth));
-        stroke.setColor(courseOverPrintRgb);
+        stroke?.setWidth(dimension(overprintLineWidth));
+        stroke?.setColor(courseOverPrintRgb);
         image.setRadius(dimension(controlCircleOutsideDiameter / 2));
         return controlStyle;
       }
@@ -147,31 +148,42 @@ export default function CreateCourse(): JSX.Element {
         } else {
           const numberControls = controlsSource.getFeatures().length;
 
-          const hasFinishControl = controlsSource.getFeatures().some(
-            (feature) => feature.get("kind") === "finish"
-          );
-          
-          if (hasFinishControl) {
-            return;
-          }
-          
+          const hasFinishControl = controlsSource
+            .getFeatures()
+            .some((feature) => feature.get("kind") === "finish");
+
           const kind =
-            activeModeRef.current === "Finish"
+            !hasFinishControl && activeModeRef.current === "Finish"
               ? "finish"
               : numberControls > 0
               ? "normal"
               : "start";
-          addControl(
-            {
-              kind,
-              coordinates: fromProjectedCoord(
-                crs,
-                (event.feature.getGeometry() as Point)?.getCoordinates()
-              ),
-              description: kind === "finish" ? { all: "14.3" } : {},
-            },
-            selectedCourseId
-          );
+          if (hasFinishControl) {
+            addControl(
+              {
+                kind,
+                coordinates: fromProjectedCoord(
+                  crs,
+                  (event.feature.getGeometry() as Point)?.getCoordinates()
+                ),
+                description: kind === "finish" ? { all: "14.3" } : {},
+              },
+              selectedCourseId,
+              controlsSource
+            );
+          } else {
+            addControl(
+              {
+                kind,
+                coordinates: fromProjectedCoord(
+                  crs,
+                  (event.feature.getGeometry() as Point)?.getCoordinates()
+                ),
+                description: kind === "finish" ? { all: "14.3" } : {},
+              },
+              selectedCourseId
+            );
+          }
         }
       });
 
@@ -201,18 +213,18 @@ export default function CreateCourse(): JSX.Element {
         map.un("pointermove", onPointerMove);
       };
     }
- 
-
 
     async function onPointerMove(e: MapBrowserEvent<PointerEvent>) {
-      const features = await otherControlsLayer.getFeatures(e.pixel);
+      const features = (await otherControlsLayer.getFeatures(
+        e.pixel
+      )) as Feature[];
       if (features.length > 0) {
         const [feature] = features;
 
         const controlKind = feature.get("kind");
 
         const numberControls = controlsSource?.getFeatures().length || 0;
-      
+
         let expectedKind: "start" | "normal" | "finish";
 
         if (numberControls === 0) {
@@ -296,4 +308,3 @@ function getEvent({
     addControl,
   };
 }
-
