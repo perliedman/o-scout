@@ -126,6 +126,13 @@ export function courseFeatureStyle(
       style = lineStyle;
       break;
     }
+    case "boundary": {
+      const stroke = lineStyle.getStroke();
+      stroke.setWidth(dimension(overprintLineWidth) * lineWidthRatio);
+      stroke.setColor(palette.purple);
+      style = lineStyle;
+      break;
+    }
     case "number": {
       const text = numberStyle.getText();
       text.setText(feature.get("label"));
