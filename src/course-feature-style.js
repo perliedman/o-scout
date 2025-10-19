@@ -118,11 +118,7 @@ export function courseFeatureStyle(
       const stroke = lineStyle.getStroke();
       const lineWidth = feature.get("lineWidth");
       if (lineWidth) {
-        stroke.setWidth(
-          (lineWidth / resolution) *
-            5 /* TODO: most likely incorrect, but without this lines are much too thin - should be conversion of paper mm to geographic coordinates */ *
-            lineWidthRatio
-        );
+        stroke.setWidth(dimension(lineWidth) * lineWidthRatio);
       } else {
         stroke.setWidth(dimension(overprintLineWidth) * lineWidthRatio);
       }
