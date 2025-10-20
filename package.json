@@ -22,7 +22,7 @@
     "blob-to-buffer": "^1.2.9",
     "immer": "^9.0.2",
     "lodash": "^4.17.21",
-    "ocad-tiler": "^1.2.2",
+    "ocad-tiler": "^1.4.1",
     "ocad2geojson": "^2.1.16",
     "ol": "^10.3.1",
     "proj4": "^2.7.2",
