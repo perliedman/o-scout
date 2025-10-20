@@ -3,6 +3,8 @@ import { featureCollection, lineString, polygon } from "@turf/helpers";
 import lineOffset from "@turf/line-offset";
 import { useMemo } from "react";
 import { getControlDescriptionExtent } from "./create-svg";
+import { palette } from "../models/course";
+import cmykToRgb from "ocad2geojson/src/cmyk-to-rgb";
 
 export default function useSpecialObjects(specialObjects, numberControls) {
   return useMemo(
@@ -26,9 +28,15 @@ export function createSpecialObjects(specialObjects, numberControls) {
               "gap-size": gapSize = 0,
             } = object;
 
+            const cmykParts = color.split(",");
+            const rgb =
+              cmykParts.length === 4
+                ? cmykToRgb(cmykParts.map((p) => p * 255))
+                : palette[color];
+
             const line = lineString(
               [...locations],
-              { kind, color, lineWidth },
+              { kind, color: [...rgb, 255], lineWidth },
               { id }
             );
             return !gapSize

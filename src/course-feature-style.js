@@ -54,9 +54,10 @@ export function courseFeatureStyle(
   resolution
 ) {
   const kind = feature.get("kind");
-  const color = feature.get("color")
-    ? palette[feature.get("color")]
-    : courseOverPrintColor;
+  const featureColor = feature.get("color");
+  const color = Array.isArray(featureColor)
+    ? featureColor
+    : palette[feature.get("color")] || courseOverPrintColor;
   let style;
   const {
     controlCircleSizeRatio = 1,

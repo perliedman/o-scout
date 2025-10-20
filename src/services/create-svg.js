@@ -30,7 +30,14 @@ export const circle = ([cx, cy], r, stroke, scale) => ({
   },
 });
 
-export const lines = (coordinates, close, stroke, fill, scale) => ({
+export const lines = (
+  coordinates,
+  close,
+  stroke,
+  fill,
+  scale = 1,
+  width = overprintLineWidth
+) => ({
   type: "path",
   attrs: {
     d: coordinates
@@ -39,7 +46,7 @@ export const lines = (coordinates, close, stroke, fill, scale) => ({
       .join(" "),
     stroke,
     fill,
-    "stroke-width": overprintLineWidth * (scale || 1),
+    "stroke-width": width * scale,
   },
 });
 
@@ -178,13 +185,21 @@ export async function courseToSvg(
                   objScale
                 );
               case "line": {
-                const { color } = specialObject.properties;
+                const { color: featureColor, width = overprintLineWidth } =
+                  specialObject.properties;
+                const color = Array.isArray(featureColor)
+                  ? `rgba(${[
+                      ...featureColor.slice(0, 3),
+                      featureColor[3] / 255,
+                    ].join(",")})`
+                  : palette[featureColor] || courseOverPrintRgb;
                 return lines(
                   coordinates.map(toSvgCoord),
                   false,
-                  palette[color] || courseOverPrintRgb,
+                  color,
                   null,
-                  objScale
+                  objScale,
+                  width
                 );
               }
               case "descriptions": {
@@ -217,63 +232,52 @@ export async function courseToSvg(
       )
     ).filter(Boolean);
   }
-  
-//Function for pattern forbidden-area, scale and area need to be fixed
-function createPatternForbiddenArea() {
 
-  const canvas = document.createElement('canvas');
-  const highResSize = 20;
-  canvas.width = highResSize;
-  canvas.height = highResSize;
+  //Function for pattern forbidden-area, scale and area need to be fixed
+  function createPatternForbiddenArea() {
+    const canvas = document.createElement("canvas");
+    const highResSize = 20;
+    canvas.width = highResSize;
+    canvas.height = highResSize;
 
-  const ctx = canvas.getContext('2d');
-  
-  ctx.strokeStyle = 'rgba(197,86,173,255)';
-  ctx.lineWidth = 2;
+    const ctx = canvas.getContext("2d");
 
-  
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(highResSize, highResSize);
-  ctx.stroke();
+    ctx.strokeStyle = "rgba(197,86,173,255)";
+    ctx.lineWidth = 2;
 
-  ctx.beginPath();
-  ctx.moveTo(0, highResSize);
-  ctx.lineTo(highResSize, 0);
-  ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(highResSize, highResSize);
+    ctx.stroke();
 
-  
-  const patternId = "forbidden-pattern";
-  const pattern = {
-    type: "pattern",
-    attrs: {
-      id: patternId,
-      patternUnits: "userSpaceOnUse",
-      width: 2,
-      height: 2, 
-    },
-    children: [
-      {
-        type: "image",
-        attrs: {
-          href: canvas.toDataURL(),
-          width: 2, 
-          height: 2, 
-        },
+    ctx.beginPath();
+    ctx.moveTo(0, highResSize);
+    ctx.lineTo(highResSize, 0);
+    ctx.stroke();
+
+    const patternId = "forbidden-pattern";
+    const pattern = {
+      type: "pattern",
+      attrs: {
+        id: patternId,
+        patternUnits: "userSpaceOnUse",
+        width: 2,
+        height: 2,
       },
-    ],
-  };
+      children: [
+        {
+          type: "image",
+          attrs: {
+            href: canvas.toDataURL(),
+            width: 2,
+            height: 2,
+          },
+        },
+      ],
+    };
 
-  return pattern;
-}
-
-
-
-
-
-
-  
-  
+    return pattern;
+  }
 
   // Function for pattern forbidden-area, scale and area need to be fixed
   function createPatternForbiddenArea() {
