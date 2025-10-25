@@ -44,6 +44,7 @@ export default function ControlDescriptionSheet({
   const role = useRole(context);
 
   const { getFloatingProps } = useInteractions([click, dismiss, role]);
+  let sequenceNumber = 0;
 
   return (
     <div ref={containerRef}>
@@ -75,13 +76,17 @@ export default function ControlDescriptionSheet({
             </td>
             <td colSpan="2"></td>
           </tr>
-          {course.controls.map((c, i) =>
-            !c.description.all ? (
+          {course.controls.map((c, i) => {
+            if (c.kind === "normal") {
+              sequenceNumber++;
+            }
+
+            return !c.description.all ? (
               <tr key={i}>
                 <td className="font-bold">
                   {c.kind !== "start" ? (
                     course.labelKind === "sequence" ? (
-                      i
+                      sequenceNumber
                     ) : (
                       ""
                     )
@@ -143,8 +148,8 @@ export default function ControlDescriptionSheet({
                   </div>
                 </td>
               </tr>
-            ) : null
-          )}
+            ) : null;
+          })}
         </tbody>
       </table>
       {descriptionSelector && (

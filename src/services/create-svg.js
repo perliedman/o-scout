@@ -452,15 +452,28 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
   }
 
   async function controlDescriptions() {
+    let sequenceNumber = 0;
     return (
       await Promise.all(
         course.controls.map(async ({ kind, code, description }, index) => {
           const y = (index + 2) * cellSize;
           const baseLine = y + cellSize - 7;
+
+          if (kind === "normal") {
+            sequenceNumber++;
+          }
+
           return [
             kind === "start"
               ? await descriptionSymbol("start", index + 2, 0)
-              : text(index, cellSize / 2, baseLine, "black", fontSize, "bold"),
+              : text(
+                  course.labelKind === "sequence" ? sequenceNumber : "",
+                  cellSize / 2,
+                  baseLine,
+                  "black",
+                  fontSize,
+                  "bold"
+                ),
             text(code, cellSize + cellSize / 2, baseLine, "black", fontSize),
             colLine(1, index + 2, 1),
             description.all
