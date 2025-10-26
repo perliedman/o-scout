@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { getControlDescriptionExtent } from "./create-svg";
 import { palette } from "../models/course";
 import cmykToRgb from "ocad2geojson/src/cmyk-to-rgb";
+import { asArray } from "ol/color";
 
 export default function useSpecialObjects(specialObjects, numberControls) {
   return useMemo(
@@ -32,7 +33,7 @@ export function createSpecialObjects(specialObjects, numberControls) {
             const rgb =
               cmykParts.length === 4
                 ? cmykToRgb(cmykParts.map((p) => p * 255))
-                : palette[color];
+                : asArray(palette[color]);
 
             const line = lineString(
               [...locations],
