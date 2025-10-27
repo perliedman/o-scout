@@ -133,17 +133,17 @@ export default function ControlDescriptionSheet({
                 <td colSpan="8">
                   <DescriptionSymbol symbol={c.description.all} />
                   <div className="relative -top-7 font-bold h-0">
-                    {i > 0
+                    {["finish", "map-issue"].includes(c.kind)
                       ? Math.round(
                           ((controlDistance(
-                            course.controls[i - 1],
-                            course.controls[i]
+                            course.controls[i > 0 ? i - 1 : 0],
+                            course.controls[i > 0 ? i : i + 1]
                           ) /
                             1000) *
                             mapScale) /
                             10
                         ) * 10
-                      : ""}
+                      : ""}{" "}
                     m
                   </div>
                 </td>
