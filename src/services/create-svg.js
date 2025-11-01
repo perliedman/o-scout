@@ -1,9 +1,4 @@
-import {
-  courseDistance,
-  courseOverPrintRgb,
-  getStartRotation,
-  palette,
-} from "../models/course";
+import { courseDistance, getStartRotation, palette } from "../models/course";
 import { createControls } from "./use-controls";
 import {
   controlCircleOutsideDiameter,
@@ -18,6 +13,10 @@ import { add, mul, rotate } from "../models/coordinate";
 import fetchSymbolSvg from "./fetch-symbol-svg";
 import { createSvgNode, getSvgDimensions } from "./svg-utils";
 import { getObjectScale } from "./coordinates";
+
+// Note that this is intentionally a different color (without transparency)
+// than we use on screen.
+const courseOverPrintRgb = "rgb(182, 44, 152)";
 
 export const circle = ([cx, cy], r, stroke, scale) => ({
   type: "circle",
