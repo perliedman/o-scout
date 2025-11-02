@@ -436,8 +436,7 @@ export async function courseDefinitionToSvg(eventName, course, mapScale) {
     return [
       text(course.name, (cellSize * 3) / 2, y, "black", fontSize, "bold"),
       text(
-        // TODO: Use correct map scale
-        `${courseDistance(course, 15000).toFixed(1)} km`,
+        `${courseDistance(course, mapScale).toFixed(1)} km`,
         cellSize * 3 + (cellSize * 3) / 2,
         y,
         "black",
